@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   Rocket,
@@ -12,20 +13,22 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { brandIconHasRender } from "./brand-icon-manifest";
 
 /**
  * BrandIcon — the 3D-styled icon system per RPD §4.4.
  *
- * MVP renders a glass-extruded card with a Lucide glyph at its center and a
- * tinted glow matching the section accent. The constant Y-axis rotation and
- * float satisfy the §7.4 motion spec.
+ * Resolution order:
+ *   1. If a render exists in /public/brand/icons/{name}.png per the manifest,
+ *      render it via next/image (which serves 2x/3x density to retina screens
+ *      automatically) inside the animated container.
+ *   2. Otherwise fall back to a Lucide glyph in a glass-extruded container
+ *      that approximates the 3D extruded aesthetic with the brand colors.
  *
- * Upgrade path: when Tim & Paul (or Spline) deliver actual 3D renders, swap
- * the body of this component to render PNG renders from /public/brand/icons/
- * at 2x and 3x density, or upgrade further to react-three-fiber.
- *
- * Until then: PLACEHOLDER_PENDING_3D_ASSETS. The visual approximates the
- * extruded-glass aesthetic so layouts and motion are correct now.
+ * The fallback is the MVP placeholder.
+ * PLACEHOLDER_PENDING_3D_ASSETS — when Spline / Blender renders arrive,
+ * drop them under /public/brand/icons/ and register them in
+ * brand-icon-manifest.ts. No other code changes required.
  */
 
 export type BrandIconName =
@@ -71,13 +74,15 @@ export function BrandIcon({
   className,
   motionless = false,
 }: BrandIconProps) {
-  const Glyph = glyphs[name];
   const tint = accent[name];
+  const hasRender = brandIconHasRender(name);
+  const Glyph = glyphs[name];
 
   return (
     <motion.div
       role="img"
       aria-label={`${name} icon`}
+      data-testid={`brand-icon-${name}`}
       className={cn(
         "relative inline-flex items-center justify-center rounded-2xl",
         className
@@ -93,11 +98,7 @@ export function BrandIcon({
         transformStyle: "preserve-3d",
         perspective: "600px",
       }}
-      animate={
-        motionless
-          ? undefined
-          : { rotateY: [-5, 5, -5], y: [0, -4, 0] }
-      }
+      animate={motionless ? undefined : { rotateY: [-5, 5, -5], y: [0, -4, 0] }}
       transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       whileHover={{
         scale: 1.05,
@@ -105,12 +106,23 @@ export function BrandIcon({
       }}
       whileTap={{ scale: 0.95 }}
     >
-      <Glyph
-        size={size * 0.5}
-        color={tint}
-        strokeWidth={1.75}
-        style={{ filter: `drop-shadow(0 2px 4px ${tint}80)` }}
-      />
+      {hasRender ? (
+        <Image
+          src={`/brand/icons/${name}.png`}
+          alt=""
+          width={size}
+          height={size}
+          className="object-contain"
+          priority={false}
+        />
+      ) : (
+        <Glyph
+          size={size * 0.5}
+          color={tint}
+          strokeWidth={1.75}
+          style={{ filter: `drop-shadow(0 2px 4px ${tint}80)` }}
+        />
+      )}
       <span
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 rounded-2xl"

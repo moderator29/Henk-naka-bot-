@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
+import { SkipToContent } from "@/components/ui/SkipToContent";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -40,6 +41,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col lg:grid lg:grid-cols-[280px_1fr] xl:grid-cols-[280px_1fr_320px]">
+      <SkipToContent />
       {/* desktop sidebar */}
       <aside className="hidden lg:flex flex-col gap-2 sticky top-0 h-screen border-r border-white/5 bg-plum/80 backdrop-blur-xl p-6">
         <div className="mb-8">
@@ -105,7 +107,10 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
           </button>
         </header>
 
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6">
+        <main
+          id="main-content"
+          className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6"
+        >
           {children}
         </main>
 
