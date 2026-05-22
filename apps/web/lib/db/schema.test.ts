@@ -56,4 +56,9 @@ describe("db/schema", () => {
     expect(schema.messages.media).toBeDefined();
     expect(schema.messages.readAt).toBeDefined();
   });
+
+  it("user_preferences tracks onboarding completion", () => {
+    expect(schema.userPreferences.onboardingCompleted).toBeDefined();
+    expect(schema.userPreferences.onboardingCompletedAt).toBeDefined();
+  });
 });
