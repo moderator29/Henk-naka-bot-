@@ -27,6 +27,7 @@ const linkGroups = [
     title: "About",
     links: [
       { href: "/journey", label: "Journey" },
+      { href: "/docs", label: "Documentation" },
       { href: "/legal/terms", label: "Terms" },
       { href: "/legal/privacy", label: "Privacy" },
       { href: "/legal/dmca", label: "DMCA" },

@@ -1,4 +1,7 @@
+import Link from "next/link";
+import { BookOpen } from "lucide-react";
 import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { ReplayOnboardingAction } from "@/components/onboarding/ReplayOnboardingAction";
 
 export default function SettingsPage() {
@@ -26,6 +29,22 @@ export default function SettingsPage() {
               </p>
             </div>
             <ReplayOnboardingAction />
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="font-display text-lg font-semibold text-white">
+                Read the docs
+              </h2>
+              <p className="mt-1 text-sm text-lilac/60">
+                Detailed guides for every part of the platform.
+              </p>
+            </div>
+            <Button variant="glass" leftIcon={<BookOpen size={16} />} asChild>
+              <Link href="/docs">Open docs</Link>
+            </Button>
           </div>
         </Card>
 
