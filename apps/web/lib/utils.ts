@@ -30,3 +30,15 @@ export function rgba(hex: string, alpha: number): string {
   const b = parseInt(h.slice(4, 6), 16);
   return `rgba(${r},${g},${b},${alpha})`;
 }
+
+export function relativeTime(input: Date | string | number) {
+  const d = input instanceof Date ? input : new Date(input);
+  const diff = (Date.now() - d.getTime()) / 1000;
+  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+  if (diff < 60) return rtf.format(-Math.round(diff), "second");
+  if (diff < 3600) return rtf.format(-Math.round(diff / 60), "minute");
+  if (diff < 86400) return rtf.format(-Math.round(diff / 3600), "hour");
+  if (diff < 2592000) return rtf.format(-Math.round(diff / 86400), "day");
+  if (diff < 31536000) return rtf.format(-Math.round(diff / 2592000), "month");
+  return rtf.format(-Math.round(diff / 31536000), "year");
+}

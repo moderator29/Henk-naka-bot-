@@ -23,6 +23,8 @@ const expectedTables = [
   "stakingPositions",
   "nftHoldings",
   "marketplaceListings",
+  "conversations",
+  "messages",
 ] as const;
 
 describe("db/schema", () => {
@@ -41,5 +43,17 @@ describe("db/schema", () => {
 
   it("staking positions carry a 12-week unlock_at column", () => {
     expect(schema.stakingPositions.unlockAt).toBeDefined();
+  });
+
+  it("conversations table tracks both participants and last activity", () => {
+    expect(schema.conversations.participantA).toBeDefined();
+    expect(schema.conversations.participantB).toBeDefined();
+    expect(schema.conversations.lastMessageAt).toBeDefined();
+  });
+
+  it("messages table carries body, media (post-MVP), and read_at", () => {
+    expect(schema.messages.body).toBeDefined();
+    expect(schema.messages.media).toBeDefined();
+    expect(schema.messages.readAt).toBeDefined();
   });
 });

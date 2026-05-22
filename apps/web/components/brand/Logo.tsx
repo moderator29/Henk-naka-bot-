@@ -1,11 +1,24 @@
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import {
+  LOGO_ASSETS,
+  hasRealLogoAsset,
+  type LogoAssetKey,
+} from "./logo-manifest";
 
 interface LogoProps {
   className?: string;
   href?: string | null;
+  /**
+   * "full" renders the wordmark lockup; "mark" renders just the icon.
+   * "auto" picks "full" when showWordmark is true, "mark" otherwise.
+   */
+  variant?: "auto" | "full" | "mark";
   showWordmark?: boolean;
   size?: "sm" | "md" | "lg";
+  /** Use the white/monochrome version (for very dark surfaces / inversions) */
+  monochrome?: boolean;
 }
 
 const sizes = {
@@ -15,24 +28,57 @@ const sizes = {
 } as const;
 
 /**
- * Pleasure Coin mark — faceted diamond with magenta-to-cyan gradient.
- * Used in marketing nav, platform sidebar, and footer.
+ * Pleasure Coin logo.
+ *
+ * Resolution order:
+ *   1. If a processed asset for the requested variant exists in
+ *      apps/web/public/brand/logo/ per logo-manifest.ts, render via
+ *      next/image.
+ *   2. Otherwise render a labeled placeholder mark (faceted diamond
+ *      gradient) so layouts remain pixel-correct.
+ *
+ * PENDING_REAL_LOGO_ASSET — drop the processed files into
+ * apps/web/public/brand/logo/ and flip the matching flags in
+ * logo-manifest.ts. No other code changes required.
  */
 export function Logo({
   className,
   href = "/",
+  variant = "auto",
   showWordmark = true,
   size = "md",
+  monochrome = false,
 }: LogoProps) {
   const { mark, text } = sizes[size];
+  const resolvedVariant: "full" | "mark" =
+    variant === "auto" ? (showWordmark ? "full" : "mark") : variant;
+
+  const assetKey: LogoAssetKey = monochrome
+    ? (`${resolvedVariant}-mono` as const)
+    : resolvedVariant;
+  const asset = LOGO_ASSETS[assetKey];
 
   const content = (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <DiamondMark size={mark} />
-      {showWordmark && (
-        <span className={cn("font-display font-bold tracking-tight", text)}>
-          Pleasure<span className="text-gradient">Coin</span>
-        </span>
+      {hasRealLogoAsset(assetKey) && asset ? (
+        <Image
+          src={asset.src}
+          alt="Pleasure Coin"
+          width={resolvedVariant === "full" ? asset.width : mark}
+          height={resolvedVariant === "full" ? asset.height : mark}
+          priority
+        />
+      ) : (
+        <>
+          <PlaceholderMark size={mark} />
+          {resolvedVariant === "full" && (
+            <span
+              className={cn("font-display font-bold tracking-tight", text)}
+            >
+              Pleasure<span className="text-gradient">Coin</span>
+            </span>
+          )}
+        </>
       )}
     </span>
   );
@@ -47,7 +93,7 @@ export function Logo({
   return content;
 }
 
-function DiamondMark({ size }: { size: number }) {
+function PlaceholderMark({ size }: { size: number }) {
   return (
     <svg
       width={size}

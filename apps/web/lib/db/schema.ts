@@ -311,7 +311,62 @@ export const marketplaceListings = pgTable(
   })
 );
 
+/**
+ * Direct messaging tables.
+ *
+ * conversations.participant_a and participant_b are stored in a canonical
+ * (sorted) order so a unique(participant_a, participant_b) constraint
+ * prevents duplicate threads between the same two users.
+ */
+export const conversations = pgTable(
+  "conversations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    participantA: uuid("participant_a")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    participantB: uuid("participant_b")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => ({
+    aIdx: index("conv_a_idx").on(t.participantA),
+    bIdx: index("conv_b_idx").on(t.participantB),
+    lastMsgIdx: index("conv_last_msg_idx").on(t.lastMessageAt),
+  })
+);
+
+export const messages = pgTable(
+  "messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    conversationId: uuid("conversation_id")
+      .references(() => conversations.id, { onDelete: "cascade" })
+      .notNull(),
+    senderId: uuid("sender_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    body: text("body"),
+    /** Reserved for post-MVP media messages and in-DM tips. Null at MVP. */
+    media: jsonb("media"),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => ({
+    convIdx: index("messages_conv_idx").on(t.conversationId),
+    createdIdx: index("messages_created_idx").on(t.createdAt),
+  })
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Post = typeof posts.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
+export type Conversation = typeof conversations.$inferSelect;
+export type Message = typeof messages.$inferSelect;
