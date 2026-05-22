@@ -1,0 +1,42 @@
+/**
+ * Aurora tokens — CSS variable mirror of src/tokens.ts.
+ * Imported once from the app's globals.css; available everywhere.
+ */
+
+:root {
+  /* colors */
+  --color-plum: #0f0420;
+  --color-imperial: #2a0e5a;
+  --color-magenta: #ff1f8f;
+  --color-orchid: #b847ff;
+  --color-lilac: #e9d5ff;
+  --color-cyan: #5dd6ff;
+  --color-white: #ffffff;
+
+  /* gradients */
+  --gradient-primary: linear-gradient(135deg, #ff1f8f 0%, #b847ff 100%);
+  --gradient-hero: linear-gradient(
+    90deg,
+    #ff1f8f 0%,
+    #b847ff 50%,
+    #5dd6ff 100%
+  );
+
+  /* radii */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+
+  /* shadows */
+  --shadow-glow: 0 0 24px rgba(255, 31, 143, 0.35);
+  --shadow-glow-lg: 0 0 48px rgba(255, 31, 143, 0.45);
+  --shadow-glass: 0 8px 32px rgba(15, 4, 32, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  /* motion */
+  --motion-fast: 150ms;
+  --motion-base: 250ms;
+  --motion-moderate: 400ms;
+}
