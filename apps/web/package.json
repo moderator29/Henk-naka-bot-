@@ -20,10 +20,11 @@
     "clsx": "^2.1.1",
     "framer-motion": "^11.5.4",
     "lucide-react": "^0.446.0",
-    "next": "14.2.13",
+    "next": "14.2.35",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "tailwind-merge": "^2.5.2"
+    "tailwind-merge": "^2.5.2",
+    "viem": "^2.21.15"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.5.0",
@@ -34,7 +35,7 @@
     "@vitejs/plugin-react": "^4.3.2",
     "autoprefixer": "^10.4.20",
     "eslint": "^8.57.1",
-    "eslint-config-next": "14.2.13",
+    "eslint-config-next": "14.2.35",
     "jsdom": "^25.0.1",
     "postcss": "^8.4.47",
     "prettier-plugin-tailwindcss": "^0.6.8",
