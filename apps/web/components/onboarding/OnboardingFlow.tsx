@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
 import { ONBOARDING_CARDS } from "./cards";
 import { OnboardingCardView } from "./OnboardingCardView";
@@ -41,6 +42,22 @@ export function OnboardingFlow({
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
+  const dialogRef = useRef<HTMLElement | null>(null);
+
+  // Move focus into the dialog on mount + restore previous focus on unmount.
+  useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    dialogRef.current?.focus();
+
+    // Lock body scroll while the dialog owns the viewport.
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      previouslyFocused?.focus?.();
+    };
+  }, []);
 
   const total = ONBOARDING_CARDS.length;
   const card = ONBOARDING_CARDS[index]!;
@@ -116,14 +133,21 @@ export function OnboardingFlow({
 
   return (
     <section
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="onboarding-headline"
-      className="fixed inset-0 z-[60] bg-plum"
+      tabIndex={-1}
+      className="fixed inset-0 z-[60] bg-plum focus:outline-none"
     >
       {/* Skip + counter */}
-      <div className="fixed top-4 inset-x-4 z-[61] flex items-center justify-between">
-        <span className="text-xs font-mono uppercase tracking-wider text-lilac/50">
+      {/* Logo + counter + skip */}
+      <div className="fixed top-4 inset-x-4 z-[61] flex items-center justify-between gap-4">
+        <Logo href={null} size="sm" />
+        <span
+          aria-live="polite"
+          className="text-xs font-mono uppercase tracking-wider text-lilac/50"
+        >
           {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
         </span>
         <button
