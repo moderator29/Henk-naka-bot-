@@ -30,7 +30,7 @@ export default function LandingPage() {
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4">
             <Button size="lg" asChild>
-              <Link href="/feed">Enter the Platform</Link>
+              <Link href="/explore">Enter the Platform</Link>
             </Button>
             <Button size="lg" variant="glass" asChild>
               <Link

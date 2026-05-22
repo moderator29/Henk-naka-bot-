@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Home,
   Compass,
+  Home,
+  MessageCircle,
   Diamond,
   Lock,
   User,
@@ -24,9 +25,14 @@ interface NavItem {
   icon: LucideIcon;
 }
 
+/**
+ * Discovery first, Feed second.
+ * /explore is the front door post-login per the revised flow.
+ */
 const nav: NavItem[] = [
+  { href: "/explore", label: "Discover", icon: Compass },
   { href: "/feed", label: "Feed", icon: Home },
-  { href: "/explore", label: "Explore", icon: Compass },
+  { href: "/messages", label: "Messages", icon: MessageCircle },
   { href: "/marketplace", label: "Marketplace", icon: Diamond },
   { href: "/staking", label: "Staking", icon: Lock },
   { href: "/profile", label: "Profile", icon: User },
@@ -36,7 +42,20 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function PlatformShell({ children }: { children: React.ReactNode }) {
+interface PlatformShellProps {
+  children: React.ReactNode;
+  /**
+   * Real value will flow from a server-fetched unread count once Supabase
+   * Realtime + auth are wired. Until then this stays undefined (no badge).
+   * PENDING_SUPABASE_AUTH — wire on auth sub-branch.
+   */
+  unreadMessageCount?: number;
+}
+
+export function PlatformShell({
+  children,
+  unreadMessageCount,
+}: PlatformShellProps) {
   const pathname = usePathname() ?? "/";
 
   return (
@@ -50,6 +69,10 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
         <nav aria-label="Primary" className="flex flex-col gap-1 flex-1">
           {nav.map(({ href, label, icon: Icon }) => {
             const active = isActive(pathname, href);
+            const showBadge =
+              href === "/messages" &&
+              typeof unreadMessageCount === "number" &&
+              unreadMessageCount > 0;
             return (
               <Link
                 key={href}
@@ -63,7 +86,15 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
                 )}
               >
                 <Icon size={20} aria-hidden="true" />
-                {label}
+                <span className="flex-1">{label}</span>
+                {showBadge && (
+                  <span
+                    aria-label={`${unreadMessageCount} unread messages`}
+                    className="min-w-[1.25rem] h-5 px-1.5 rounded-full bg-magenta text-white text-[0.65rem] font-semibold inline-flex items-center justify-center"
+                  >
+                    {unreadMessageCount! > 99 ? "99+" : unreadMessageCount}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -98,6 +129,26 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
               className="w-full h-10 pl-9 pr-3 rounded-xl bg-plum/60 border border-white/10 text-sm text-white placeholder:text-lilac/40 focus:border-magenta/50 focus:outline-none focus:ring-2 focus:ring-magenta/20"
             />
           </div>
+          <Link
+            href="/messages"
+            aria-label={
+              unreadMessageCount && unreadMessageCount > 0
+                ? `Messages — ${unreadMessageCount} unread`
+                : "Messages"
+            }
+            className="relative h-10 w-10 rounded-xl flex items-center justify-center text-lilac/70 hover:text-white hover:bg-white/5"
+          >
+            <MessageCircle size={18} />
+            {typeof unreadMessageCount === "number" &&
+              unreadMessageCount > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="absolute top-1 right-1 min-w-[1rem] h-4 px-1 rounded-full bg-magenta text-white text-[0.55rem] font-semibold inline-flex items-center justify-center"
+                >
+                  {unreadMessageCount > 9 ? "9+" : unreadMessageCount}
+                </span>
+              )}
+          </Link>
           <button
             type="button"
             aria-label="Notifications"
@@ -119,20 +170,30 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
           className="lg:hidden fixed bottom-0 inset-x-0 z-40 glass-strong border-t border-white/5"
         >
           <ul className="flex justify-around items-center h-16">
-            {nav.map(({ href, label, icon: Icon }) => {
+            {nav.slice(0, 5).map(({ href, label, icon: Icon }) => {
               const active = isActive(pathname, href);
+              const showBadge =
+                href === "/messages" &&
+                typeof unreadMessageCount === "number" &&
+                unreadMessageCount > 0;
               return (
                 <li key={href}>
                   <Link
                     href={href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex flex-col items-center gap-1 px-3 py-2 text-[0.65rem] font-medium",
+                      "relative flex flex-col items-center gap-1 px-3 py-2 text-[0.65rem] font-medium",
                       active ? "text-magenta" : "text-lilac/60"
                     )}
                   >
                     <Icon size={20} aria-hidden="true" />
                     {label}
+                    {showBadge && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute top-1 right-2 h-2 w-2 rounded-full bg-magenta"
+                      />
+                    )}
                   </Link>
                 </li>
               );

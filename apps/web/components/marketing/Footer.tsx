@@ -7,8 +7,9 @@ const linkGroups = [
   {
     title: "Platform",
     links: [
+      { href: "/explore", label: "Discover" },
       { href: "/feed", label: "Feed" },
-      { href: "/explore", label: "Explore" },
+      { href: "/messages", label: "Messages" },
       { href: "/marketplace", label: "Marketplace" },
       { href: "/staking", label: "Staking" },
     ],
