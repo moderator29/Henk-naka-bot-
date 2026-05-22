@@ -56,20 +56,32 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) {
-    const Comp = asChild ? Slot : "button";
+    const classes = cn(
+      "inline-flex items-center justify-center font-medium select-none",
+      "transition-transform duration-150 active:scale-[0.97]",
+      "disabled:opacity-50 disabled:pointer-events-none",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-2 focus-visible:ring-offset-plum",
+      variantClasses[variant],
+      sizeClasses[size],
+      className
+    );
+
+    // Slot requires a single child. When asChild is true we delegate every
+    // visual concern to the wrapped element; icons and the loading spinner are
+    // only rendered in the native <button> path.
+    if (asChild) {
+      return (
+        <Slot ref={ref} className={classes} {...props}>
+          {children}
+        </Slot>
+      );
+    }
+
     return (
-      <Comp
+      <button
         ref={ref}
-        type={asChild ? undefined : (type ?? "button")}
-        className={cn(
-          "inline-flex items-center justify-center font-medium select-none",
-          "transition-transform duration-150 active:scale-[0.97]",
-          "disabled:opacity-50 disabled:pointer-events-none",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-2 focus-visible:ring-offset-plum",
-          variantClasses[variant],
-          sizeClasses[size],
-          className
-        )}
+        type={type ?? "button"}
+        className={classes}
         disabled={disabled || loading}
         aria-busy={loading || undefined}
         {...props}
@@ -81,7 +93,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {children}
         {!loading && rightIcon}
-      </Comp>
+      </button>
     );
   }
 );
