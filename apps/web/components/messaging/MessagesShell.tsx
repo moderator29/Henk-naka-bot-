@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { cn, relativeTime } from "@/lib/utils";
 import { Card } from "@/components/ui/Card";
 import { BrandIcon } from "@/components/brand/BrandIcon";
-import { ThreadView } from "./ThreadView";
 
 /**
  * Messages two-pane shell.
@@ -32,11 +32,18 @@ export interface ConversationPreview {
 interface MessagesShellProps {
   activeConversationId?: string;
   conversations?: ConversationPreview[];
+  /**
+   * The live thread, injected by the server page (a ThreadContainer wired to
+   * Supabase Realtime + the send action). When absent but a conversation is
+   * active, the shell shows the empty thread prompt.
+   */
+  threadSlot?: ReactNode;
 }
 
 export function MessagesShell({
   activeConversationId,
   conversations = [],
+  threadSlot,
 }: MessagesShellProps) {
   const hasConversations = conversations.length > 0;
   const showThread = !!activeConversationId;
@@ -84,14 +91,7 @@ export function MessagesShell({
           !showThread && "hidden md:flex"
         )}
       >
-        {showThread ? (
-          <ThreadView
-            conversationId={activeConversationId!}
-            backHref="/messages"
-          />
-        ) : (
-          <ThreadPlaceholder />
-        )}
+        {showThread && threadSlot ? threadSlot : <ThreadPlaceholder />}
       </section>
     </div>
   );
