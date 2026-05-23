@@ -9,6 +9,8 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     globals: true,
     css: true,
+    // e2e specs belong to Playwright, not Vitest.
+    exclude: ["node_modules", "dist", ".next", "e2e/**"],
   },
   resolve: {
     alias: {
