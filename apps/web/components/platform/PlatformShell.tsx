@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { SkipToContent } from "@/components/ui/SkipToContent";
+import { ConnectWallet } from "@/components/web3/ConnectWallet";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -166,6 +167,7 @@ export function PlatformShell({
           >
             <Bell size={18} />
           </button>
+          <ConnectWallet compact />
         </header>
 
         <main

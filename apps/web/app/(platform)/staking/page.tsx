@@ -1,6 +1,7 @@
 import { AuroraBackground } from "@/components/brand/AuroraBackground";
 import { BrandIcon } from "@/components/brand/BrandIcon";
 import { Card } from "@/components/ui/Card";
+import { WalletBalanceCard } from "@/components/staking/WalletBalanceCard";
 import { STAKING_CONTRACT_ADDRESS } from "@/lib/web3/addresses";
 import { isStakingDeployed } from "@aurora/contracts";
 
@@ -29,10 +30,14 @@ export default function StakingPage() {
         </div>
       </section>
 
+      <div className="mb-6">
+        <WalletBalanceCard />
+      </div>
+
       {!deployed && (
         <Card className="text-center py-16 border-dashed border-2 border-white/10 bg-transparent">
           <h2 className="font-display text-xl font-semibold text-white mb-2">
-            Staking surface activates when the contract address is provided
+            Staking actions activate when the contract address is provided
           </h2>
           <p className="text-lilac/60 text-sm max-w-md mx-auto font-mono">
             STAKING_CONTRACT_ADDRESS = PENDING_CONTRACT_ADDRESS
