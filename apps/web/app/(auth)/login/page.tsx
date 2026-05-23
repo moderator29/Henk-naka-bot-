@@ -1,0 +1,41 @@
+import Link from "next/link";
+import type { Metadata } from "next";
+import { Card } from "@/components/ui/Card";
+import { GradientText } from "@/components/brand/GradientText";
+import { EmailSignInForm } from "@/components/auth/EmailSignInForm";
+import { GoogleButton } from "@/components/auth/GoogleButton";
+import { WalletAuthButton } from "@/components/auth/WalletAuthButton";
+import { AuthDivider } from "@/components/auth/AuthDivider";
+
+export const metadata: Metadata = {
+  title: "Sign in",
+};
+
+export default function LoginPage() {
+  return (
+    <Card variant="glass" className="p-8">
+      <h1 className="font-display text-3xl font-bold text-white mb-1">
+        Welcome <GradientText>back</GradientText>
+      </h1>
+      <p className="text-sm text-lilac/70 mb-6">
+        Sign in to pick up where you left off.
+      </p>
+
+      <div className="flex flex-col gap-3">
+        <GoogleButton label="Sign in with Google" />
+        <WalletAuthButton />
+      </div>
+
+      <AuthDivider label="or with email" />
+
+      <EmailSignInForm />
+
+      <p className="mt-6 text-sm text-lilac/70 text-center">
+        New here?{" "}
+        <Link href="/signup" className="text-magenta hover:text-magenta-light font-medium">
+          Create an account
+        </Link>
+      </p>
+    </Card>
+  );
+}

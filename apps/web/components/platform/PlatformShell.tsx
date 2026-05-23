@@ -13,6 +13,7 @@ import {
   Bell,
   Search,
   Sparkles,
+  LogOut,
   type LucideIcon,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
@@ -106,6 +107,15 @@ export function PlatformShell({
           <Settings size={20} aria-hidden="true" />
           Settings
         </Link>
+        <form action="/auth/signout" method="post">
+          <button
+            type="submit"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-lilac/60 hover:text-white hover:bg-white/5 transition-colors text-left"
+          >
+            <LogOut size={20} aria-hidden="true" />
+            Sign out
+          </button>
+        </form>
       </aside>
 
       <div className="flex flex-col min-h-screen">
