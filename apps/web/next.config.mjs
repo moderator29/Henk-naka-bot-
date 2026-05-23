@@ -5,6 +5,8 @@ const nextConfig = {
   transpilePackages: ["@aurora/design-system", "@aurora/contracts"],
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
+    // Enables instrumentation.ts (Sentry server/edge init) on Next 14.2.
+    instrumentationHook: true,
   },
   images: {
     formats: ["image/avif", "image/webp"],

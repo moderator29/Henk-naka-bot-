@@ -1,10 +1,11 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useState, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { ToastProvider } from "@/components/ui/Toast";
+import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 import { wagmiConfig } from "@/lib/web3/wagmi";
 import "@rainbow-me/rainbowkit/styles.css";
 
@@ -37,7 +38,11 @@ export function Providers({ children }: { children: ReactNode }) {
             overlayBlur: "large",
           })}
         >
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <Suspense fallback={null}>
+              <AnalyticsProvider>{children}</AnalyticsProvider>
+            </Suspense>
+          </ToastProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

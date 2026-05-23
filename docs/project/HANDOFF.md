@@ -75,18 +75,21 @@ RainbowKit needs wagmi v2 (not v3). `parseSiweMessage`/`verifySiweMessage`/
 9. `claude/aurora-auth-and-age-gate` — email + Google + SIWE, age gate
    (`lib/auth/*`), `requireAdult()`, `0004` auth-user trigger, `middleware.ts`,
    `/login` `/signup` `/check-email`
-10. `claude/aurora-project-docs` — THIS folder (source prompts + handoff)
-11. `claude/aurora-wallet` — wagmi + RainbowKit, `useNsfwBalance` (real on-chain
-    read), ConnectWallet in top bar, SIWE button activated, staking shows live
-    $NSFW balance. ~102 tests passing.
+9b. `claude/aurora-wallet` — wagmi + RainbowKit, `useNsfwBalance` (real
+    on-chain read), ConnectWallet in top bar, SIWE button activated, staking
+    shows live $NSFW balance.
+10. `claude/aurora-project-docs` — `docs/project/` source prompts + this handoff.
+11. `claude/aurora-observability` — Sentry (gated on DSN via
+    `instrumentation.ts` + `lib/observability/sentry.ts` +
+    `app/global-error.tsx`) and PostHog (gated on key via
+    `components/analytics/AnalyticsProvider.tsx`; manual pageviews, autocapture
+    off). **104 tests passing.**
 
-> NOTE: branch order above lists project-docs (#10 by creation) before wallet,
-> but wallet (#9 feature work) was built first. Both are pushed. Always branch
-> off the newest pushed branch — check `git branch -r` and `git log`.
+> Always branch off the NEWEST pushed branch — check `git branch -r` and
+> `git log`. Latest is `claude/aurora-observability`.
 
 ## NEXT UP (TODO)
 
-- **#10 Sentry + PostHog** SDK init (gated on env — must not crash without keys)
 - **#11 Supabase Realtime** wiring for DMs (channels on `messages`)
 - **#12 Playwright** critical-flow tests
 - **PHASE 2:** full landing sections (LiveTicker w/ CoinGecko + CMC fallback,
