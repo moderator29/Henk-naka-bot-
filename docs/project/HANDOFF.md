@@ -122,6 +122,12 @@ Nova, Aurora in `lib/demo/data.ts`. Toggle off with `NEXT_PUBLIC_DISABLE_DEMO=1`
 
 ## NOT DONE (next up, priority order)
 
+0. **Wallet sign-in does NOT complete a session.** `/api/auth/verify` verifies
+   the SIWE signature but returns `session: null` (PENDING_SUPABASE_AUTH) — it
+   never mints a Supabase session. Email + Google auth fully work; wallet
+   "sign in/up" only verifies. Finish: with the service role, upsert a users
+   row keyed by wallet_address and mint a session (admin.generateLink /
+   setSession / a custom JWT), then set the auth cookie.
 1. **Earnings Forecaster** (AI #4, RPD §3.4): `/api/ai/forecast` — stat model
    over last 90d (revenue/cadence/churn/tips) + Claude narrative + scenario
    sliders. Surface on a creator dashboard/earnings panel.
@@ -131,13 +137,31 @@ Nova, Aurora in `lib/demo/data.ts`. Toggle off with `NEXT_PUBLIC_DISABLE_DEMO=1`
    (PENDING_AI_SUMMARY) to it.
 3. **Creator Dashboard** (RPD §6.3): Overview, Content Studio, Analytics,
    Earnings (+Forecaster), Tiers, Fans, Co-Pilot conversation surface.
+   NOTE: Co-Pilot is currently ONLY DM reply suggestions. Still to build:
+   best posting times, 3 caption variations, pricing benchmarks, conversion
+   analysis, weekly digest, one-click apply.
 4. **Real engagement**: like/save/comment/tip writes to Supabase + on-chain
    tips (wagmi useWriteContract on $NSFW); real follow/subscribe actions.
+   There are NO engagement action files yet (like/save/follow are local-only
+   UI state). This is also where notification CREATION lives — the
+   notifications surface is read-only today; nothing writes notifications.
 5. **Staking + NFT marketplace** live wiring — BLOCKED on contract addresses
    from Tim & Paul (PENDING_CONTRACT_ADDRESS). UIs built against typed mocks.
+   Also missing: NFT detail page, My NFTs tab, token-page holder-distribution
+   visual.
 6. Settings panels (notifications/privacy/wallets/AI prefs), content
-   moderation queue, GDPR export/delete.
+   moderation queue, GDPR export/delete, age re-confirmation on suspicious
+   flows (§9.1).
 7. Resend transactional email (owner setting it up).
+8. **`/pleasureland` surface** (RPD §2.1) — a styled in-platform metaverse
+   launch page does NOT exist; Ecosystem cards point Pleasureland → /explore.
+9. **Onboarding completion** persists to localStorage, not yet
+   `user_preferences` server-side (PENDING_SUPABASE_AUTH).
+10. **Test backfill (honest gap).** "Test as you go" slipped during the rapid
+    feature push. NO unit tests yet for: PostCard, Composer/EmojiPicker,
+    ProfileView/EditProfileForm, PveelsFeed, VerifyGate/Turnstile,
+    PlatformBottomNav, CreatorCard, demo data. Playwright specs don't cover
+    /compose, /pveels, /verify, /profile. 23 test files exist (112 unit tests).
 
 ## OWNER ACTION ITEMS (so things work live)
 
