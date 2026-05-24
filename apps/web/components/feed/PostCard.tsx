@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { BadgeCheck, Heart, MessageCircle, Bookmark, Coins, Lock } from "lucide-react";
 import { cn, formatNumber, relativeTime } from "@/lib/utils";
 
@@ -27,14 +27,19 @@ export interface FeedPost {
 export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
+  const reduce = useReducedMotion();
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={reduce ? false : { opacity: 0, y: 18 }}
+      whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-8%" }}
-      transition={{ duration: 0.45, delay: Math.min(index * 0.05, 0.3), ease: [0.16, 1, 0.3, 1] }}
-      className="glass rounded-2xl p-5 transition-shadow hover:shadow-glow"
+      transition={{
+        duration: 0.42,
+        delay: Math.min(index * 0.05, 0.3),
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      className="glass edge-light rounded-2xl p-5 transition-shadow hover:shadow-[var(--glow-magenta)]"
     >
       <header className="flex items-center gap-3">
         <Link

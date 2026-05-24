@@ -2,9 +2,11 @@ import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { PostCard } from "@/components/feed/PostCard";
+import { CreatorCard } from "@/components/explore/CreatorCard";
 import { getSessionUser } from "@/lib/auth/session";
 import { getFeedPosts } from "@/lib/posts/queries";
-import { DEMO_POSTS, demoEnabled } from "@/lib/demo/data";
+import { getTrendingCreators, type TrendingCreator } from "@/lib/explore/queries";
+import { DEMO_CREATORS, DEMO_POSTS, demoEnabled } from "@/lib/demo/data";
 
 export const metadata = { title: "Feed" };
 
@@ -15,11 +17,21 @@ export const metadata = { title: "Feed" };
  */
 export default async function FeedPage() {
   const me = await getSessionUser();
-  const realPosts = await getFeedPosts(me?.id ?? null);
+  const [realPosts, liveCreators] = await Promise.all([
+    getFeedPosts(me?.id ?? null),
+    getTrendingCreators(4),
+  ]);
   const showDemo = realPosts.length === 0 && demoEnabled();
+  const suggested: TrendingCreator[] =
+    liveCreators.length > 0
+      ? liveCreators
+      : demoEnabled()
+        ? DEMO_CREATORS.slice(0, 3)
+        : [];
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="mx-auto max-w-5xl xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:gap-8 xl:items-start">
+      <div className="w-full max-w-2xl mx-auto xl:mx-0">
       <header className="mb-6 flex items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-4xl font-bold text-white">
@@ -87,6 +99,40 @@ export default async function FeedPage() {
             <Link href="/compose">Create a post</Link>
           </Button>
         </div>
+      )}
+      </div>
+
+      {suggested.length > 0 && (
+        <aside className="hidden xl:flex flex-col gap-4 sticky top-20">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-sm font-semibold text-white uppercase tracking-wider">
+              Suggested for you
+            </h2>
+            <Link
+              href="/explore"
+              className="text-xs text-magenta hover:text-magenta-light"
+            >
+              See all
+            </Link>
+          </div>
+          <div className="flex flex-col gap-3">
+            {suggested.map((c) => (
+              <CreatorCard key={c.username} creator={c} />
+            ))}
+          </div>
+          <Link
+            href="/staking"
+            className="glass edge-light rounded-2xl p-4 hover:shadow-[var(--glow-orchid)] transition-shadow"
+          >
+            <p className="text-xs uppercase tracking-wider text-cyan">Earn</p>
+            <p className="mt-1 font-display font-semibold text-white">
+              Stake $NSFW for 10% APY
+            </p>
+            <p className="mt-1 text-sm text-lilac/60">
+              Lock for 12 weeks, earn while you hold.
+            </p>
+          </Link>
+        </aside>
       )}
     </div>
   );
