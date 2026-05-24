@@ -62,33 +62,35 @@ export const auroraPreset = {
         shell: "16px",
       },
       animation: {
-        "aurora-drift-1": "aurora-drift-1 40s ease-in-out infinite",
-        "aurora-drift-2": "aurora-drift-2 55s ease-in-out infinite",
-        "aurora-drift-3": "aurora-drift-3 35s ease-in-out infinite",
-        "aurora-drift-4": "aurora-drift-4 60s ease-in-out infinite",
+        "aurora-drift-1": "aurora-drift-1 34s ease-in-out infinite",
+        "aurora-drift-2": "aurora-drift-2 28s ease-in-out infinite",
+        "aurora-drift-3": "aurora-drift-3 40s ease-in-out infinite",
+        "aurora-drift-4": "aurora-drift-4 24s ease-in-out infinite",
         "float-3d": "float-3d 8s ease-in-out infinite",
         "float-particle": "float-particle 16s ease-in-out infinite",
         "pulse-glow": "pulse-glow 3s ease-in-out infinite",
         "gradient-shift": "gradient-shift 8s ease infinite",
-        "marquee": "marquee 40s linear infinite",
+        marquee: "marquee 40s linear infinite",
         shimmer: "shimmer 2s linear infinite",
       },
       keyframes: {
+        // Translate-only, small range (breathing not sliding), each a
+        // different duration so the blobs never sync. Part 5 doctrine.
         "aurora-drift-1": {
-          "0%, 100%": { transform: "translate(0%, 0%) scale(1)" },
-          "50%": { transform: "translate(20%, 15%) scale(1.1)" },
+          "0%, 100%": { transform: "translate3d(0, 0, 0)" },
+          "50%": { transform: "translate3d(7%, 5%, 0)" },
         },
         "aurora-drift-2": {
-          "0%, 100%": { transform: "translate(0%, 0%) scale(1)" },
-          "50%": { transform: "translate(-15%, 20%) scale(1.15)" },
+          "0%, 100%": { transform: "translate3d(0, 0, 0)" },
+          "50%": { transform: "translate3d(-6%, 7%, 0)" },
         },
         "aurora-drift-3": {
-          "0%, 100%": { transform: "translate(0%, 0%) scale(1.1)" },
-          "50%": { transform: "translate(10%, -20%) scale(1)" },
+          "0%, 100%": { transform: "translate3d(0, 0, 0)" },
+          "50%": { transform: "translate3d(5%, -8%, 0)" },
         },
         "aurora-drift-4": {
-          "0%, 100%": { transform: "translate(0%, 0%) scale(1)" },
-          "50%": { transform: "translate(-20%, -10%) scale(1.2)" },
+          "0%, 100%": { transform: "translate3d(0, 0, 0)" },
+          "50%": { transform: "translate3d(-8%, -4%, 0)" },
         },
         "float-3d": {
           "0%, 100%": { transform: "rotateY(-5deg) translateY(0px)" },

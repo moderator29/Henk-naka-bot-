@@ -130,7 +130,7 @@ export function PlatformShell({
         </form>
       </aside>
 
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen min-w-0 max-w-full overflow-x-clip">
         <header className="sticky top-0 z-30 glass-strong border-b border-white/5 px-4 sm:px-6 py-3 flex items-center gap-3">
           <div className="lg:hidden">
             <Logo size="sm" showWordmark={false} />
@@ -162,7 +162,7 @@ export function PlatformShell({
 
         <main
           id="main-content"
-          className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-28 lg:pb-6"
+          className="flex-1 min-w-0 max-w-full px-4 sm:px-6 lg:px-8 py-6 pb-28 lg:pb-6"
         >
           {children}
         </main>

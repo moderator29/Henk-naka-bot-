@@ -7,6 +7,8 @@
   html {
     color-scheme: dark;
     scroll-behavior: smooth;
+    /* clip (not hidden) stops sideways drift without breaking sticky chrome */
+    overflow-x: clip;
   }
   @media (prefers-reduced-motion: reduce) {
     html {
@@ -16,6 +18,16 @@
 
   body {
     @apply bg-plum text-lilac font-sans antialiased;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  /* Media never forces the viewport wider than the screen. */
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
   }
 
   *:focus-visible {
@@ -41,18 +53,83 @@
 }
 
 @layer components {
+  /* The single glass recipe. Every glass surface reads from this so the
+     product feels carved from one material (Part 5 / Part 6). */
   .glass {
-    background: rgba(42, 14, 90, 0.35);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 31, 143, 0.15);
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(120%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(120%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-e3), var(--glass-highlight);
+  }
+
+  /* Featured glass: a faint magenta edge instead of neutral white. */
+  .glass-featured {
+    border-color: var(--glass-border-featured);
+  }
+
+  /* Shell chrome: same material, lighter blur (persistent, never stacked). */
+  .glass-chrome {
+    position: relative;
+    background: rgba(22, 9, 46, 0.5);
+    backdrop-filter: blur(var(--shell-blur)) saturate(120%);
+    -webkit-backdrop-filter: blur(var(--shell-blur)) saturate(120%);
+    box-shadow: var(--glass-highlight);
+  }
+
+  /* The focused content panel set into the chassis: brighter, more opaque,
+     large radius, hairline inner border, lifted with e3. */
+  .content-panel {
+    position: relative;
+    background: rgba(22, 9, 46, 0.62);
+    backdrop-filter: blur(var(--glass-blur)) saturate(120%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-e3), var(--glass-highlight);
+  }
+
+  /* Gradient edge light: a 1px border, brighter at top-left, fading toward
+     bottom-right, as if a soft light hits the top of the chassis. */
+  .edge-light::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.03) 45%,
+      rgba(255, 255, 255, 0.01)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Low-transparency fallback keeps borders + highlight, drops the blur. */
+  @media (prefers-reduced-transparency: reduce) {
+    .glass,
+    .glass-chrome,
+    .content-panel {
+      background: var(--color-plum-2);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
   }
 
   .glass-strong {
-    background: rgba(15, 4, 32, 0.65);
-    backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-    border: 1px solid rgba(184, 71, 255, 0.25);
+    position: relative;
+    background: rgba(15, 4, 32, 0.7);
+    backdrop-filter: blur(var(--shell-blur)) saturate(120%);
+    -webkit-backdrop-filter: blur(var(--shell-blur)) saturate(120%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-e2), var(--glass-highlight);
   }
 
   .text-gradient {
