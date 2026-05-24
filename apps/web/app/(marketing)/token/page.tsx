@@ -6,7 +6,10 @@ import { GradientText } from "@/components/brand/GradientText";
 import { BrandIcon, type BrandIconName } from "@/components/brand/BrandIcon";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { StatTicker } from "@/components/ui/StatTicker";
+import {
+  StatTicker,
+  type StatFormatPreset,
+} from "@/components/ui/StatTicker";
 import { CopyAddress } from "@/components/marketing/CopyAddress";
 import { PriceChart } from "@/components/token/PriceChart";
 import { NSFW_TOKEN_ADDRESS } from "@/lib/web3/addresses";
@@ -72,15 +75,15 @@ export default async function TokenPage() {
 
       <section className="relative pb-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Metric label="Price" value={stats.price} format={(n) => `$${n.toFixed(6)}`} />
+          <Metric label="Price" value={stats.price} formatPreset="price6" />
           <Metric
             label="24h"
             value={stats.change24h}
-            format={(n) => `${n >= 0 ? "+" : ""}${n.toFixed(2)}%`}
+            formatPreset="percentSigned"
             tone={stats.change24h != null && stats.change24h >= 0 ? "up" : "down"}
           />
-          <Metric label="Market Cap" value={stats.marketCap} format={(n) => `$${compact(n)}`} />
-          <Metric label="24h Volume" value={stats.volume24h} format={(n) => `$${compact(n)}`} />
+          <Metric label="Market Cap" value={stats.marketCap} formatPreset="usdCompact" />
+          <Metric label="24h Volume" value={stats.volume24h} formatPreset="usdCompact" />
         </div>
       </section>
 
@@ -110,12 +113,12 @@ export default async function TokenPage() {
 function Metric({
   label,
   value,
-  format,
+  formatPreset,
   tone,
 }: {
   label: string;
   value: number | null;
-  format: (n: number) => string;
+  formatPreset: StatFormatPreset;
   tone?: "up" | "down";
 }) {
   return (
@@ -127,7 +130,7 @@ function Metric({
         }`}
       >
         {value != null ? (
-          <StatTicker value={value} format={format} />
+          <StatTicker value={value} formatPreset={formatPreset} />
         ) : (
           <span className="text-lilac/40">—</span>
         )}
@@ -154,11 +157,4 @@ function Utility({
       </div>
     </Card>
   );
-}
-
-function compact(n: number) {
-  return new Intl.NumberFormat("en-US", {
-    notation: "compact",
-    maximumFractionDigits: 2,
-  }).format(n);
 }

@@ -17,7 +17,7 @@ export async function LiveTicker() {
         <div className="glass-strong rounded-2xl px-6 py-5 grid grid-cols-2 md:grid-cols-4 gap-6">
           <Stat label="$NSFW">
             {stats.price != null ? (
-              <StatTicker value={stats.price} format={(n) => `$${n.toFixed(6)}`} duration={1.4} />
+              <StatTicker value={stats.price} formatPreset="price6" duration={1.4} />
             ) : (
               <Dash />
             )}
@@ -34,7 +34,7 @@ export async function LiveTicker() {
           </Stat>
           <Stat label="Market Cap">
             {stats.marketCap != null ? (
-              <StatTicker value={stats.marketCap} format={(n) => `$${compact(n)}`} />
+              <StatTicker value={stats.marketCap} formatPreset="usdCompact" />
             ) : (
               <Dash />
             )}
@@ -59,11 +59,4 @@ function Stat({ label, children }: { label: string; children: React.ReactNode })
 
 function Dash() {
   return <span className="text-lilac/40 text-base">—</span>;
-}
-
-function compact(n: number) {
-  return new Intl.NumberFormat("en-US", {
-    notation: "compact",
-    maximumFractionDigits: 2,
-  }).format(n);
 }

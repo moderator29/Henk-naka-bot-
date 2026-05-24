@@ -9,10 +9,39 @@ import {
 } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+/**
+ * Serializable format presets. Server Components can't pass a function prop to
+ * a Client Component (Next throws during RSC serialization), so server callers
+ * use `formatPreset` (a plain string) instead of `format`. Client callers may
+ * still pass a `format` function directly.
+ */
+export type StatFormatPreset =
+  | "int"
+  | "price6"
+  | "percentSigned"
+  | "usdCompact"
+  | "compact";
+
+const compact = (n: number) =>
+  new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: 2,
+  }).format(n);
+
+const PRESETS: Record<StatFormatPreset, (n: number) => string> = {
+  int: (n) => Math.round(n).toLocaleString(),
+  price6: (n) => `$${n.toFixed(6)}`,
+  percentSigned: (n) => `${n >= 0 ? "+" : ""}${n.toFixed(2)}%`,
+  usdCompact: (n) => `$${compact(n)}`,
+  compact,
+};
+
 interface StatTickerProps {
   value: number;
-  /** Pre-formatter applied to the running count */
+  /** Client-only formatter. Do NOT pass from a Server Component. */
   format?: (n: number) => string;
+  /** Serializable formatter selector — safe from Server Components. */
+  formatPreset?: StatFormatPreset;
   duration?: number;
   className?: string;
   prefix?: string;
@@ -25,17 +54,19 @@ interface StatTickerProps {
  */
 export function StatTicker({
   value,
-  format = (n) => Math.round(n).toLocaleString(),
+  format,
+  formatPreset = "int",
   duration = 1.2,
   className,
   prefix,
   suffix,
 }: StatTickerProps) {
+  const fmt = format ?? PRESETS[formatPreset];
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-10%" });
   const mv = useMotionValue(0);
-  const rounded = useTransform(mv, (latest) => format(latest));
-  const [display, setDisplay] = useState(format(0));
+  const rounded = useTransform(mv, (latest) => fmt(latest));
+  const [display, setDisplay] = useState(fmt(0));
 
   useEffect(() => {
     const unsub = rounded.on("change", setDisplay);
