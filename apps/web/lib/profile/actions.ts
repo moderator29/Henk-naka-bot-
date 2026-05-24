@@ -1,14 +1,17 @@
 "use server";
 
 import { z } from "zod";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth/session";
+import { passwordSchema } from "@/lib/auth/schemas";
 
 /**
- * Update the signed-in user's profile (display name, username, bio, avatar).
- * Runs under the caller's session; RLS restricts writes to their own row.
- * Avatar uploads go to the public `avatars` storage bucket (owner creates it
- * in Supabase). Returns a typed result the client renders.
+ * Profile + account actions for the signed-in user. Profile writes run under
+ * the caller's session (RLS restricts to their own row); the account delete
+ * uses the service role to cascade-remove their data and auth identity. Media
+ * uploads go to the public `avatars` storage bucket.
  */
 
 const AVATAR_BUCKET = "avatars";
@@ -22,7 +25,22 @@ const schema = z.object({
     .max(30)
     .regex(/^[a-z0-9_]+$/i, "Letters, numbers, and underscores only"),
   bio: z.string().trim().max(300).optional(),
+  country: z.string().trim().max(60).optional(),
 });
+
+async function uploadImage(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  file: File,
+  prefix: string
+): Promise<string | undefined> {
+  const path = `${userId}/${prefix}-${crypto.randomUUID()}-${file.name}`;
+  const { error } = await supabase.storage
+    .from(AVATAR_BUCKET)
+    .upload(path, file, { contentType: file.type, upsert: true });
+  if (error) return undefined;
+  return supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path).data.publicUrl;
+}
 
 export interface UpdateProfileResult {
   ok: boolean;
@@ -45,6 +63,7 @@ export async function updateProfile(
     displayName: String(formData.get("displayName") ?? ""),
     username: String(formData.get("username") ?? ""),
     bio: (formData.get("bio") as string) || undefined,
+    country: (formData.get("country") as string) || undefined,
   });
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
@@ -59,18 +78,16 @@ export async function updateProfile(
 
   const supabase = createClient();
 
-  let avatarUrl: string | undefined;
   const avatar = formData.get("avatar");
-  if (avatar instanceof File && avatar.size > 0) {
-    const path = `${me.id}/${crypto.randomUUID()}-${avatar.name}`;
-    const { error: upErr } = await supabase.storage
-      .from(AVATAR_BUCKET)
-      .upload(path, avatar, { contentType: avatar.type, upsert: true });
-    if (!upErr) {
-      avatarUrl = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path)
-        .data.publicUrl;
-    }
-  }
+  const cover = formData.get("cover");
+  const avatarUrl =
+    avatar instanceof File && avatar.size > 0
+      ? await uploadImage(supabase, me.id, avatar, "avatar")
+      : undefined;
+  const coverUrl =
+    cover instanceof File && cover.size > 0
+      ? await uploadImage(supabase, me.id, cover, "cover")
+      : undefined;
 
   const { error } = await supabase
     .from("users")
@@ -78,7 +95,9 @@ export async function updateProfile(
       display_name: parsed.data.displayName,
       username: parsed.data.username.toLowerCase(),
       bio: parsed.data.bio ?? null,
+      country: parsed.data.country ?? null,
       ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
+      ...(coverUrl ? { cover_url: coverUrl } : {}),
     })
     .eq("id", me.id);
 
@@ -89,4 +108,75 @@ export async function updateProfile(
     return { ok: false, error: "Could not save. Try again." };
   }
   return { ok: true };
+}
+
+/** Change the signed-in user's password after re-checking the current one. */
+export async function changePassword(formData: FormData): Promise<{
+  ok: boolean;
+  error?: string;
+  fieldErrors?: Record<string, string>;
+}> {
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me?.email) return { ok: false, error: "Sign in to change your password." };
+
+  const current = String(formData.get("currentPassword") ?? "");
+  const next = String(formData.get("newPassword") ?? "");
+  const confirm = String(formData.get("confirmPassword") ?? "");
+
+  const parsed = passwordSchema.safeParse(next);
+  if (!parsed.success) {
+    return { ok: false, fieldErrors: { newPassword: parsed.error.issues[0]?.message ?? "Invalid" } };
+  }
+  if (next !== confirm) {
+    return { ok: false, fieldErrors: { confirmPassword: "Passwords do not match" } };
+  }
+
+  const supabase = createClient();
+  // Re-authenticate to confirm the current password.
+  const { error: reauth } = await supabase.auth.signInWithPassword({
+    email: me.email,
+    password: current,
+  });
+  if (reauth) {
+    return { ok: false, fieldErrors: { currentPassword: "Current password is incorrect" } };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: next });
+  if (error) return { ok: false, error: "Could not update password. Try again." };
+  return { ok: true };
+}
+
+/**
+ * Permanently delete the signed-in user's account. Requires typing the exact
+ * confirmation phrase. Cascade-deletes their data (FKs ON DELETE CASCADE) and
+ * removes the auth identity via the service role, then signs out.
+ */
+export async function deleteAccount(formData: FormData): Promise<{ ok: false; error: string } | void> {
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me) return { ok: false, error: "Sign in first." };
+
+  const confirm = String(formData.get("confirm") ?? "").trim().toLowerCase();
+  if (confirm !== "delete my account") {
+    return { ok: false, error: 'Type "delete my account" to confirm.' };
+  }
+
+  const admin = createAdminClient();
+  // Remove the profile row first (cascades to posts, follows, tips, etc.).
+  await admin.from("users").delete().eq("id", me.id);
+  await admin.auth.admin.deleteUser(me.id);
+
+  // Invalidate the local session, then leave the app.
+  const supabase = createClient();
+  await supabase.auth.signOut();
+  redirect("/?deleted=1");
 }
