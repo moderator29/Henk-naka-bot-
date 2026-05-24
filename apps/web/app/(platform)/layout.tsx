@@ -1,5 +1,6 @@
 import { PlatformShell } from "@/components/platform/PlatformShell";
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
+import { ConciergeFab } from "@/components/ai/ConciergeFab";
 
 export default function PlatformLayout({
   children,
@@ -10,6 +11,7 @@ export default function PlatformLayout({
     <PlatformShell>
       <OnboardingGate />
       {children}
+      <ConciergeFab />
     </PlatformShell>
   );
 }
