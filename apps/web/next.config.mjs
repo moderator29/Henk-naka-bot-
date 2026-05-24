@@ -32,6 +32,28 @@ const nextConfig = {
       },
     ];
   },
+  webpack: (config) => {
+    // Optional deps pulled in by wagmi / WalletConnect / MetaMask connectors
+    // that aren't needed on the web build. Externalizing (server) and aliasing
+    // to false (client) silences the harmless "Module not found" warnings for
+    // @react-native-async-storage/async-storage and pino-pretty without
+    // changing runtime behavior.
+    config.externals.push("pino-pretty", "lokijs", "encoding");
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@react-native-async-storage/async-storage": false,
+      "pino-pretty": false,
+    };
+    // Silence OpenTelemetry/Sentry "Critical dependency: the request of a
+    // dependency is an expression" notices, which are expected and harmless.
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings ?? []),
+      { module: /@opentelemetry\/instrumentation/ },
+      { module: /require-in-the-middle/ },
+      { message: /Critical dependency: the request of a dependency is an expression/ },
+    ];
+    return config;
+  },
 };
 
 export default nextConfig;
