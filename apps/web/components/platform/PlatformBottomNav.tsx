@@ -3,13 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Home, Clapperboard, Plus, MessageCircle, User, type LucideIcon } from "lucide-react";
+import {
+  Compass,
+  Home,
+  Plus,
+  MessageCircle,
+  User,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Floating glass bottom nav (mobile/tablet). A rounded pill that hovers above
- * the content with a prominent, elevated center "+" that opens the post
- * composer. Pveels (reels), Messages, and Profile flank it.
+ * Mobile glass tab bar (Part 6): the rail's pocket-sized counterpart, same
+ * material and edge light, pinned above content with an elevated center "+"
+ * that opens the composer. Discover and Feed flank the left, Messages and
+ * Profile the right.
  */
 
 interface NavItem {
@@ -19,8 +27,8 @@ interface NavItem {
 }
 
 const left: NavItem[] = [
-  { href: "/feed", label: "Home", icon: Home },
-  { href: "/pveels", label: "Pveels", icon: Clapperboard },
+  { href: "/explore", label: "Discover", icon: Compass },
+  { href: "/feed", label: "Feed", icon: Home },
 ];
 
 const right: NavItem[] = [
@@ -41,7 +49,7 @@ export function PlatformBottomNav() {
       className="lg:hidden fixed bottom-4 inset-x-4 z-40"
     >
       <div className="relative mx-auto max-w-md">
-        <div className="glass-strong rounded-full shadow-glow flex items-center justify-between px-3 h-16">
+        <div className="glass-chrome edge-light rounded-full shadow-e3 flex items-center justify-between px-3 h-16">
           <div className="flex items-center gap-1">
             {left.map((item) => (
               <NavButton key={item.href} item={item} active={isActive(pathname, item.href)} />
@@ -67,7 +75,7 @@ export function PlatformBottomNav() {
           <motion.span
             whileTap={{ scale: 0.92 }}
             whileHover={{ scale: 1.06 }}
-            className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-primary text-white shadow-glow-lg ring-4 ring-plum animate-pulse-glow"
+            className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-primary text-white shadow-glow-lg ring-4 ring-plum/80"
           >
             <Plus size={28} />
           </motion.span>
