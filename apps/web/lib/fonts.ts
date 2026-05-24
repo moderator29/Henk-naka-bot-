@@ -13,7 +13,7 @@
  *   3. No other code changes required, every component reads var(--font-display).
  */
 
-import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Inter, JetBrains_Mono, Sora } from "next/font/google";
 // import localFont from "next/font/local"; // re-enable when Clash file lands
 
 export const inter = Inter({
@@ -28,12 +28,12 @@ export const mono = JetBrains_Mono({
   display: "swap",
 });
 
-// PLACEHOLDER_PENDING_BRAND_ASSETS, Space Grotesk stands in for Clash Display
-// until the woff2 is dropped in.
-export const display = Space_Grotesk({
+// Display face: Sora — a clean, modern, geometric face that reads premium and
+// a touch futuristic. Inter stays for body copy (readability).
+export const display = Sora({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 

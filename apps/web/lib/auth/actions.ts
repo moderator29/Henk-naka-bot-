@@ -167,7 +167,7 @@ export async function signInAction(
   }
 
   const next = String(formData.get("next") ?? "");
-  const dest = next.startsWith("/") && !next.startsWith("//") ? next : "/explore";
+  const dest = next.startsWith("/") && !next.startsWith("//") ? next : "/feed";
   redirect(dest);
 }
 

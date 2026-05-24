@@ -22,8 +22,8 @@ export function Hero() {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full glass text-xs font-medium text-lilac/80"
           >
-            <span className="h-2 w-2 rounded-full bg-magenta animate-pulse" />
-            Project Aurora · v2 launching
+            <span className="h-2 w-2 rounded-full bg-magenta" />
+            Now live · Powered by $NSFW
           </motion.div>
 
           <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.05] tracking-tight text-white">

@@ -31,8 +31,8 @@ const milestones: Milestone[] = [
   },
   {
     year: "2026",
-    title: "Project Aurora ships",
-    body: "One unified platform. AI-native. Aurora-styled. The bar resets.",
+    title: "The unified platform ships",
+    body: "One platform, one wallet, one home. AI-native. The bar resets.",
   },
 ];
 

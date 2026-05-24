@@ -27,8 +27,8 @@ interface NavItem {
 }
 
 const left: NavItem[] = [
+  { href: "/feed", label: "Home", icon: Home },
   { href: "/explore", label: "Discover", icon: Compass },
-  { href: "/feed", label: "Feed", icon: Home },
 ];
 
 const right: NavItem[] = [

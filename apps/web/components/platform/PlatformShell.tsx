@@ -22,8 +22,8 @@ import { PlatformBottomNav } from "@/components/platform/PlatformBottomNav";
 
 /** Discovery first, Feed second; routes that exist today. */
 const nav: RailItem[] = [
+  { href: "/feed", label: "Home", icon: Home },
   { href: "/explore", label: "Discover", icon: Compass },
-  { href: "/feed", label: "Feed", icon: Home },
   { href: "/pveels", label: "Pveels", icon: Clapperboard },
   { href: "/messages", label: "Messages", icon: MessageCircle },
   { href: "/marketplace", label: "Marketplace", icon: Diamond },
