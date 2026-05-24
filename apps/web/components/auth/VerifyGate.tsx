@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, Check, ArrowRight } from "lucide-react";
@@ -9,27 +9,40 @@ import { Button } from "@/components/ui/Button";
 
 /**
  * Full-screen human-verification gate. The landing "Get Started" CTA routes
- * here (/verify?next=...); on a successful Turnstile challenge it stores a
- * short-lived client flag and forwards to the destination (default /signup).
+ * here (/verify?next=...). On a successful Turnstile challenge it auto-advances
+ * to the destination (default /signup). It never gets stuck: if the widget is
+ * slow or fails to load, a manual "Continue" appears after a few seconds (the
+ * real server-side check still runs on the actual sign-up submit).
  */
 export function VerifyGate({ next = "/signup" }: { next?: string }) {
   const router = useRouter();
   const [verified, setVerified] = useState(false);
   const [advancing, setAdvancing] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
+  const advanced = useRef(false);
 
-  const onVerify = () => {
+  const proceed = useCallback(() => {
+    if (advanced.current) return;
+    advanced.current = true;
+    setAdvancing(true);
+    router.push(next);
+  }, [next, router]);
+
+  const onVerify = useCallback(() => {
     setVerified(true);
     try {
       sessionStorage.setItem("aurora.verified", String(Date.now()));
     } catch {
       // sessionStorage may be unavailable; non-fatal.
     }
-  };
+    setTimeout(proceed, 700);
+  }, [proceed]);
 
-  const proceed = () => {
-    setAdvancing(true);
-    router.push(next);
-  };
+  // Safety net: never hard-stuck if the widget is slow or misconfigured.
+  useEffect(() => {
+    const t = setTimeout(() => setShowFallback(true), 6000);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <div className="w-full max-w-md">
@@ -68,14 +81,12 @@ export function VerifyGate({ next = "/signup" }: { next?: string }) {
         </h1>
         <p className="mt-2 text-sm text-lilac/70">
           {verified
-            ? "Welcome to Pleasure Coin. Let's get you in."
+            ? "Welcome to Pleasure Coin. Taking you in."
             : "We keep the platform safe with a fast human check. One tap and you're through."}
         </p>
 
         <div className="mt-6 flex flex-col items-center gap-4">
-          {!verified ? (
-            <Turnstile onVerify={onVerify} onExpire={() => setVerified(false)} />
-          ) : (
+          {verified ? (
             <Button
               size="lg"
               className="w-full"
@@ -85,9 +96,33 @@ export function VerifyGate({ next = "/signup" }: { next?: string }) {
             >
               Continue
             </Button>
+          ) : (
+            <>
+              <Turnstile onVerify={onVerify} onExpire={() => setVerified(false)} />
+              {showFallback && (
+                <button
+                  type="button"
+                  onClick={proceed}
+                  className="text-xs text-lilac/50 hover:text-white underline"
+                >
+                  Having trouble? Continue to sign up
+                </button>
+              )}
+            </>
           )}
         </div>
       </motion.div>
+
+      <p className="mt-6 text-center text-sm text-lilac/60">
+        Already have an account?{" "}
+        <button
+          type="button"
+          onClick={() => router.push("/login")}
+          className="text-magenta hover:text-magenta-light font-medium"
+        >
+          Sign in
+        </button>
+      </p>
     </div>
   );
 }
