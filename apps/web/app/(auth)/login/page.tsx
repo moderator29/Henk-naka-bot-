@@ -11,8 +11,16 @@ export const metadata: Metadata = {
   title: "Sign in",
 };
 
-export default function LoginPage() {
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams: { next?: string };
+}) {
   const humanVerified = hasHumanVerified();
+  const next =
+    searchParams.next && searchParams.next.startsWith("/")
+      ? searchParams.next
+      : undefined;
   return (
     <Card variant="glass" className="p-6 sm:p-8 edge-light">
       <h1 className="font-display text-3xl font-bold text-white mb-1">
@@ -29,7 +37,7 @@ export default function LoginPage() {
 
       <AuthDivider label="or with email" />
 
-      <EmailSignInForm humanVerified={humanVerified} />
+      <EmailSignInForm humanVerified={humanVerified} next={next} />
     </Card>
   );
 }

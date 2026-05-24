@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Script from "next/script";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, RotateCcw } from "lucide-react";
 
 /**
  * Cloudflare Turnstile widget. Renders the real challenge when
  * NEXT_PUBLIC_TURNSTILE_SITE_KEY is set; calls onVerify with the token on
- * success. When the site key isn't configured yet it shows a labeled dev
- * passthrough so the flow still works locally (PENDING_TURNSTILE_KEYS).
+ * success. Centered, with a clean error + retry state. When the site key isn't
+ * configured it shows a single labeled passthrough (dev only).
  */
 
 declare global {
@@ -39,18 +39,34 @@ export function Turnstile({ onVerify, onExpire }: TurnstileProps) {
   const ref = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [errored, setErrored] = useState(false);
 
-  useEffect(() => {
-    if (!siteKey || !ready || !ref.current || !window.turnstile) return;
+  const render = useCallback(() => {
+    if (!siteKey || !ref.current || !window.turnstile) return;
     if (widgetId.current) return;
+    setErrored(false);
     widgetId.current = window.turnstile.render(ref.current, {
       sitekey: siteKey,
       theme: "dark",
       callback: (token) => onVerify(token),
       "expired-callback": () => onExpire?.(),
-      "error-callback": () => onExpire?.(),
+      "error-callback": () => setErrored(true),
     });
-  }, [siteKey, ready, onVerify, onExpire]);
+  }, [siteKey, onVerify, onExpire]);
+
+  useEffect(() => {
+    if (ready) render();
+  }, [ready, render]);
+
+  const retry = () => {
+    setErrored(false);
+    if (widgetId.current && window.turnstile) {
+      window.turnstile.reset(widgetId.current);
+    } else {
+      widgetId.current = null;
+      render();
+    }
+  };
 
   // Dev passthrough when no site key is configured.
   if (!siteKey) {
@@ -58,13 +74,13 @@ export function Turnstile({ onVerify, onExpire }: TurnstileProps) {
       <button
         type="button"
         onClick={() => onVerify("dev-bypass-token")}
-        className="w-full glass rounded-xl px-4 py-3 flex items-center gap-3 text-sm text-lilac/70 hover:text-white hover:border-cyan/40 transition-colors"
+        className="w-full glass edge-light rounded-xl px-4 py-3 flex items-center gap-3 text-sm text-lilac/80 hover:text-white transition-colors"
       >
-        <ShieldCheck size={18} className="text-cyan" />
+        <ShieldCheck size={18} className="text-cyan shrink-0" />
         <span className="text-left">
           Verify you are human
           <span className="block text-[0.65rem] text-lilac/40">
-            Turnstile activates once the site key is configured. Tap to continue.
+            Turnstile activates once the site key is configured.
           </span>
         </span>
       </button>
@@ -78,7 +94,18 @@ export function Turnstile({ onVerify, onExpire }: TurnstileProps) {
         strategy="afterInteractive"
         onLoad={() => setReady(true)}
       />
-      <div ref={ref} className="min-h-[65px]" data-testid="turnstile-widget" />
+      <div className="flex flex-col items-center gap-3 w-full">
+        <div ref={ref} className="min-h-[65px] flex items-center justify-center" data-testid="turnstile-widget" />
+        {errored && (
+          <button
+            type="button"
+            onClick={retry}
+            className="inline-flex items-center gap-1.5 text-xs text-lilac/70 hover:text-white"
+          >
+            <RotateCcw size={13} /> Verification didn&apos;t load. Retry
+          </button>
+        )}
+      </div>
     </>
   );
 }

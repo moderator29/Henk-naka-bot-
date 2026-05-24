@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, Check, ArrowRight } from "lucide-react";
@@ -18,7 +18,6 @@ export function VerifyGate({ next = "/signup" }: { next?: string }) {
   const router = useRouter();
   const [verified, setVerified] = useState(false);
   const [advancing, setAdvancing] = useState(false);
-  const [showFallback, setShowFallback] = useState(false);
   const advanced = useRef(false);
 
   const proceed = useCallback(() => {
@@ -44,12 +43,6 @@ export function VerifyGate({ next = "/signup" }: { next?: string }) {
     },
     [proceed]
   );
-
-  // Safety net: never hard-stuck if the widget is slow or misconfigured.
-  useEffect(() => {
-    const t = setTimeout(() => setShowFallback(true), 6000);
-    return () => clearTimeout(t);
-  }, []);
 
   return (
     <div className="w-full max-w-md">
@@ -106,15 +99,6 @@ export function VerifyGate({ next = "/signup" }: { next?: string }) {
           ) : (
             <>
               <Turnstile onVerify={onVerify} onExpire={() => setVerified(false)} />
-              {showFallback && (
-                <button
-                  type="button"
-                  onClick={proceed}
-                  className="text-xs text-lilac/50 hover:text-white underline"
-                >
-                  Having trouble? Continue to sign up
-                </button>
-              )}
             </>
           )}
         </div>

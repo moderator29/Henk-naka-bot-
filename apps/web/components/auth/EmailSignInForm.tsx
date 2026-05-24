@@ -18,8 +18,10 @@ const initialState: AuthActionState = {};
 
 export function EmailSignInForm({
   humanVerified = false,
+  next,
 }: {
   humanVerified?: boolean;
+  next?: string;
 }) {
   const [pwState, pwAction] = useFormState(signInAction, initialState);
   const [magicState, magicAction] = useFormState(magicLinkAction, initialState);
@@ -58,6 +60,7 @@ export function EmailSignInForm({
 
       {mode === "password" ? (
         <form action={pwAction} className="flex flex-col gap-4">
+          {next && <input type="hidden" name="next" value={next} />}
           <Input
             name="email"
             type="email"

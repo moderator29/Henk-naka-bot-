@@ -2,13 +2,31 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 /**
- * Refreshes the Supabase session on every request so Server Components always
- * see a fresh auth state. When Supabase env isn't configured (local dev before
- * keys land), it passes through untouched rather than crashing.
- *
- * Route gating (redirecting signed-out users away from /feed, /messages, etc.)
- * is layered on here once auth is connected end-to-end.
+ * Refreshes the Supabase session on every request, and gates the in-app
+ * platform routes: signed-out visitors are redirected to sign in. When Supabase
+ * env isn't configured (local dev before keys land) it passes through.
  */
+
+// In-app surfaces that require authentication. Marketing (/, /token, /journey,
+// /docs) and the auth pages stay public.
+const PROTECTED_PREFIXES = [
+  "/explore",
+  "/feed",
+  "/pveels",
+  "/messages",
+  "/marketplace",
+  "/staking",
+  "/profile",
+  "/settings",
+  "/compose",
+  "/notifications",
+  "/creators",
+];
+
+function isProtected(path: string): boolean {
+  return PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
+}
+
 export async function middleware(req: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -32,7 +50,17 @@ export async function middleware(req: NextRequest) {
   });
 
   // Touch the session to trigger a refresh if the access token is stale.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Gate the platform: no session, no entry. Redirect to sign in with a return path.
+  if (!user && isProtected(req.nextUrl.pathname)) {
+    const redirect = req.nextUrl.clone();
+    redirect.pathname = "/login";
+    redirect.search = `?next=${encodeURIComponent(req.nextUrl.pathname)}`;
+    return NextResponse.redirect(redirect);
+  }
 
   return res;
 }

@@ -166,7 +166,9 @@ export async function signInAction(
     return { error: "Email or password is incorrect." };
   }
 
-  redirect("/explore");
+  const next = String(formData.get("next") ?? "");
+  const dest = next.startsWith("/") && !next.startsWith("//") ? next : "/explore";
+  redirect(dest);
 }
 
 /** Passwordless sign-in via Supabase magic link. */
