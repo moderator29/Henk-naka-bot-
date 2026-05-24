@@ -2,32 +2,45 @@ import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { PostCard } from "@/components/feed/PostCard";
+import { getSessionUser } from "@/lib/auth/session";
+import { getFeedPosts } from "@/lib/posts/queries";
 import { DEMO_POSTS, demoEnabled } from "@/lib/demo/data";
 
 export const metadata = { title: "Feed" };
 
 /**
- * Feed surface. With auth + a real follow graph this shows posts from creators
- * the user follows. For a brand-new user with an empty graph we render a demo
- * feed (clearly labeled) so the platform feels alive, with a nudge to Discover
- * real creators. PENDING_SUPABASE_AUTH for the live follow-graph fetch.
+ * Feed surface. Shows real posts from creators the user follows (or recent
+ * public posts) when Supabase has data. For a brand-new platform with no posts
+ * yet, falls back to a clearly-labeled demo feed so it never looks broken.
  */
-export default function FeedPage() {
-  const hasFollows = false; // PENDING_SUPABASE_AUTH
-  const showDemo = !hasFollows && demoEnabled();
+export default async function FeedPage() {
+  const me = await getSessionUser();
+  const realPosts = await getFeedPosts(me?.id ?? null);
+  const showDemo = realPosts.length === 0 && demoEnabled();
 
   return (
     <div className="max-w-2xl mx-auto">
-      <header className="mb-6">
-        <h1 className="font-display text-4xl font-bold text-white">
-          Your <span className="text-gradient">feed</span>
-        </h1>
-        <p className="mt-2 text-lilac/70">
-          Posts from creators you follow, in one place.
-        </p>
+      <header className="mb-6 flex items-center justify-between gap-4">
+        <div>
+          <h1 className="font-display text-4xl font-bold text-white">
+            Your <span className="text-gradient">feed</span>
+          </h1>
+          <p className="mt-2 text-lilac/70">
+            Posts from creators you follow, in one place.
+          </p>
+        </div>
+        <Button asChild className="hidden sm:inline-flex">
+          <Link href="/compose">New post</Link>
+        </Button>
       </header>
 
-      {showDemo && (
+      {realPosts.length > 0 ? (
+        <div className="flex flex-col gap-5">
+          {realPosts.map((p, i) => (
+            <PostCard key={p.id} post={p} index={i} />
+          ))}
+        </div>
+      ) : showDemo ? (
         <>
           <div className="mb-5 flex items-center justify-between gap-4 rounded-xl glass px-4 py-3">
             <div className="flex items-center gap-2 text-sm">
@@ -67,6 +80,13 @@ export default function FeedPage() {
             you sign in and follow people.
           </p>
         </>
+      ) : (
+        <div className="rounded-2xl glass p-10 text-center">
+          <p className="text-lilac/70">No posts yet. Be the first to post.</p>
+          <Button asChild className="mt-4">
+            <Link href="/compose">Create a post</Link>
+          </Button>
+        </div>
       )}
     </div>
   );
