@@ -37,7 +37,7 @@ const sizes = {
  *   2. Otherwise render a labeled placeholder mark (faceted diamond
  *      gradient) so layouts remain pixel-correct.
  *
- * PENDING_REAL_LOGO_ASSET — drop the processed files into
+ * PENDING_REAL_LOGO_ASSET, drop the processed files into
  * apps/web/public/brand/logo/ and flip the matching flags in
  * logo-manifest.ts. No other code changes required.
  */

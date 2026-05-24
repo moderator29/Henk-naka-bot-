@@ -1,5 +1,5 @@
 /**
- * Aurora database schema — Drizzle.
+ * Aurora database schema, Drizzle.
  *
  * Mirrors RPD §5.3. All `id` columns use UUID. Numeric columns hold $NSFW
  * balances at 36/6 precision (the token has 18 decimals on-chain; we store a

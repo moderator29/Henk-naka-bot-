@@ -1,5 +1,5 @@
 /**
- * Smart Search — parses a natural-language query into structured filters
+ * Smart Search, parses a natural-language query into structured filters
  * (RPD §3.3). The model returns JSON matching SmartSearchFilters; the server
  * translates that into Supabase queries. Low confidence → pg_trgm fallback.
  */

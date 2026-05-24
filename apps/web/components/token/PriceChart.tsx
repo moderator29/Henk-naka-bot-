@@ -24,7 +24,7 @@ interface PriceChartProps {
 /**
  * $NSFW price chart with a timeframe selector. Seeds with server-fetched data
  * and refetches from /api/market/price-history on timeframe change. Shows an
- * honest "data unavailable" panel when the provider returns nothing — no
+ * honest "data unavailable" panel when the provider returns nothing, no
  * fabricated series.
  */
 export function PriceChart({

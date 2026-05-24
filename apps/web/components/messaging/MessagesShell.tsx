@@ -16,7 +16,7 @@ import { BrandIcon } from "@/components/brand/BrandIcon";
  *
  * Real conversations + messages arrive once auth + Supabase realtime are
  * wired (sub-branches #8 + #11). Until then the shell renders the empty
- * onboarding state — never fake threads. PENDING_SUPABASE_AUTH.
+ * onboarding state, never fake threads. PENDING_SUPABASE_AUTH.
  */
 
 export interface ConversationPreview {

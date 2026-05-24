@@ -9,7 +9,7 @@ import { initSentry } from "@/lib/observability/sentry";
  * Client-side observability. Initializes PostHog (gated on key) and Sentry's
  * client runtime (gated on DSN), and records SPA pageviews on route change.
  *
- * Both are no-ops without their env keys — nothing crashes, nothing is sent,
+ * Both are no-ops without their env keys, nothing crashes, nothing is sent,
  * no surveillance by default (autocapture off, manual pageviews only).
  */
 

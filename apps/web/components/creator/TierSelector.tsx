@@ -8,7 +8,7 @@ import type { CreatorTier } from "@/lib/creators/types";
 /**
  * Visual tier cards with one-tap subscribe (RPD §6.2). The subscribe action
  * triggers the $NSFW approval + tx flow once auth + the subscribe contract
- * path are wired (Phase 3) — labeled at the call site.
+ * path are wired (Phase 3), labeled at the call site.
  */
 export function TierSelector({ tiers }: { tiers: CreatorTier[] }) {
   if (tiers.length === 0) {

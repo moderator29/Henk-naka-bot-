@@ -2,9 +2,9 @@ import { StatTicker } from "@/components/ui/StatTicker";
 import { getTokenStats } from "@/lib/market/token-stats";
 
 /**
- * Live $NSFW ticker — price, 24h change, market cap, holders. Server-rendered
+ * Live $NSFW ticker, price, 24h change, market cap, holders. Server-rendered
  * with a 60s revalidate so CoinGecko isn't hit on every visit. Any metric the
- * provider doesn't return shows a dash — never a fabricated number.
+ * provider doesn't return shows a dash, never a fabricated number.
  */
 export const revalidate = 60;
 
@@ -58,5 +58,5 @@ function Stat({ label, children }: { label: string; children: React.ReactNode })
 }
 
 function Dash() {
-  return <span className="text-lilac/40 text-base">—</span>;
+  return <span className="text-lilac/40 text-base">, </span>;
 }

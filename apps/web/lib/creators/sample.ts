@@ -1,7 +1,7 @@
 import type { CreatorProfileData } from "./types";
 
 /**
- * SAMPLE_PREVIEW_DATA — a single, clearly-labeled demo profile used ONLY to
+ * SAMPLE_PREVIEW_DATA, a single, clearly-labeled demo profile used ONLY to
  * preview the flagship creator surface before real creators are onboarded.
  *
  * This is NOT a real creator and is never presented as one: the page shows a

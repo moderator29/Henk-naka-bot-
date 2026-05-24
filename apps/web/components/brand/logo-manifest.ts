@@ -4,7 +4,7 @@
  * Flip a flag from false to true after the corresponding file lands under
  * apps/web/public/brand/logo/. The Logo component picks it up automatically.
  *
- * PENDING_REAL_LOGO_ASSET — every flag is false until the owner ships the
+ * PENDING_REAL_LOGO_ASSET, every flag is false until the owner ships the
  * processed lockup. The placeholder mark renders in the meantime.
  */
 

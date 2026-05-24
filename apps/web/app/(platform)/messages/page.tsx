@@ -7,7 +7,7 @@ export const metadata = {
 
 /**
  * Conversation index. Server-fetches the signed-in user's conversations
- * (empty when unauthenticated / unconfigured — never fabricated). The thread
+ * (empty when unauthenticated / unconfigured, never fabricated). The thread
  * view itself lives at /messages/[conversationId].
  */
 export default async function MessagesPage() {

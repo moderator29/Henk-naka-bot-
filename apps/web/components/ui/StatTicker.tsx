@@ -40,7 +40,7 @@ interface StatTickerProps {
   value: number;
   /** Client-only formatter. Do NOT pass from a Server Component. */
   format?: (n: number) => string;
-  /** Serializable formatter selector — safe from Server Components. */
+  /** Serializable formatter selector, safe from Server Components. */
   formatPreset?: StatFormatPreset;
   duration?: number;
   className?: string;

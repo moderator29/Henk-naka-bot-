@@ -8,7 +8,7 @@ import type { ThreadMessage } from "@/components/messaging/ThreadView";
  * Subscribes to live INSERTs on the messages table for one conversation via
  * Supabase Realtime, seeded with server-rendered initial messages.
  *
- * Real subscription — activates the moment NEXT_PUBLIC_SUPABASE_* env is set.
+ * Real subscription, activates the moment NEXT_PUBLIC_SUPABASE_* env is set.
  * Without env it returns the initial messages and stays inert (no crash),
  * labeled PENDING_SUPABASE_REALTIME at the call site.
  */
@@ -39,7 +39,7 @@ export function useRealtimeMessages(
   useEffect(() => {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!url || !key) return; // PENDING_SUPABASE_REALTIME — inert until configured
+    if (!url || !key) return; // PENDING_SUPABASE_REALTIME, inert until configured
 
     const supabase = createBrowserClient(url, key);
     const channel = supabase

@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 
 /**
- * Sentry init — gated on NEXT_PUBLIC_SENTRY_DSN. When the DSN isn't set
+ * Sentry init, gated on NEXT_PUBLIC_SENTRY_DSN. When the DSN isn't set
  * (local dev before keys land) init is a no-op, so nothing crashes and no
  * events are sent. Shared by server, edge, and client entry points.
  */

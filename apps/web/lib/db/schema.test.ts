@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import * as schema from "./schema";
 
 /**
- * Smoke test — the schema module loads, exposes every table the RPD calls
+ * Smoke test, the schema module loads, exposes every table the RPD calls
  * for, and Drizzle has assembled valid column metadata on each. This protects
  * against accidental column removals or import-time regressions.
  */

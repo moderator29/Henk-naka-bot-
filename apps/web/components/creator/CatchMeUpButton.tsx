@@ -5,7 +5,7 @@ import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 /**
- * "Catch me up on what they've posted lately" — the AI summary entry point
+ * "Catch me up on what they've posted lately", the AI summary entry point
  * (RPD §6.2). The streaming summary is produced by the Subscription
  * Intelligence / Concierge AI route in Phase 3. Until that route is wired this
  * surfaces the state honestly rather than streaming fabricated text.

@@ -4,7 +4,7 @@ import { Redis } from "@upstash/redis";
 /**
  * Per-user rate limits for AI endpoints (RPD §5.7 / §9.6). Backed by Upstash
  * Redis. When Upstash env isn't set the limiters are null and checkAILimit
- * allows the request (dev), so nothing crashes — production sets the keys.
+ * allows the request (dev), so nothing crashes, production sets the keys.
  */
 
 const hasRedis =

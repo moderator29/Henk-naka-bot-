@@ -16,7 +16,7 @@ import { OnboardingCardView } from "./OnboardingCardView";
  * route through `/settings` for replays and call onComplete on finish.
  *
  * Persistence to `user_preferences.onboarding_completed` happens in the
- * server action wired in sub-branch #8 (auth) — until then, persistence
+ * server action wired in sub-branch #8 (auth), until then, persistence
  * stays local (localStorage) so the flow doesn't re-show every visit.
  * Labeled PENDING_SUPABASE_AUTH where the swap goes.
  */
@@ -78,12 +78,12 @@ export function OnboardingFlow({
 
   const persistCompletion = useCallback(() => {
     try {
-      // PENDING_SUPABASE_AUTH — once user_preferences is reachable, swap this
+      // PENDING_SUPABASE_AUTH, once user_preferences is reachable, swap this
       // localStorage write for a server action that updates
       // user_preferences.onboarding_completed.
       window.localStorage.setItem(STORAGE_KEY, new Date().toISOString());
     } catch {
-      // Storage may be unavailable in private mode — non-fatal.
+      // Storage may be unavailable in private mode, non-fatal.
     }
   }, []);
 
@@ -254,7 +254,7 @@ export function OnboardingFlow({
 }
 
 /** Programmatic check used by the platform layout to decide whether to
- *  auto-show the flow on first visit. PENDING_SUPABASE_AUTH — replace the
+ *  auto-show the flow on first visit. PENDING_SUPABASE_AUTH, replace the
  *  localStorage read with a server-side fetch of
  *  user_preferences.onboarding_completed once auth lands. */
 export function isOnboardingComplete(): boolean {

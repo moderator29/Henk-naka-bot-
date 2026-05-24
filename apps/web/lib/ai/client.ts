@@ -5,7 +5,7 @@ import Anthropic from "@anthropic-ai/sdk";
  * the browser never talks to Anthropic directly (RPD §5.7).
  *
  * The client is created lazily so importing this module never throws at build
- * time. Call getAnthropic() inside a handler — it returns null when
+ * time. Call getAnthropic() inside a handler, it returns null when
  * ANTHROPIC_API_KEY isn't set, and the route responds with a clear 503 rather
  * than faking a completion.
  */

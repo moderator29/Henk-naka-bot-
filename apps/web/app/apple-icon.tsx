@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
 
 /**
- * Apple touch icon — 180x180 rounded magenta-orchid-cyan diamond on plum.
- * PENDING_REAL_LOGO_ASSET — swap when the processed logo lands.
+ * Apple touch icon, 180x180 rounded magenta-orchid-cyan diamond on plum.
+ * PENDING_REAL_LOGO_ASSET, swap when the processed logo lands.
  */
 export const runtime = "edge";
 export const size = { width: 180, height: 180 };

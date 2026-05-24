@@ -3,7 +3,7 @@ import { AuroraBackground } from "@/components/brand/AuroraBackground";
 import { Logo } from "@/components/brand/Logo";
 
 /**
- * Auth surface layout. Centered glass card over a drifting aurora — the
+ * Auth surface layout. Centered glass card over a drifting aurora, the
  * first impression for a signed-out visitor. Logo top-left, links home.
  */
 export default function AuthLayout({

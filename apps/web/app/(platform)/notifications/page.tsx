@@ -36,7 +36,7 @@ export default async function NotificationsPage() {
           <span className="text-gradient">Notifications</span>
         </h1>
         <p className="mt-2 text-lilac/70">
-          Follows, subscriptions, tips, and messages — all in one place.
+          Follows, subscriptions, tips, and messages, all in one place.
         </p>
       </header>
 

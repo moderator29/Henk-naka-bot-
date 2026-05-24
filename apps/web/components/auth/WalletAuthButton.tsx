@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { buildSiweMessage } from "@/lib/auth/siwe";
 
 /**
- * Wallet (SIWE) sign-in — full client flow (RPD §5.4 / §9.3):
+ * Wallet (SIWE) sign-in, full client flow (RPD §5.4 / §9.3):
  *   1. Ensure a wallet is connected (RainbowKit connect modal if not).
  *   2. GET /api/auth/nonce for a single-use server nonce.
  *   3. Build a SIWE message and have the wallet sign it.
@@ -16,7 +16,7 @@ import { buildSiweMessage } from "@/lib/auth/siwe";
  *
  * The server verifies the signature and nonce. Session minting completes once
  * the Supabase service role is configured server-side (the verify route
- * returns verified:true until then) — the client flow itself is fully real,
+ * returns verified:true until then), the client flow itself is fully real,
  * no fake signing.
  */
 export function WalletAuthButton() {

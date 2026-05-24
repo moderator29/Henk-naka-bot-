@@ -49,7 +49,7 @@ interface PlatformShellProps {
   /**
    * Real value will flow from a server-fetched unread count once Supabase
    * Realtime + auth are wired. Until then this stays undefined (no badge).
-   * PENDING_SUPABASE_AUTH — wire on auth sub-branch.
+   * PENDING_SUPABASE_AUTH, wire on auth sub-branch.
    */
   unreadMessageCount?: number;
 }
@@ -129,7 +129,7 @@ export function PlatformShell({
             href="/messages"
             aria-label={
               unreadMessageCount && unreadMessageCount > 0
-                ? `Messages — ${unreadMessageCount} unread`
+                ? `Messages, ${unreadMessageCount} unread`
                 : "Messages"
             }
             className="relative h-10 w-10 rounded-xl flex items-center justify-center text-lilac/70 hover:text-white hover:bg-white/5"

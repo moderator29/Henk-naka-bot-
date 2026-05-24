@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * Explore data reads. Trending creators (by subscriber count) and recent
  * public posts come from Supabase under RLS. Everything returns empty when
- * Supabase isn't configured or nothing's seeded — Explore then shows honest
+ * Supabase isn't configured or nothing's seeded, Explore then shows honest
  * empty states, never fabricated creators or posts (Rule 7).
  */
 

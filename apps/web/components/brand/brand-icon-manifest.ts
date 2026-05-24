@@ -15,7 +15,7 @@
 
 import type { BrandIconName } from "./BrandIcon";
 
-// PLACEHOLDER_PENDING_3D_ASSETS — flip a flag to true once the asset lands.
+// PLACEHOLDER_PENDING_3D_ASSETS, flip a flag to true once the asset lands.
 const RENDERS: Record<BrandIconName, boolean> = {
   rocket: false,
   heart: false,

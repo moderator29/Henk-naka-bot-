@@ -11,7 +11,7 @@ import { streamToSSE } from "@/lib/ai/sse";
 import { getSessionUser } from "@/lib/auth/session";
 
 /**
- * Discovery Concierge chat — streams Aura's responses as SSE. Auth-gated,
+ * Discovery Concierge chat, streams Aura's responses as SSE. Auth-gated,
  * rate-limited, validated. Returns 503 (not a fake reply) when ANTHROPIC_API_KEY
  * isn't set.
  */

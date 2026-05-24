@@ -1,5 +1,5 @@
 /**
- * Docs content. Single source of truth — the docs route reads this list,
+ * Docs content. Single source of truth, the docs route reads this list,
  * builds the sidebar nav, generates the search index, and renders the page
  * body. Sections live in display order.
  *
@@ -38,7 +38,7 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "Create your account" },
       {
         type: "p",
-        text: "Sign up with email, Google, or your wallet. Wallet sign-in uses a one-tap signature — no password, no email if you don't want one. You can link more methods later from Settings.",
+        text: "Sign up with email, Google, or your wallet. Wallet sign-in uses a one-tap signature, no password, no email if you don't want one. You can link more methods later from Settings.",
       },
       { type: "h2", text: "Verify your age" },
       {
@@ -75,7 +75,7 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "Discover" },
       {
         type: "p",
-        text: "Discover blends trending creators, fresh drops, the Concierge's recommendations, and category browsing. It's where you go when you want to find something new — not when you want to catch up on what you already follow.",
+        text: "Discover blends trending creators, fresh drops, the Concierge's recommendations, and category browsing. It's where you go when you want to find something new, not when you want to catch up on what you already follow.",
       },
       { type: "h2", text: "Feed" },
       {
@@ -112,7 +112,7 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h3", text: "Auto-renew" },
       {
         type: "p",
-        text: "Subscriptions auto-renew at the end of each billing cycle. We'll always remind you a few days before the next charge — turn auto-renew off from your Subscriptions panel any time.",
+        text: "Subscriptions auto-renew at the end of each billing cycle. We'll always remind you a few days before the next charge, turn auto-renew off from your Subscriptions panel any time.",
       },
       {
         type: "callout",
@@ -134,7 +134,7 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "Tipping" },
       {
         type: "p",
-        text: "Tap the tip icon on any post, profile, or DM. Pick an amount in $NSFW, confirm in your wallet, and it lands in the creator's wallet immediately. Tips are visible to the creator — they're a public thank-you, not a hidden transaction.",
+        text: "Tap the tip icon on any post, profile, or DM. Pick an amount in $NSFW, confirm in your wallet, and it lands in the creator's wallet immediately. Tips are visible to the creator, they're a public thank-you, not a hidden transaction.",
       },
       { type: "h2", text: "Buying $NSFW" },
       {
@@ -144,7 +144,7 @@ export const DOC_SECTIONS: DocSection[] = [
       {
         type: "callout",
         tone: "warning",
-        text: "Always double-check the contract address before swapping. The official address is on the Token page with a one-tap copy button — that's the only one we'll ever recommend.",
+        text: "Always double-check the contract address before swapping. The official address is on the Token page with a one-tap copy button, that's the only one we'll ever recommend.",
       },
     ],
   },
@@ -161,7 +161,7 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "Set up your tiers" },
       {
         type: "p",
-        text: "Tiers are how fans subscribe. Most creators run one or two — start with a flagship tier covering everything, optionally add a premium tier with extras (1-on-1 DM time, exclusive series, NFT drops).",
+        text: "Tiers are how fans subscribe. Most creators run one or two, start with a flagship tier covering everything, optionally add a premium tier with extras (1-on-1 DM time, exclusive series, NFT drops).",
       },
       {
         type: "callout",
@@ -171,7 +171,7 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "Your first post" },
       {
         type: "p",
-        text: "Upload media, write a caption, pick whether it's public, follower-only, or tier-gated. Co-Pilot will offer three caption variations — playful, intimate, bold — and the best posting time for your specific audience.",
+        text: "Upload media, write a caption, pick whether it's public, follower-only, or tier-gated. Co-Pilot will offer three caption variations, playful, intimate, bold, and the best posting time for your specific audience.",
       },
       { type: "h2", text: "Earnings" },
       {
@@ -253,7 +253,7 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "Browse" },
       {
         type: "p",
-        text: "Marketplace lists every NFT across the verified collections, with filters for collection, price, and rarity. Smart Search works here too — ask for what you want in plain English.",
+        text: "Marketplace lists every NFT across the verified collections, with filters for collection, price, and rarity. Smart Search works here too, ask for what you want in plain English.",
       },
       { type: "h2", text: "Buy" },
       {
@@ -276,10 +276,10 @@ export const DOC_SECTIONS: DocSection[] = [
         type: "p",
         text: "Five AI features ship at MVP. Each solves a real job for a real person, not a chatbot in the corner.",
       },
-      { type: "h2", text: "Aura — your concierge (for fans)" },
+      { type: "h2", text: "Aura, your concierge (for fans)" },
       {
         type: "p",
-        text: "Aura builds your feed through conversation. \"Show me something calm tonight.\" \"Find me creators like X but smaller.\" \"Refresh — I've seen this stuff.\" Tap the floating sparkle button to summon her.",
+        text: "Aura builds your feed through conversation. \"Show me something calm tonight.\" \"Find me creators like X but smaller.\" \"Refresh, I've seen this stuff.\" Tap the floating sparkle button to summon her.",
       },
       { type: "h2", text: "Co-Pilot (for creators)" },
       {
@@ -316,12 +316,12 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "Sign-in via wallet" },
       {
         type: "p",
-        text: "Wallet sign-in uses Sign-In With Ethereum. We generate a unique nonce, you sign it once, we verify the signature. Nonces are single-use and time-bounded — replay attacks aren't possible.",
+        text: "Wallet sign-in uses Sign-In With Ethereum. We generate a unique nonce, you sign it once, we verify the signature. Nonces are single-use and time-bounded, replay attacks aren't possible.",
       },
       { type: "h2", text: "Your data" },
       {
         type: "p",
-        text: "Email, date of birth, country, and wallet addresses are encrypted at rest. Row-level security policies sit on every table — you can only read your own data, creators can only read their own analytics, and admins access flows are logged and audited.",
+        text: "Email, date of birth, country, and wallet addresses are encrypted at rest. Row-level security policies sit on every table, you can only read your own data, creators can only read their own analytics, and admins access flows are logged and audited.",
       },
       { type: "h2", text: "Export and delete" },
       {
@@ -343,7 +343,7 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h3", text: "Do I need crypto to use the platform?" },
       {
         type: "p",
-        text: "Browsing Discover and reading public posts: no. Subscribing, tipping, buying NFTs, and staking: yes — those happen in $NSFW on Polygon.",
+        text: "Browsing Discover and reading public posts: no. Subscribing, tipping, buying NFTs, and staking: yes, those happen in $NSFW on Polygon.",
       },
       { type: "h3", text: "Which wallets are supported?" },
       {

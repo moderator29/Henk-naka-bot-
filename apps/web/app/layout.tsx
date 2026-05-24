@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
   ),
   title: {
-    default: "Pleasure Coin — The Unified Creator Platform",
+    default: "Pleasure Coin, The Unified Creator Platform",
     template: "%s · Pleasure Coin",
   },
   description:

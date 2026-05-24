@@ -13,10 +13,10 @@ import { relativeTime } from "@/lib/utils";
 export const metadata = { title: "Discover" };
 
 /**
- * Discovery — the front door (RPD §6.2). Trending creators + recent public
+ * Discovery, the front door (RPD §6.2). Trending creators + recent public
  * posts come from Supabase; the category grid is fixed product taxonomy; the
  * "For You" AI rail activates with the Concierge in Phase 3. Empty states are
- * honest — no fabricated creators (Rule 7).
+ * honest, no fabricated creators (Rule 7).
  */
 export default async function ExplorePage() {
   const [creators, posts] = await Promise.all([
@@ -51,7 +51,7 @@ export default async function ExplorePage() {
         </div>
       </section>
 
-      {/* For You — AI */}
+      {/* For You, AI */}
       <section className="mb-12">
         <Card className="border-magenta/30 bg-gradient-to-br from-magenta/10 to-orchid/10">
           <div className="flex items-start gap-4">
@@ -64,7 +64,7 @@ export default async function ExplorePage() {
                 Let Aura build your feed
               </h2>
               <p className="mt-1 text-sm text-lilac/70 max-w-xl">
-                Tell the Concierge a vibe, a type, a feeling — it assembles a
+                Tell the Concierge a vibe, a type, a feeling, it assembles a
                 personalized feed in seconds. Activates with the AI features.
               </p>
             </div>
@@ -103,7 +103,7 @@ export default async function ExplorePage() {
                   </span>
                 )}
                 <p className="mt-1 text-sm text-lilac/85 line-clamp-3">
-                  {p.caption || "—"}
+                  {p.caption || ", "}
                 </p>
                 <time className="block mt-3 text-[0.65rem] text-lilac/40">
                   {relativeTime(p.createdAt)}

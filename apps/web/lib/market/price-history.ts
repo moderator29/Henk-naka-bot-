@@ -2,7 +2,7 @@ import { NSFW_TOKEN_ADDRESS } from "@/lib/web3/addresses";
 
 /**
  * Historical $NSFW price series for the token chart, from CoinGecko's
- * market_chart endpoint (by contract on Polygon). Real integration — returns
+ * market_chart endpoint (by contract on Polygon). Real integration, returns
  * an empty array when the provider is unavailable so the chart shows an
  * honest "unavailable" state rather than fabricated candles.
  */

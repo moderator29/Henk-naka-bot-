@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/Button";
 import { BrandIcon } from "@/components/brand/BrandIcon";
 
 /**
- * Feed surface — followed-creator content lives here. With auth and a real
+ * Feed surface, followed-creator content lives here. With auth and a real
  * follow graph (sub-branches #8 + Phase 2) this fills in. For a user with an
  * empty graph, the surface gracefully points them back to Discover, which is
  * now the platform's front door.
  */
 export default function FeedPage() {
-  // PENDING_SUPABASE_AUTH — once auth is wired, fetch the requesting user's
+  // PENDING_SUPABASE_AUTH, once auth is wired, fetch the requesting user's
   // follow graph + recent posts here. Until then we always render the empty
   // encouragement state.
   const hasFollows = false;
@@ -42,7 +42,7 @@ function EmptyFeedEncouragement() {
             Your feed is quiet.
           </h2>
           <p className="mt-2 text-lilac/70">
-            Discover creators you&apos;ll love and follow a few — your feed
+            Discover creators you&apos;ll love and follow a few, your feed
             will fill up the moment they post.
           </p>
           <div className="mt-5">

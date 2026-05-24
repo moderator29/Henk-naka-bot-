@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 /**
  * Featured creators. Renders real verified-creator profiles once they're
  * onboarded and seeded; until then it shows the structure without inventing
- * fake people (Rule 7 — no fake data).
+ * fake people (Rule 7, no fake data).
  */
 export function CreatorsCarousel() {
   return (

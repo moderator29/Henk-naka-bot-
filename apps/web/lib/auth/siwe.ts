@@ -2,13 +2,13 @@ import { createSiweMessage } from "viem/siwe";
 import type { Address } from "viem";
 
 /**
- * SIWE (Sign-In With Ethereum) helpers — RPD §5.4 / §9.3.
+ * SIWE (Sign-In With Ethereum) helpers, RPD §5.4 / §9.3.
  *
  * Flow:
- *   1. Browser GET /api/auth/nonce — server mints a random nonce, sets it in
+ *   1. Browser GET /api/auth/nonce, server mints a random nonce, sets it in
  *      an httpOnly cookie, returns it.
  *   2. Browser builds a SIWE message with that nonce and has the wallet sign
- *      it (client side, via wagmi — wired in sub-branch #9).
+ *      it (client side, via wagmi, wired in sub-branch #9).
  *   3. Browser POST /api/auth/verify with { message, signature }. Server
  *      verifies the signature, checks the nonce matches the cookie (single
  *      use), then mints a Supabase session for the wallet address.

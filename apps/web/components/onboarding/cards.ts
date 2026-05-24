@@ -1,9 +1,9 @@
 import type { BrandIconName } from "@/components/brand/BrandIcon";
 
 /**
- * Onboarding card sequence — RPD update §3.
+ * Onboarding card sequence, RPD update §3.
  *
- * 15 cards total. The first 10 are big, immersive, one concept per card —
+ * 15 cards total. The first 10 are big, immersive, one concept per card , 
  * they sell the experience. The last 5 are tighter "how to" cards.
  *
  * Voice: confident, warm, a little playful, never crude.
@@ -67,7 +67,7 @@ export const ONBOARDING_CARDS: OnboardingCard[] = [
     auroraVariant: "magenta",
     eyebrow: "Subscriptions",
     headline: "Pay creators directly.",
-    body: "Subscribing is a tap. Pricing is set by the creator, paid in $NSFW from your wallet, and goes to them — not a middleman. Tiers unlock private posts, DMs, and perks.",
+    body: "Subscribing is a tap. Pricing is set by the creator, paid in $NSFW from your wallet, and goes to them, not a middleman. Tiers unlock private posts, DMs, and perks.",
   },
   {
     id: "tip",
@@ -103,7 +103,7 @@ export const ONBOARDING_CARDS: OnboardingCard[] = [
     auroraVariant: "purple",
     eyebrow: "Conviction earns",
     headline: "Stake. Earn. Belong.",
-    body: "Lock $NSFW for 12 weeks and earn rewards on top. Staking signals you're here for the long game — and unlocks perks across the platform as the ecosystem grows.",
+    body: "Lock $NSFW for 12 weeks and earn rewards on top. Staking signals you're here for the long game, and unlocks perks across the platform as the ecosystem grows.",
   },
   {
     id: "community",
@@ -112,7 +112,7 @@ export const ONBOARDING_CARDS: OnboardingCard[] = [
     auroraVariant: "orchid",
     eyebrow: "The community",
     headline: "Built by holders, for holders.",
-    body: "Pleasure Coin has been alive since 2021 because real people stayed through every cycle. You're not joining a launch — you're joining a chapter. Welcome.",
+    body: "Pleasure Coin has been alive since 2021 because real people stayed through every cycle. You're not joining a launch, you're joining a chapter. Welcome.",
   },
 
   // -- 5 small how-to cards -----------------------------------------------
@@ -132,7 +132,7 @@ export const ONBOARDING_CARDS: OnboardingCard[] = [
     auroraVariant: "orchid",
     eyebrow: "How to subscribe",
     headline: "Pick a tier, confirm in your wallet.",
-    body: "Tier cards show what's included. Approve the $NSFW transaction once — auto-renew is on by default and easy to turn off.",
+    body: "Tier cards show what's included. Approve the $NSFW transaction once, auto-renew is on by default and easy to turn off.",
   },
   {
     id: "how-tip",

@@ -4,7 +4,7 @@ import { NSFW_TOKEN_ADDRESS } from "@/lib/web3/addresses";
  * Live $NSFW market data. CoinGecko is primary; CoinMarketCap is the fallback.
  *
  * Per Rule 8 (real integrations, no fake data): every field is null when the
- * providers don't return it. The UI renders a dash for null metrics — it never
+ * providers don't return it. The UI renders a dash for null metrics, it never
  * invents a number. Holders count is null until an explorer integration lands
  * (CoinGecko's simple endpoint doesn't expose it).
  */

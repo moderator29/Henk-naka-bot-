@@ -69,7 +69,7 @@ export function ContentTabs({ posts }: { posts: CreatorPostCard[] }) {
                     p.gated && "blur-[3px] select-none"
                   )}
                 >
-                  {p.caption || "—"}
+                  {p.caption || ", "}
                 </p>
                 <time className="block mt-3 text-[0.65rem] text-lilac/40">
                   {relativeTime(p.createdAt)}

@@ -89,14 +89,14 @@ export function OnboardingCardView({ card }: OnboardingCardViewProps) {
 }
 
 /**
- * Picks out a key word from the headline to receive the gradient sweep —
+ * Picks out a key word from the headline to receive the gradient sweep , 
  * keeps the visual rhythm interesting across 15 cards without per-card
  * authoring effort. Falls back to the final word.
  */
 function renderHeadlineWithAccent(headline: string) {
   const words = headline.trim().split(/\s+/);
   if (words.length === 0) return headline;
-  // Highlight the last "meaningful" word — strip trailing punctuation.
+  // Highlight the last "meaningful" word, strip trailing punctuation.
   const lastIdx = words.length - 1;
   const last = words[lastIdx]!;
   const head = words.slice(0, lastIdx).join(" ");

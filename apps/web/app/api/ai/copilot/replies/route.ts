@@ -10,7 +10,7 @@ import { checkAILimit } from "@/lib/ai/ratelimit";
 import { getSessionUser } from "@/lib/auth/session";
 
 /**
- * Creator Co-Pilot — DM reply suggestions (RPD §3.2). Wired to the REAL
+ * Creator Co-Pilot, DM reply suggestions (RPD §3.2). Wired to the REAL
  * /messages surface: the client passes the recent thread, we return 3 reply
  * options. Auth-gated, rate-limited, Zod-validated. 503 (not a fake) when the
  * AI key isn't configured.

@@ -3,7 +3,7 @@ import type { CreatorProfileData, CreatorTier, CreatorPostCard } from "./types";
 
 /**
  * Fetches a real creator profile by username from Supabase. Returns null when
- * Supabase isn't configured or no such creator exists — the page then falls
+ * Supabase isn't configured or no such creator exists, the page then falls
  * back to the labeled preview. RLS makes only public fields + non-gated posts
  * readable to anonymous visitors.
  */

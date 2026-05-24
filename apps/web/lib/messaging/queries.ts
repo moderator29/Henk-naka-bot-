@@ -8,7 +8,7 @@ import type { ThreadMessage } from "@/components/messaging/ThreadView";
  * caller's session, so RLS (participant-only) is enforced by Postgres.
  *
  * Each returns an empty result when Supabase isn't configured or the user
- * isn't signed in — the UI renders its empty state rather than crashing.
+ * isn't signed in, the UI renders its empty state rather than crashing.
  * Real data flows the moment env + auth are live.
  */
 

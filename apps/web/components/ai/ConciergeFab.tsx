@@ -12,7 +12,7 @@ interface ChatMessage {
 }
 
 const GREETING =
-  "Hey — I'm Aura. What are you in the mood to discover tonight? Tell me a vibe, a type, a feeling, and I'll build your feed.";
+  "Hey, I'm Aura. What are you in the mood to discover tonight? Tell me a vibe, a type, a feeling, and I'll build your feed.";
 
 /**
  * Discovery Concierge floating action button (RPD §3.1 / §6.2). Streams from
@@ -62,7 +62,7 @@ export function ConciergeFab() {
       }
       if (res.status === 503) {
         return finishWith(
-          "Aura isn't switched on yet — the AI key isn't configured. Soon."
+          "Aura isn't switched on yet, the AI key isn't configured. Soon."
         );
       }
       if (!res.ok || !res.body) {
@@ -144,7 +144,7 @@ export function ConciergeFab() {
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{ duration: 0.2 }}
             role="dialog"
-            aria-label="Aura — Discovery Concierge"
+            aria-label="Aura, Discovery Concierge"
             className="fixed bottom-20 lg:bottom-6 right-4 lg:right-6 z-50 w-[calc(100vw-2rem)] sm:w-96 h-[28rem] glass-strong rounded-2xl shadow-glow flex flex-col overflow-hidden"
           >
             <header className="flex items-center justify-between px-4 py-3 border-b border-white/5">

@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 
 /**
  * Service-role client. Server-only. NEVER import from a client component or
- * route handler that doesn't enforce its own auth gate — this client bypasses
+ * route handler that doesn't enforce its own auth gate, this client bypasses
  * RLS by design.
  */
 export function createAdminClient() {

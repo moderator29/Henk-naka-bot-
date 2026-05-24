@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
  * Thread view. Renders the bubble stream and the composer for a single
  * conversation. Real messages arrive from Supabase Realtime once auth +
  * channels are wired (sub-branch #11). Until then the surface renders the
- * empty state — never fake bubbles.
+ * empty state, never fake bubbles.
  *
  * PENDING_SUPABASE_AUTH / PENDING_SUPABASE_REALTIME.
  */
@@ -73,7 +73,7 @@ export function ThreadView({
         setSuggestions(data.suggestions ?? []);
       }
     } catch {
-      // leave empty — control just shows nothing new
+      // leave empty, control just shows nothing new
     } finally {
       setLoadingSuggestions(false);
     }

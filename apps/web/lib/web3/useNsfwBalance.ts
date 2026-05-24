@@ -7,7 +7,7 @@ import { NSFW_TOKEN_ADDRESS } from "./addresses";
 
 /**
  * Reads the connected wallet's $NSFW balance from the live token contract on
- * Polygon. Real on-chain read via wagmi/viem — no mock. Returns formatted and
+ * Polygon. Real on-chain read via wagmi/viem, no mock. Returns formatted and
  * raw values plus loading/connection state.
  */
 export function useNsfwBalance() {

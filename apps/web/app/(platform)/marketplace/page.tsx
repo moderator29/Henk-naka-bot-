@@ -12,7 +12,7 @@ export default function MarketplacePage() {
           <span className="text-gradient">PleasureNifty</span> marketplace
         </h1>
         <p className="mt-2 text-lilac/70">
-          Creator NFTs on Polygon. Browse, buy, list — all priced in $NSFW.
+          Creator NFTs on Polygon. Browse, buy, list, all priced in $NSFW.
         </p>
       </header>
 
@@ -25,7 +25,7 @@ export default function MarketplacePage() {
             Marketplace wires up once NFT contracts are deployed
           </h2>
           <p className="text-lilac/60 text-sm max-w-md mx-auto font-mono">
-            PENDING_CONTRACT_ADDRESS — set NEXT_PUBLIC_NFT_CONTRACT_ADDRESSES
+            PENDING_CONTRACT_ADDRESS, set NEXT_PUBLIC_NFT_CONTRACT_ADDRESSES
             to enable.
           </p>
         </Card>

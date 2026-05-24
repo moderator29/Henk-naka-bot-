@@ -15,7 +15,7 @@ interface SearchResult {
  * Smart Search input for the platform top bar (RPD §3.3). Submits the
  * natural-language query to /api/ai/search, which parses it via Claude and
  * runs it against Supabase (pg_trgm fallback on low confidence). Renders
- * results in a dropdown. Honest empty/needs-auth states — no fabricated hits.
+ * results in a dropdown. Honest empty/needs-auth states, no fabricated hits.
  */
 export function SmartSearch() {
   const [query, setQuery] = useState("");

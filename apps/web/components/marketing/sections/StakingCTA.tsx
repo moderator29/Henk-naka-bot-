@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 
 /**
  * Staking CTA. APY / total-staked figures come from the staking contract,
- * which is PENDING_CONTRACT_ADDRESS — so we describe the mechanism without
+ * which is PENDING_CONTRACT_ADDRESS, so we describe the mechanism without
  * showing a fabricated APY. Real numbers appear once the contract is wired.
  */
 export function StakingCTA() {

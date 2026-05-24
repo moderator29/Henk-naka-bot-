@@ -3,7 +3,7 @@ import { Logo } from "@/components/brand/Logo";
 
 /**
  * Root-level loading state. App Router shows this for any route that
- * suspends without its own loading.tsx — keeps the aurora atmosphere alive
+ * suspends without its own loading.tsx, keeps the aurora atmosphere alive
  * while content streams in instead of flashing a blank page.
  */
 export default function RootLoading() {

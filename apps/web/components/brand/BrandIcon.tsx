@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { brandIconHasRender } from "./brand-icon-manifest";
 
 /**
- * BrandIcon — the 3D-styled icon system per RPD §4.4.
+ * BrandIcon, the 3D-styled icon system per RPD §4.4.
  *
  * Resolution order:
  *   1. If a render exists in /public/brand/icons/{name}.png per the manifest,
@@ -26,7 +26,7 @@ import { brandIconHasRender } from "./brand-icon-manifest";
  *      that approximates the 3D extruded aesthetic with the brand colors.
  *
  * The fallback is the MVP placeholder.
- * PLACEHOLDER_PENDING_3D_ASSETS — when Spline / Blender renders arrive,
+ * PLACEHOLDER_PENDING_3D_ASSETS, when Spline / Blender renders arrive,
  * drop them under /public/brand/icons/ and register them in
  * brand-icon-manifest.ts. No other code changes required.
  */

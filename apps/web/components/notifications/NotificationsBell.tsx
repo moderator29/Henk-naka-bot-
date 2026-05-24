@@ -31,7 +31,7 @@ const ICONS: Record<NotificationType, LucideIcon> = {
 /**
  * Top-bar notifications bell with an unread badge and a dropdown of recent
  * items. Fetches from /api/notifications on open; mark-all-read posts to
- * /api/notifications/read. Empty + signed-out states are honest — no
+ * /api/notifications/read. Empty + signed-out states are honest, no
  * fabricated notifications.
  */
 export function NotificationsBell() {
@@ -54,7 +54,7 @@ export function NotificationsBell() {
         setUnread(data.unread ?? 0);
       }
     } catch {
-      // network/unconfigured — keep empty state
+      // network/unconfigured, keep empty state
     } finally {
       setLoading(false);
     }
@@ -104,7 +104,7 @@ export function NotificationsBell() {
     <div className="relative" ref={ref}>
       <button
         type="button"
-        aria-label={unread > 0 ? `Notifications — ${unread} unread` : "Notifications"}
+        aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
         aria-expanded={open}
         onClick={toggle}
         className="relative h-10 w-10 rounded-xl flex items-center justify-center text-lilac/70 hover:text-white hover:bg-white/5"

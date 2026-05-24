@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No address in message" }, { status: 400 });
   }
 
-  // PENDING_SUPABASE_AUTH — with the service role configured, this is where we
+  // PENDING_SUPABASE_AUTH, with the service role configured, this is where we
   // upsert a users row keyed by wallet_address and mint a Supabase session
   // (admin.generateLink / setSession). Until the project is connected we do
   // not fake a session.

@@ -10,12 +10,12 @@ import { http } from "wagmi";
  * falls back to the chain's public RPC so local dev still functions.
  *
  * The WalletConnect project id is required in production. In dev we allow a
- * placeholder so the app boots without it — the connect modal's WalletConnect
+ * placeholder so the app boots without it, the connect modal's WalletConnect
  * option simply won't initialise until a real id is set.
  */
 
 // WalletConnect needs a project id to enable its connector. We never throw at
-// module load (that would break `next build` and SSR) — instead we fall back
+// module load (that would break `next build` and SSR), instead we fall back
 // to a placeholder so the app boots, and the WalletConnect option stays inert
 // until a real id is provided. Injected connectors (MetaMask, Coinbase) work
 // regardless. PENDING_WC_PROJECT_ID for live WalletConnect support.

@@ -43,7 +43,7 @@ export default function GlobalError({
             Something went sideways.
           </h1>
           <p style={{ opacity: 0.7, marginBottom: 24 }}>
-            We hit an unexpected error. Try again — if it keeps happening,
+            We hit an unexpected error. Try again, if it keeps happening,
             we&apos;re already on it.
           </p>
           <button

@@ -18,7 +18,7 @@ export function CopyAddress({ address, label }: CopyAddressProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      // clipboard API unavailable — silent no-op, no fake feedback.
+      // clipboard API unavailable, silent no-op, no fake feedback.
     }
   };
 

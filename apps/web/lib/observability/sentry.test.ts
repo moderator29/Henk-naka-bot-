@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 /**
- * The init must be a no-op without a DSN — we never want events firing (or a
+ * The init must be a no-op without a DSN, we never want events firing (or a
  * crash) in environments where Sentry isn't configured.
  */
 describe("initSentry", () => {

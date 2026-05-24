@@ -1,5 +1,5 @@
 /**
- * Age verification — RPD §9.1. The platform is strictly 18+.
+ * Age verification, RPD §9.1. The platform is strictly 18+.
  *
  * DOB is captured at signup, stored on the user record, and checked on every
  * sensitive action via requireAdult() in the server layer.

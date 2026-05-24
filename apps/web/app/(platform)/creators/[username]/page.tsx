@@ -34,7 +34,7 @@ export default async function CreatorProfilePage({
         <div className="mx-4 sm:mx-8 mb-2 mt-2 flex items-center gap-2 rounded-xl glass px-4 py-2.5 text-xs text-lilac/70">
           <Info size={14} className="text-cyan flex-shrink-0" />
           <span>
-            Preview — a sample profile showing the creator surface. Real
+            Preview, a sample profile showing the creator surface. Real
             profiles render here once creators are onboarded.
           </span>
         </div>

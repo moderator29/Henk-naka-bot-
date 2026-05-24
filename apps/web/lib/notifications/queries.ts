@@ -6,7 +6,7 @@ import type { AppNotification, NotificationType } from "./types";
  * Notification reads (server-only). RLS restricts the notifications table to
  * the owning user (policy from 0001), so these run under the caller's session.
  * Returns empty / zero when Supabase isn't configured or the user isn't signed
- * in — never fabricated notifications.
+ * in, never fabricated notifications.
  *
  * Types + the describeNotification formatter live in ./types so client
  * components can import them without pulling in this server-only module

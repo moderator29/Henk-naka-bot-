@@ -28,7 +28,7 @@ const alphaFor: Record<Intensity, number> = {
 };
 
 /**
- * Aurora background — four blurred radial blobs drifting independently
+ * Aurora background, four blurred radial blobs drifting independently
  * with optional mouse-position parallax on desktop (RPD §4.5).
  *
  * Parallax shifts each blob by a fraction of the cursor offset from the

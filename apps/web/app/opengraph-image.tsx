@@ -2,12 +2,12 @@ import { ImageResponse } from "next/og";
 
 /**
  * Default Open Graph share image. 1200x630.
- * PENDING_REAL_LOGO_ASSET — when the processed logo is in /public/brand/logo,
+ * PENDING_REAL_LOGO_ASSET, when the processed logo is in /public/brand/logo,
  * load it via fs.readFile and composite on the aurora background. The
  * placeholder below renders the brand wordmark + diamond mark on plum.
  */
 export const runtime = "edge";
-export const alt = "Pleasure Coin — the unified creator platform";
+export const alt = "Pleasure Coin, the unified creator platform";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

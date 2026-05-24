@@ -1,5 +1,5 @@
 /**
- * Skip-to-content link. Hidden until focused — when a keyboard user presses
+ * Skip-to-content link. Hidden until focused, when a keyboard user presses
  * Tab on a fresh page load, this becomes the first focusable element,
  * letting them jump past the nav. Per RPD §14 accessibility.
  */

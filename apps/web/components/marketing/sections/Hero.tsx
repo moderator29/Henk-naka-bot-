@@ -51,7 +51,7 @@ export function Hero() {
             className="mt-6 max-w-xl text-lg text-lilac/80"
           >
             One platform. One wallet. One sign-in. Pleasurely, PleasureNifty,
-            staking, and the $NSFW token — unified, AI-native, and built for the
+            staking, and the $NSFW token, unified, AI-native, and built for the
             decade ahead.
           </motion.p>
 

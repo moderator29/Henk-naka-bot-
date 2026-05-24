@@ -1,13 +1,13 @@
 import { ImageResponse } from "next/og";
 
 /**
- * Dynamic favicon — renders the diamond mark gradient at 32x32 via Next's
+ * Dynamic favicon, renders the diamond mark gradient at 32x32 via Next's
  * built-in OG image runtime. Picked up automatically as /favicon.
  *
  * When the real logo lands, swap this to load the SVG via fs.readFile
  * (or replace with a static apps/web/public/favicon.ico).
  *
- * PENDING_REAL_LOGO_ASSET — placeholder uses the same diamond mark the
+ * PENDING_REAL_LOGO_ASSET, placeholder uses the same diamond mark the
  * <Logo /> component falls back to.
  */
 export const runtime = "edge";

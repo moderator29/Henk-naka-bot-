@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const roadmap = [
   {
     title: "Aurora launch",
-    body: "The unified platform ships — Discovery, Feed, Messages, Marketplace, Staking, and the five AI cornerstones.",
+    body: "The unified platform ships, Discovery, Feed, Messages, Marketplace, Staking, and the five AI cornerstones.",
   },
   {
     title: "Creator economy depth",
@@ -38,7 +38,7 @@ export default function JourneyPage() {
             From launch to <GradientText>Aurora.</GradientText>
           </h1>
           <p className="mt-6 text-lg text-lilac/70 max-w-2xl mx-auto">
-            Every milestone that brought us here — and the roadmap that takes us
+            Every milestone that brought us here, and the roadmap that takes us
             further.
           </p>
         </div>

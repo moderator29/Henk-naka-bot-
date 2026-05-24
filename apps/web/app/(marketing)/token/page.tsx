@@ -132,7 +132,7 @@ function Metric({
         {value != null ? (
           <StatTicker value={value} formatPreset={formatPreset} />
         ) : (
-          <span className="text-lilac/40">—</span>
+          <span className="text-lilac/40">, </span>
         )}
       </div>
     </Card>

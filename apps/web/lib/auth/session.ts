@@ -4,7 +4,7 @@ import { isAdult } from "./age";
 /**
  * Server-side session helpers. Used by Server Components and route handlers to
  * read the current user and enforce the 18+ gate on sensitive surfaces
- * (RPD §9.1 — "checked on every sensitive action").
+ * (RPD §9.1, "checked on every sensitive action").
  */
 
 export interface SessionUser {

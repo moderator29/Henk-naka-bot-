@@ -13,7 +13,7 @@ import { createClient } from "@/lib/supabase/server";
  * Smart Search (RPD §3.3). Parses the natural-language query into structured
  * filters via Claude, then runs them against Supabase. If the AI isn't
  * configured or returns low confidence, falls back to pg_trgm full-text search
- * so the user always gets results. Never fabricates results — empty when the
+ * so the user always gets results. Never fabricates results, empty when the
  * DB is unconfigured/unseeded.
  */
 const CONFIDENCE_FLOOR = 0.5;

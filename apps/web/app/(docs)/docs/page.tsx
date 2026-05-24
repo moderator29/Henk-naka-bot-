@@ -9,7 +9,7 @@ import { DOC_SECTIONS } from "./content";
 export const metadata: Metadata = {
   title: "Docs",
   description:
-    "Everything you need to know about Pleasure Coin — the unified creator platform.",
+    "Everything you need to know about Pleasure Coin, the unified creator platform.",
 };
 
 export default function DocsIndexPage() {

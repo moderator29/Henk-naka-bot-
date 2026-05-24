@@ -16,7 +16,7 @@ interface DocsTableOfContentsProps {
 /**
  * Right-rail "on this page" table of contents. Highlights the section that
  * currently owns the viewport via IntersectionObserver. Hidden on
- * narrow screens — the sidebar is enough on mobile.
+ * narrow screens, the sidebar is enough on mobile.
  */
 export function DocsTableOfContents({ items }: DocsTableOfContentsProps) {
   const [active, setActive] = useState<string | null>(
