@@ -72,7 +72,7 @@ async function fromCoinGecko(): Promise<TokenStats | null> {
 }
 
 async function fromCoinMarketCap(): Promise<TokenStats | null> {
-  const apiKey = process.env.CMC_API_KEY;
+  const apiKey = process.env.COINMARKETCAP_API_KEY;
   const cmcId = process.env.CMC_NSFW_ID;
   // CMC quotes need an API key + the token's CMC id. Without both we can't
   // resolve $NSFW reliably (symbol lookups are ambiguous), so we bail to null

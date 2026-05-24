@@ -22,13 +22,17 @@ const bodySchema = z.object({
   signature: z.string().regex(/^0x[0-9a-fA-F]+$/, "Invalid signature"),
 });
 
+// Server-side Alchemy RPC: prefer the full URL, else build from the key, else
+// fall back to the public RPC so verification still works without a key.
+const alchemyRpc =
+  process.env.ALCHEMY_POLYGON_RPC_URL ??
+  (process.env.ALCHEMY_API_KEY
+    ? `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
+    : undefined);
+
 const publicClient = createPublicClient({
   chain: polygon,
-  transport: http(
-    process.env.NEXT_PUBLIC_ALCHEMY_KEY
-      ? `https://polygon-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`
-      : undefined
-  ),
+  transport: http(alchemyRpc),
 });
 
 export async function POST(req: NextRequest) {
