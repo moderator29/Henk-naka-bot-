@@ -101,30 +101,47 @@ RainbowKit needs wagmi v2 (not v3). `parseSiweMessage`/`verifySiweMessage`/
     CatchMeUpButton). Real Supabase data via `lib/creators/queries.ts`, else a
     labeled `SAMPLE_PREVIEW_DATA` preview behind a visible banner.
 
-> Always branch off the NEWEST pushed branch — check `git branch -r` and
-> `git log`. Latest is `claude/aurora-creator-profile`. 106 unit tests + e2e
-> specs; every branch typecheck + build verified.
+17. `claude/aurora-explore-notifications` — Explore real content
+    (`lib/explore/*`: trending creators + recent posts, category grid, For-You
+    rail) and notifications (`lib/notifications/*`, bell dropdown,
+    `/notifications`, API routes).
+18. `claude/aurora-ai-foundation` — shared AI plumbing: `lib/ai/client.ts`
+    (lazy Anthropic, env-gated), `ratelimit.ts` (Upstash), `sse.ts`,
+    `schemas.ts` (Zod), versioned prompts; POST `/api/ai/concierge` (streaming)
+    + POST `/api/ai/search` (parse → Supabase, pg_trgm fallback).
+19. `claude/aurora-concierge-ui` — Aura FAB (`components/ai/ConciergeFab.tsx`)
+    streaming from /api/ai/concierge, mounted in the platform layout.
+20. `claude/aurora-copilot-replies` — POST `/api/ai/copilot/replies` + "Suggest
+    replies" control in ThreadView, wired to the REAL /messages thread.
+21. `claude/aurora-smart-search-ui` — `components/ai/SmartSearch.tsx` replaces
+    the top-bar input, calls /api/ai/search, results dropdown.
+
+> Always branch off the NEWEST pushed branch (also pushed to `main` + the
+> default branch each time). 112 unit tests + e2e specs; every branch
+> typecheck + build verified.
 
 ## NEXT UP (TODO)
 
-- **Rest of PHASE 2:** Explore real content (trending/categories driven by
-  Supabase queries, AI "For You" placeholder), notifications shell (bell
-  dropdown + `notifications` table reads).
-- **PHASE 3 (largest remaining):** five AI cornerstones via `/api/ai/*`
-  streaming routes —
-  - Discovery Concierge (FAB + conversational feed builder)
-  - Creator Co-Pilot wired to the REAL `/messages` surface for reply suggestions
-  - Smart Search (Claude parse → Supabase filters, pg_trgm fallback) — there's a
-    search input in the platform top bar + docs sidebar already
-  - Earnings Forecaster (Supabase Edge Function + Claude narrative)
-  - Subscription Intelligence (cron + summaries + Resend)
-  - Shared AI plumbing already scaffolded in `lib/ai/README.md`: client,
-    versioned prompts in `lib/ai/prompts/`, Zod output schemas, Upstash rate
-    limits. The CatchMeUpButton on creator profiles is waiting on this
-    (PENDING_AI_SUMMARY).
+PHASE 2 ✅ complete. PHASE 3 in progress — 3 of 5 AI cornerstones done
+(Concierge, Smart Search, Co-Pilot replies). Remaining:
+
+- **Earnings Forecaster (RPD §3.4):** stat model over the creator's last 90d
+  (revenue, cadence, churn, tips) + Claude narrative + scenario sliders. The
+  RPD suggests a Supabase Edge Function; a Next route handler is fine for MVP.
+  Build `/api/ai/forecast` + a Forecaster panel for the creator dashboard.
+- **Subscription Intelligence (RPD §3.5):** daily summaries of what each
+  subscribed creator posted since last visit + renewal reminders. Supabase
+  cron (`app/api/cron/*`) + Claude + Resend. A `/api/ai/sub-digest` route +
+  a panel on the fan profile.
+- **CatchMeUpButton** on creator profiles is waiting on this (PENDING_AI_SUMMARY)
+  — wire it to a summary route once Subscription Intelligence lands.
 - **Then:** Creator Dashboard (Overview/Content Studio/Analytics/Earnings/
-  Tiers/Fans/Co-Pilot), Profile + Settings panels, full motion + perf pass
-  (Lighthouse targets §10), Vercel deploy.
+  Tiers/Fans/Co-Pilot surface), Profile + Settings panels, full motion + perf
+  pass (Lighthouse targets §10), Vercel deploy.
+
+Note: no new SQL migrations were needed for Phase 3 so far
+(`user_preferences` already has `ai_persona_memory`, etc.). The OWNER runs all
+SQL in Supabase — only commit `.sql` files, never execute them.
 
 ## Known PENDING labels in the tree (grep for these)
 
