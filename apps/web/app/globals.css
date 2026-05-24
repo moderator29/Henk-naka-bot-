@@ -64,6 +64,14 @@
     -webkit-text-fill-color: transparent;
   }
 
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   .btn-primary {
     background: var(--gradient-primary);
     background-size: 200% auto;

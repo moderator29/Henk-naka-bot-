@@ -5,12 +5,14 @@ import { usePathname } from "next/navigation";
 import {
   Compass,
   Home,
+  Clapperboard,
   MessageCircle,
   Diamond,
   Lock,
   User,
   Settings,
   Sparkles,
+  Plus,
   LogOut,
   type LucideIcon,
 } from "lucide-react";
@@ -19,6 +21,7 @@ import { SkipToContent } from "@/components/ui/SkipToContent";
 import { ConnectWallet } from "@/components/web3/ConnectWallet";
 import { NotificationsBell } from "@/components/notifications/NotificationsBell";
 import { SmartSearch } from "@/components/ai/SmartSearch";
+import { PlatformBottomNav } from "@/components/platform/PlatformBottomNav";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -34,6 +37,7 @@ interface NavItem {
 const nav: NavItem[] = [
   { href: "/explore", label: "Discover", icon: Compass },
   { href: "/feed", label: "Feed", icon: Home },
+  { href: "/pveels", label: "Pveels", icon: Clapperboard },
   { href: "/messages", label: "Messages", icon: MessageCircle },
   { href: "/marketplace", label: "Marketplace", icon: Diamond },
   { href: "/staking", label: "Staking", icon: Lock },
@@ -65,9 +69,16 @@ export function PlatformShell({
       <SkipToContent />
       {/* desktop sidebar */}
       <aside className="hidden lg:flex flex-col gap-2 sticky top-0 h-screen border-r border-white/5 bg-plum/80 backdrop-blur-xl p-6">
-        <div className="mb-8">
+        <div className="mb-6">
           <Logo />
         </div>
+        <Link
+          href="/compose"
+          className="mb-4 inline-flex items-center justify-center gap-2 h-11 rounded-xl btn-primary text-white font-semibold shadow-glow"
+        >
+          <Plus size={18} />
+          Create post
+        </Link>
         <nav aria-label="Primary" className="flex flex-col gap-1 flex-1">
           {nav.map(({ href, label, icon: Icon }) => {
             const active = isActive(pathname, href);
@@ -151,46 +162,12 @@ export function PlatformShell({
 
         <main
           id="main-content"
-          className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6"
+          className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-28 lg:pb-6"
         >
           {children}
         </main>
 
-        <nav
-          aria-label="Primary (mobile)"
-          className="lg:hidden fixed bottom-0 inset-x-0 z-40 glass-strong border-t border-white/5"
-        >
-          <ul className="flex justify-around items-center h-16">
-            {nav.slice(0, 5).map(({ href, label, icon: Icon }) => {
-              const active = isActive(pathname, href);
-              const showBadge =
-                href === "/messages" &&
-                typeof unreadMessageCount === "number" &&
-                unreadMessageCount > 0;
-              return (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(
-                      "relative flex flex-col items-center gap-1 px-3 py-2 text-[0.65rem] font-medium",
-                      active ? "text-magenta" : "text-lilac/60"
-                    )}
-                  >
-                    <Icon size={20} aria-hidden="true" />
-                    {label}
-                    {showBadge && (
-                      <span
-                        aria-hidden="true"
-                        className="absolute top-1 right-2 h-2 w-2 rounded-full bg-magenta"
-                      />
-                    )}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+        <PlatformBottomNav />
       </div>
 
       {/* AI rail (desktop xl) */}

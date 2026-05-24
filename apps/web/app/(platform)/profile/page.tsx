@@ -1,23 +1,14 @@
-import { Card } from "@/components/ui/Card";
+import { getSessionUser } from "@/lib/auth/session";
+import { ProfileView } from "@/components/profile/ProfileView";
 
-export default function ProfilePage() {
+export const metadata = { title: "Profile" };
+
+export default async function ProfilePage() {
+  const me = await getSessionUser();
   return (
-    <div className="max-w-3xl mx-auto">
-      <header className="mb-8">
-        <h1 className="font-display text-4xl font-bold text-white">
-          Your <span className="text-gradient">profile</span>
-        </h1>
-        <p className="mt-2 text-lilac/70">
-          Manage your account, subscriptions, wallet, and (for creators) the
-          dashboard.
-        </p>
-      </header>
-      <Card>
-        <p className="text-sm text-lilac/60">
-          Sign in to view your profile. Authentication ships in the next
-          sub-branch.
-        </p>
-      </Card>
-    </div>
+    <ProfileView
+      signedIn={!!me}
+      email={me?.email ?? null}
+    />
   );
 }
