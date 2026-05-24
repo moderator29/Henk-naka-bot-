@@ -9,20 +9,23 @@ import {
   getRecentPublicPosts,
 } from "@/lib/explore/queries";
 import { relativeTime } from "@/lib/utils";
+import { DEMO_CREATORS, demoEnabled } from "@/lib/demo/data";
 
 export const metadata = { title: "Discover" };
 
 /**
  * Discovery, the front door (RPD §6.2). Trending creators + recent public
- * posts come from Supabase; the category grid is fixed product taxonomy; the
- * "For You" AI rail activates with the Concierge in Phase 3. Empty states are
- * honest, no fabricated creators (Rule 7).
+ * posts come from Supabase. When nothing is seeded yet, we fall back to
+ * clearly-labeled demo creators so the surface feels alive.
  */
 export default async function ExplorePage() {
-  const [creators, posts] = await Promise.all([
+  const [liveCreators, posts] = await Promise.all([
     getTrendingCreators(8),
     getRecentPublicPosts(9),
   ]);
+
+  const usingDemo = liveCreators.length === 0 && demoEnabled();
+  const creators = usingDemo ? DEMO_CREATORS : liveCreators;
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -74,9 +77,16 @@ export default async function ExplorePage() {
 
       {/* Trending creators */}
       <section className="mb-12">
-        <h2 className="font-display text-2xl font-bold text-white mb-5">
-          Trending creators
-        </h2>
+        <div className="flex items-center gap-3 mb-5">
+          <h2 className="font-display text-2xl font-bold text-white">
+            Trending creators
+          </h2>
+          {usingDemo && (
+            <span className="text-[0.6rem] uppercase tracking-wider text-cyan border border-cyan/30 rounded-full px-2 py-0.5">
+              Demo
+            </span>
+          )}
+        </div>
         {creators.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {creators.map((c) => (

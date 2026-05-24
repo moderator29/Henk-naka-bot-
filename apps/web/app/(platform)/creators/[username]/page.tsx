@@ -6,6 +6,7 @@ import { ContentTabs } from "@/components/creator/ContentTabs";
 import { CatchMeUpButton } from "@/components/creator/CatchMeUpButton";
 import { getCreatorByUsername } from "@/lib/creators/queries";
 import { SAMPLE_PREVIEW_DATA } from "@/lib/creators/sample";
+import { demoCreatorProfile, demoEnabled } from "@/lib/demo/data";
 
 interface CreatorPageProps {
   params: { username: string };
@@ -26,7 +27,8 @@ export default async function CreatorProfilePage({
   params,
 }: CreatorPageProps) {
   const real = await getCreatorByUsername(params.username);
-  const creator = real ?? SAMPLE_PREVIEW_DATA;
+  const demo = demoEnabled() ? demoCreatorProfile(params.username) : null;
+  const creator = real ?? demo ?? SAMPLE_PREVIEW_DATA;
 
   return (
     <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-6">
