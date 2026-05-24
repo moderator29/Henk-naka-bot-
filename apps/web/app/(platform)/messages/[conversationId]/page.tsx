@@ -25,6 +25,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
           backHref="/messages"
           meId={me?.id}
           initialMessages={initialMessages}
+          enableReplySuggestions={!!me}
         />
       }
     />

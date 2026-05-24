@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Sparkles } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { cn, relativeTime } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -32,6 +32,11 @@ interface ThreadViewProps {
   otherVerified?: boolean;
   messages?: ThreadMessage[];
   onSend?: (body: string) => Promise<void> | void;
+  /**
+   * When true, shows the Co-Pilot "Suggest replies" control (RPD §3.2) wired
+   * to /api/ai/copilot/replies. Intended for creators replying to fans.
+   */
+  enableReplySuggestions?: boolean;
 }
 
 export function ThreadView({
@@ -42,9 +47,37 @@ export function ThreadView({
   otherVerified,
   messages = [],
   onSend,
+  enableReplySuggestions = false,
 }: ThreadViewProps) {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
+  const fetchSuggestions = async () => {
+    if (messages.length === 0) return;
+    setLoadingSuggestions(true);
+    setSuggestions([]);
+    try {
+      const payload = messages.slice(-12).map((m) => ({
+        role: m.senderId === meId ? ("assistant" as const) : ("user" as const),
+        content: m.body,
+      }));
+      const res = await fetch("/api/ai/copilot/replies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: payload }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { suggestions: string[] };
+        setSuggestions(data.suggestions ?? []);
+      }
+    } catch {
+      // leave empty — control just shows nothing new
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -111,10 +144,44 @@ export function ThreadView({
         )}
       </ol>
 
+      {/* Co-Pilot reply suggestions */}
+      {enableReplySuggestions && (
+        <div className="px-4 pt-2 border-t border-white/5 bg-plum/80 backdrop-blur">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={fetchSuggestions}
+              disabled={loadingSuggestions || messages.length === 0}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full glass text-xs font-medium text-magenta hover:text-magenta-light disabled:opacity-50"
+            >
+              <Sparkles size={12} />
+              {loadingSuggestions ? "Thinking…" : "Suggest replies"}
+            </button>
+            {suggestions.map((s, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => {
+                  setDraft(s);
+                  setSuggestions([]);
+                }}
+                className="px-2.5 py-1 rounded-full bg-plum/60 border border-white/10 text-xs text-lilac/80 hover:text-white hover:border-magenta/40 max-w-[16rem] truncate"
+                title={s}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Composer */}
       <form
         onSubmit={handleSubmit}
-        className="px-4 py-3 border-t border-white/5 bg-plum/80 backdrop-blur"
+        className={cn(
+          "px-4 py-3 bg-plum/80 backdrop-blur",
+          !enableReplySuggestions && "border-t border-white/5"
+        )}
       >
         <label htmlFor="dm-composer" className="sr-only">
           Type a message

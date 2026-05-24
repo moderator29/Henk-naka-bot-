@@ -19,6 +19,8 @@ interface ThreadContainerProps {
   otherAvatarUrl?: string | null;
   otherVerified?: boolean;
   initialMessages: ThreadMessage[];
+  /** Show Co-Pilot reply suggestions (creators replying to fans). */
+  enableReplySuggestions?: boolean;
 }
 
 export function ThreadContainer({
@@ -29,6 +31,7 @@ export function ThreadContainer({
   otherAvatarUrl,
   otherVerified,
   initialMessages,
+  enableReplySuggestions,
 }: ThreadContainerProps) {
   const { messages, append } = useRealtimeMessages(
     conversationId,
@@ -60,6 +63,7 @@ export function ThreadContainer({
       otherVerified={otherVerified}
       messages={messages}
       onSend={onSend}
+      enableReplySuggestions={enableReplySuggestions}
     />
   );
 }
