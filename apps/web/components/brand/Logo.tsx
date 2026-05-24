@@ -64,9 +64,11 @@ export function Logo({
         <Image
           src={asset.src}
           alt="Pleasure Coin"
-          width={resolvedVariant === "full" ? asset.width : mark}
-          height={resolvedVariant === "full" ? asset.height : mark}
+          width={asset.width}
+          height={asset.height}
           priority
+          className="w-auto select-none"
+          style={{ height: mark }}
         />
       ) : (
         <>

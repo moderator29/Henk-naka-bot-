@@ -3,9 +3,7 @@ import type { MetadataRoute } from "next";
 /**
  * PWA manifest. Routed automatically by Next at /manifest.webmanifest.
  *
- * Icon assets point to the runtime-generated /icon and /apple-icon routes
- * until the real logo PNGs land in /public/brand/logo and the icons can be
- * baked statically. PENDING_REAL_LOGO_ASSET.
+ * Icons use the processed brand logo in /public/brand/logo.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -21,15 +19,10 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["social", "lifestyle"],
     icons: [
       {
-        src: "/icon",
-        sizes: "32x32",
+        src: "/brand/logo/logo-mark.png",
+        sizes: "any",
         type: "image/png",
-      },
-      {
-        src: "/apple-icon",
-        sizes: "180x180",
-        type: "image/png",
-        purpose: "maskable",
+        purpose: "any",
       },
     ],
   };

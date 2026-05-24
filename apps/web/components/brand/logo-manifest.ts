@@ -21,25 +21,23 @@ export interface LogoAsset {
 }
 
 const HAS_REAL: Record<LogoAssetKey, boolean> = {
-  full: false,
-  mark: false,
-  "full-mono": false,
-  "mark-mono": false,
+  full: true,
+  mark: true,
+  "full-mono": true,
+  "mark-mono": true,
 };
 
+// The processed transparent logo (intrinsic 854x666). The Logo component
+// scales it by height per usage. A single color asset serves dark and inverted
+// surfaces alike until dedicated mono variants are provided.
+const FULL: LogoAsset = { src: "/brand/logo/logo-full.png", width: 854, height: 666 };
+const MARK: LogoAsset = { src: "/brand/logo/logo-mark.png", width: 854, height: 666 };
+
 export const LOGO_ASSETS: Record<LogoAssetKey, LogoAsset> = {
-  full: { src: "/brand/logo/logo-full.svg", width: 192, height: 48 },
-  mark: { src: "/brand/logo/logo-mark.svg", width: 48, height: 48 },
-  "full-mono": {
-    src: "/brand/logo/logo-full-mono.svg",
-    width: 192,
-    height: 48,
-  },
-  "mark-mono": {
-    src: "/brand/logo/logo-mark-mono.svg",
-    width: 48,
-    height: 48,
-  },
+  full: FULL,
+  mark: MARK,
+  "full-mono": FULL,
+  "mark-mono": MARK,
 };
 
 export function hasRealLogoAsset(key: LogoAssetKey): boolean {
