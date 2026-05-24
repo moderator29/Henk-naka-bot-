@@ -1,3 +1,5 @@
+<img width="854" height="666" alt="Subject" src="https://github.com/user-attachments/assets/20026304-8f13-4327-9010-e9dcee4f099f" />
+<img width="854" height="666" alt="IMG_0285" src="https://github.com/user-attachments/assets/0d53a85a-382f-4196-8934-e9c586a2565e" />
 # Pleasure Coin logo
 
 The real, processed Pleasure Coin logo files belong here. They are loaded
