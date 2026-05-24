@@ -10,7 +10,6 @@ import {
   Lock,
   User,
   Settings,
-  Search,
   Sparkles,
   LogOut,
   type LucideIcon,
@@ -19,6 +18,7 @@ import { Logo } from "@/components/brand/Logo";
 import { SkipToContent } from "@/components/ui/SkipToContent";
 import { ConnectWallet } from "@/components/web3/ConnectWallet";
 import { NotificationsBell } from "@/components/notifications/NotificationsBell";
+import { SmartSearch } from "@/components/ai/SmartSearch";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -124,22 +124,7 @@ export function PlatformShell({
           <div className="lg:hidden">
             <Logo size="sm" showWordmark={false} />
           </div>
-          <div className="flex-1 relative max-w-xl">
-            <label htmlFor="platform-search" className="sr-only">
-              Search Pleasure Coin
-            </label>
-            <Search
-              size={16}
-              aria-hidden="true"
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-lilac/40 pointer-events-none"
-            />
-            <input
-              id="platform-search"
-              type="search"
-              placeholder="Ask anything…"
-              className="w-full h-10 pl-9 pr-3 rounded-xl bg-plum/60 border border-white/10 text-sm text-white placeholder:text-lilac/40 focus:border-magenta/50 focus:outline-none focus:ring-2 focus:ring-magenta/20"
-            />
-          </div>
+          <SmartSearch />
           <Link
             href="/messages"
             aria-label={
