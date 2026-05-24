@@ -17,6 +17,8 @@ create table if not exists public.users (
   id uuid primary key default gen_random_uuid(),
   email text unique,
   username text unique,
+  first_name text,
+  last_name text,
   display_name text,
   bio text,
   avatar_url text,
@@ -260,18 +262,40 @@ create trigger messages_bump_conversation
 -- copying date_of_birth from signup metadata for the 18+ gate.
 create or replace function public.handle_new_auth_user()
 returns trigger language plpgsql security definer set search_path = public as $$
-declare dob date;
+declare
+  dob date;
+  meta jsonb := coalesce(new.raw_user_meta_data, '{}'::jsonb);
+  uname text := nullif(meta ->> 'username', '');
+  fname text := nullif(meta ->> 'first_name', '');
+  lname text := nullif(meta ->> 'last_name', '');
+  dname text := coalesce(nullif(meta ->> 'display_name', ''), nullif(meta ->> 'first_name', ''));
 begin
   begin
-    dob := (new.raw_user_meta_data ->> 'date_of_birth')::date;
+    dob := (meta ->> 'date_of_birth')::date;
   exception when others then dob := null;
   end;
 
-  insert into public.users (id, email, date_of_birth, created_at)
-  values (new.id, new.email, dob, now())
-  on conflict (id) do update
-    set email = excluded.email,
-        date_of_birth = coalesce(excluded.date_of_birth, public.users.date_of_birth);
+  begin
+    insert into public.users
+      (id, email, date_of_birth, first_name, last_name, username, display_name, created_at)
+    values
+      (new.id, new.email, dob, fname, lname, uname, dname, now())
+    on conflict (id) do update
+      set email = excluded.email,
+          date_of_birth = coalesce(excluded.date_of_birth, public.users.date_of_birth),
+          first_name = coalesce(excluded.first_name, public.users.first_name),
+          last_name = coalesce(excluded.last_name, public.users.last_name),
+          username = coalesce(public.users.username, excluded.username),
+          display_name = coalesce(excluded.display_name, public.users.display_name);
+  exception when unique_violation then
+    insert into public.users
+      (id, email, date_of_birth, first_name, last_name, display_name, created_at)
+    values
+      (new.id, new.email, dob, fname, lname, dname, now())
+    on conflict (id) do update
+      set email = excluded.email,
+          date_of_birth = coalesce(excluded.date_of_birth, public.users.date_of_birth);
+  end;
 
   insert into public.user_preferences (user_id)
   values (new.id)

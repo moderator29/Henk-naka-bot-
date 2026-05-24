@@ -27,34 +27,46 @@ describe("signInSchema", () => {
 
 describe("signUpSchema", () => {
   const adultDob = maxDateOfBirthInput(); // exactly 18 today
+  const base = {
+    firstName: "Ada",
+    lastName: "Lovelace",
+    username: "ada_l",
+    displayName: "Ada",
+    email: "fan@example.com",
+    password: "GoodPass1",
+    confirmPassword: "GoodPass1",
+    dateOfBirth: adultDob,
+    ageConfirmed: true as const,
+  };
 
   it("accepts a complete, adult, confirmed signup", () => {
+    expect(signUpSchema.safeParse(base).success).toBe(true);
+  });
+
+  it("rejects mismatched passwords", () => {
     const result = signUpSchema.safeParse({
-      email: "fan@example.com",
-      password: "GoodPass1",
-      dateOfBirth: adultDob,
-      ageConfirmed: true,
+      ...base,
+      confirmPassword: "Different1",
     });
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects an invalid username", () => {
+    const result = signUpSchema.safeParse({ ...base, username: "no" });
+    expect(result.success).toBe(false);
   });
 
   it("rejects an underage dob", () => {
     const result = signUpSchema.safeParse({
+      ...base,
       email: "kid@example.com",
-      password: "GoodPass1",
       dateOfBirth: "2015-01-01",
-      ageConfirmed: true,
     });
     expect(result.success).toBe(false);
   });
 
   it("requires the age confirmation checkbox", () => {
-    const result = signUpSchema.safeParse({
-      email: "fan@example.com",
-      password: "GoodPass1",
-      dateOfBirth: adultDob,
-      ageConfirmed: false,
-    });
+    const result = signUpSchema.safeParse({ ...base, ageConfirmed: false });
     expect(result.success).toBe(false);
   });
 });

@@ -73,9 +73,15 @@ export function Logo({
           <PlaceholderMark size={mark} />
           {resolvedVariant === "full" && (
             <span
-              className={cn("font-display font-bold tracking-tight", text)}
+              className={cn(
+                "font-display font-bold tracking-tight leading-[1.25] whitespace-nowrap",
+                text
+              )}
             >
-              Pleasure<span className="text-gradient">Coin</span>
+              Pleasure{" "}
+              <span className="text-gradient inline-block pb-[0.08em]">
+                Coin
+              </span>
             </span>
           )}
         </>

@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { AuroraBackground } from "@/components/brand/AuroraBackground";
 import { Logo } from "@/components/brand/Logo";
+import { AuthBrandPanel } from "@/components/auth/AuthBrandPanel";
 
 /**
- * Auth surface layout. Centered glass card over a drifting aurora, the
- * first impression for a signed-out visitor. Logo top-left, links home.
+ * Auth surface: a calm two-pane layout on desktop (branded panel + form) and a
+ * single centered card on mobile, over the drifting aurora. The logo lockup
+ * gets generous room on both so it is never clipped.
  */
 export default function AuthLayout({
   children,
@@ -12,25 +14,34 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-[100svh] flex flex-col items-center justify-center px-4 py-12">
-      <AuroraBackground variant="orchid" intensity="normal" />
-      <div className="absolute top-6 left-6">
-        <Logo />
+    <div className="relative min-h-[100svh]">
+      <div aria-hidden="true" className="fixed inset-0 -z-10 pointer-events-none">
+        <AuroraBackground variant="orchid" intensity="hero" />
       </div>
-      <main id="main-content" className="w-full max-w-md">
-        {children}
-      </main>
-      <p className="mt-8 text-xs text-lilac/50 text-center max-w-sm">
-        By continuing you confirm you are 18 or older and agree to our{" "}
-        <Link href="/legal/terms" className="text-lilac/70 hover:text-white underline">
-          Terms
-        </Link>{" "}
-        and{" "}
-        <Link href="/legal/privacy" className="text-lilac/70 hover:text-white underline">
-          Privacy Policy
-        </Link>
-        .
-      </p>
+
+      <div className="relative z-10 min-h-[100svh] lg:grid lg:grid-cols-2">
+        <AuthBrandPanel />
+
+        <div className="flex flex-col items-center justify-center px-4 py-12 sm:px-8">
+          <div className="lg:hidden mb-8">
+            <Logo size="lg" />
+          </div>
+          <main id="main-content" className="w-full max-w-md">
+            {children}
+          </main>
+          <p className="mt-8 text-xs text-faint text-center max-w-sm">
+            By continuing you confirm you are 18 or older and agree to our{" "}
+            <Link href="/legal/terms" className="text-lilac/70 hover:text-white underline">
+              Terms
+            </Link>{" "}
+            and{" "}
+            <Link href="/legal/privacy" className="text-lilac/70 hover:text-white underline">
+              Privacy Policy
+            </Link>
+            .
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

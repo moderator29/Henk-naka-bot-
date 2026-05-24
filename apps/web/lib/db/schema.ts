@@ -30,6 +30,8 @@ export const users = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     email: text("email").unique(),
     username: text("username").unique(),
+    firstName: text("first_name"),
+    lastName: text("last_name"),
     displayName: text("display_name"),
     bio: text("bio"),
     avatarUrl: text("avatar_url"),
