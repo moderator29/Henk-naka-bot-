@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useFormState } from "react-dom";
 import { Input } from "@/components/ui/Input";
 import { SubmitButton } from "./SubmitButton";
+import { Turnstile } from "./Turnstile";
 import { signUpAction, type AuthActionState } from "@/lib/auth/actions";
 import { maxDateOfBirthInput } from "@/lib/auth/age";
 
@@ -10,6 +12,7 @@ const initialState: AuthActionState = {};
 
 export function EmailSignUpForm() {
   const [state, formAction] = useFormState(signUpAction, initialState);
+  const [token, setToken] = useState("");
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -65,6 +68,10 @@ export function EmailSignUpForm() {
           )}
         </span>
       </label>
+
+      <input type="hidden" name="turnstileToken" value={token} />
+      <Turnstile onVerify={setToken} onExpire={() => setToken("")} />
+
       <SubmitButton>Create account</SubmitButton>
     </form>
   );

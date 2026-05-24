@@ -62,7 +62,7 @@ export function Hero() {
             className="mt-10 flex flex-col sm:flex-row gap-4"
           >
             <Button size="lg" asChild rightIcon={<ArrowRight size={18} />}>
-              <Link href="/explore">Enter the Platform</Link>
+              <Link href="/verify?next=/signup">Get Started</Link>
             </Button>
             <Button size="lg" variant="glass" asChild leftIcon={<Wallet size={18} />}>
               <Link

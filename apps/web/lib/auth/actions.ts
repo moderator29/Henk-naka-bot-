@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signInSchema, signUpSchema } from "./schemas";
 import { parseDateOfBirth } from "./age";
+import { verifyTurnstile } from "./turnstile";
 
 export interface AuthActionState {
   error?: string;
@@ -43,6 +44,13 @@ export async function signUpAction(
     return { fieldErrors: { dateOfBirth: "Enter a valid date" } };
   }
 
+  const turnstile = await verifyTurnstile(
+    String(formData.get("turnstileToken") ?? "")
+  );
+  if (!turnstile.ok) {
+    return { error: turnstile.error ?? "Please complete the verification." };
+  }
+
   const supabase = createClient();
   const { error } = await supabase.auth.signUp({
     email: parsed.data.email,
@@ -79,6 +87,13 @@ export async function signInAction(
       }
     }
     return { fieldErrors };
+  }
+
+  const turnstile = await verifyTurnstile(
+    String(formData.get("turnstileToken") ?? "")
+  );
+  if (!turnstile.ok) {
+    return { error: turnstile.error ?? "Please complete the verification." };
   }
 
   const supabase = createClient();

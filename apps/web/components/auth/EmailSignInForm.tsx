@@ -1,14 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { useFormState } from "react-dom";
 import { Input } from "@/components/ui/Input";
 import { SubmitButton } from "./SubmitButton";
+import { Turnstile } from "./Turnstile";
 import { signInAction, type AuthActionState } from "@/lib/auth/actions";
 
 const initialState: AuthActionState = {};
 
 export function EmailSignInForm() {
   const [state, formAction] = useFormState(signInAction, initialState);
+  const [token, setToken] = useState("");
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -38,6 +41,9 @@ export function EmailSignInForm() {
         error={state.fieldErrors?.password}
         required
       />
+      <input type="hidden" name="turnstileToken" value={token} />
+      <Turnstile onVerify={setToken} onExpire={() => setToken("")} />
+
       <SubmitButton>Sign in</SubmitButton>
     </form>
   );

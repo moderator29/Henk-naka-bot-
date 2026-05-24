@@ -54,7 +54,7 @@ export function MarketingNav() {
             <Link href="/login">Sign in</Link>
           </Button>
           <Button variant="primary" size="sm" asChild>
-            <Link href="/explore">Enter Platform</Link>
+            <Link href="/verify?next=/signup">Get Started</Link>
           </Button>
         </div>
 
@@ -95,7 +95,7 @@ export function MarketingNav() {
                   <Link href="/login">Sign in</Link>
                 </Button>
                 <Button variant="primary" size="md" asChild className="flex-1">
-                  <Link href="/explore">Enter</Link>
+                  <Link href="/verify?next=/signup">Get Started</Link>
                 </Button>
               </li>
             </ul>
