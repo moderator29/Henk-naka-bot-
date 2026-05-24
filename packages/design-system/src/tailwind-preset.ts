@@ -55,8 +55,10 @@ export const auroraPreset = {
         "aurora-drift-3": "aurora-drift-3 35s ease-in-out infinite",
         "aurora-drift-4": "aurora-drift-4 60s ease-in-out infinite",
         "float-3d": "float-3d 8s ease-in-out infinite",
+        "float-particle": "float-particle 16s ease-in-out infinite",
         "pulse-glow": "pulse-glow 3s ease-in-out infinite",
         "gradient-shift": "gradient-shift 8s ease infinite",
+        "marquee": "marquee 40s linear infinite",
         shimmer: "shimmer 2s linear infinite",
       },
       keyframes: {
@@ -79,6 +81,14 @@ export const auroraPreset = {
         "float-3d": {
           "0%, 100%": { transform: "rotateY(-5deg) translateY(0px)" },
           "50%": { transform: "rotateY(5deg) translateY(-6px)" },
+        },
+        "float-particle": {
+          "0%, 100%": { transform: "translateY(0px)", opacity: "0.3" },
+          "50%": { transform: "translateY(-24px)", opacity: "0.8" },
+        },
+        marquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
         },
         "pulse-glow": {
           "0%, 100%": { boxShadow: "0 0 24px rgba(255,31,143,0.35)" },

@@ -117,6 +117,26 @@ export function AuroraBackground({
           transform: `translate3d(${parallax.x * -10}px, ${parallax.y * 10}px, 0)`,
         }}
       />
+      {/* Floating ambient particles (subtle, GPU-cheap, motion-safe) */}
+      <div className="absolute inset-0 motion-reduce:hidden">
+        {PARTICLES.map((p, i) => (
+          <span
+            key={i}
+            className="absolute rounded-full animate-float-particle"
+            style={{
+              left: `${p.left}%`,
+              top: `${p.top}%`,
+              width: p.size,
+              height: p.size,
+              background: rgba(colors[i % colors.length] ?? colors[0], 0.5),
+              boxShadow: `0 0 ${p.size * 2}px ${rgba(colors[i % colors.length] ?? colors[0], 0.5)}`,
+              animationDelay: `${p.delay}s`,
+              animationDuration: `${p.duration}s`,
+            }}
+          />
+        ))}
+      </div>
+
       <div
         className="absolute inset-0 opacity-[0.04] mix-blend-overlay"
         style={{
@@ -127,3 +147,15 @@ export function AuroraBackground({
     </div>
   );
 }
+
+// Deterministic particle field (stable across SSR/CSR, no layout shift).
+const PARTICLES = [
+  { left: 12, top: 18, size: 4, delay: 0, duration: 14 },
+  { left: 78, top: 24, size: 3, delay: 2, duration: 18 },
+  { left: 34, top: 62, size: 5, delay: 1, duration: 16 },
+  { left: 64, top: 72, size: 3, delay: 3, duration: 20 },
+  { left: 88, top: 52, size: 4, delay: 1.5, duration: 15 },
+  { left: 22, top: 84, size: 3, delay: 2.5, duration: 19 },
+  { left: 50, top: 14, size: 4, delay: 0.5, duration: 17 },
+  { left: 6, top: 46, size: 3, delay: 3.5, duration: 21 },
+] as const;
