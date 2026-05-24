@@ -41,6 +41,15 @@
 8. Audit each branch against the RPD before pushing (not just typecheck).
 9. Maintain a live TODO inline in every message. Don't stop until complete.
 
+## THE DESIGN QUALITY BAR (non-negotiable, applies to every screen)
+
+Sleek and restrained. The standard is Linear, Apple, Vercel, and Stripe, not a
+flashy crypto site. Subtle aurora only (it is an accent, never the main event).
+In-app feel comes first: the platform should feel like a polished native
+product, not a marketing page. Generous whitespace, calm typography, quiet
+motion (respect prefers-reduced-motion), tight and consistent spacing. When in
+doubt, do less. Polish over spectacle on every screen.
+
 ## VERCEL TRAPS already hit + fixed (do not repeat)
 
 - **Server Components must NOT pass function props to Client Components.**
