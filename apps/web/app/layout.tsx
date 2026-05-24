@@ -25,6 +25,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Pinch-zoom stays enabled for accessibility; we prevent unwanted auto-zoom
+  // on input focus by keeping form controls at 16px on small screens (see CSS).
   themeColor: "#0F0420",
   colorScheme: "dark",
 };

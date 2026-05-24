@@ -6,12 +6,14 @@ import { EmailSignUpForm } from "@/components/auth/EmailSignUpForm";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { WalletAuthButton } from "@/components/auth/WalletAuthButton";
 import { AuthDivider } from "@/components/auth/AuthDivider";
+import { hasHumanVerified } from "@/lib/auth/human-check";
 
 export const metadata: Metadata = {
   title: "Create account",
 };
 
 export default function SignupPage() {
+  const humanVerified = hasHumanVerified();
   return (
     <Card variant="glass" className="p-8">
       <h1 className="font-display text-3xl font-bold text-white mb-1">
@@ -28,7 +30,7 @@ export default function SignupPage() {
 
       <AuthDivider label="or with email" />
 
-      <EmailSignUpForm />
+      <EmailSignUpForm humanVerified={humanVerified} />
 
       <p className="mt-6 text-sm text-lilac/70 text-center">
         Already have an account?{" "}

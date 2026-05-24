@@ -5,6 +5,17 @@ import { createClient } from "@/lib/supabase/server";
 import { signInSchema, signUpSchema } from "./schemas";
 import { parseDateOfBirth } from "./age";
 import { verifyTurnstile } from "./turnstile";
+import { hasHumanVerified } from "./human-check";
+
+/**
+ * A visitor is allowed through if they already passed the full-page verify gate
+ * (signed cookie) OR they completed the inline widget on this form. This keeps
+ * the flow to a single human check, the way mainstream platforms work.
+ */
+async function passedHumanCheck(formData: FormData) {
+  if (hasHumanVerified()) return { ok: true as const };
+  return verifyTurnstile(String(formData.get("turnstileToken") ?? ""));
+}
 
 export interface AuthActionState {
   error?: string;
@@ -44,9 +55,7 @@ export async function signUpAction(
     return { fieldErrors: { dateOfBirth: "Enter a valid date" } };
   }
 
-  const turnstile = await verifyTurnstile(
-    String(formData.get("turnstileToken") ?? "")
-  );
+  const turnstile = await passedHumanCheck(formData);
   if (!turnstile.ok) {
     return { error: turnstile.error ?? "Please complete the verification." };
   }
@@ -65,7 +74,7 @@ export async function signUpAction(
     return { error: error.message };
   }
 
-  redirect("/auth/check-email");
+  redirect("/check-email");
 }
 
 /** Email + password sign-in. */
@@ -89,9 +98,7 @@ export async function signInAction(
     return { fieldErrors };
   }
 
-  const turnstile = await verifyTurnstile(
-    String(formData.get("turnstileToken") ?? "")
-  );
+  const turnstile = await passedHumanCheck(formData);
   if (!turnstile.ok) {
     return { error: turnstile.error ?? "Please complete the verification." };
   }

@@ -6,12 +6,14 @@ import { EmailSignInForm } from "@/components/auth/EmailSignInForm";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { WalletAuthButton } from "@/components/auth/WalletAuthButton";
 import { AuthDivider } from "@/components/auth/AuthDivider";
+import { hasHumanVerified } from "@/lib/auth/human-check";
 
 export const metadata: Metadata = {
   title: "Sign in",
 };
 
 export default function LoginPage() {
+  const humanVerified = hasHumanVerified();
   return (
     <Card variant="glass" className="p-8">
       <h1 className="font-display text-3xl font-bold text-white mb-1">
@@ -28,7 +30,7 @@ export default function LoginPage() {
 
       <AuthDivider label="or with email" />
 
-      <EmailSignInForm />
+      <EmailSignInForm humanVerified={humanVerified} />
 
       <p className="mt-6 text-sm text-lilac/70 text-center">
         New here?{" "}

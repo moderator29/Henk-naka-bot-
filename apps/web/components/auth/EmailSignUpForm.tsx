@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useFormState } from "react-dom";
+import { ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { SubmitButton } from "./SubmitButton";
 import { Turnstile } from "./Turnstile";
@@ -10,7 +11,16 @@ import { maxDateOfBirthInput } from "@/lib/auth/age";
 
 const initialState: AuthActionState = {};
 
-export function EmailSignUpForm() {
+/**
+ * `humanVerified` is true when the visitor already cleared the full-page verify
+ * gate (signed cookie). In that case we show a quiet confirmation instead of a
+ * second Turnstile challenge.
+ */
+export function EmailSignUpForm({
+  humanVerified = false,
+}: {
+  humanVerified?: boolean;
+}) {
   const [state, formAction] = useFormState(signUpAction, initialState);
   const [token, setToken] = useState("");
 
@@ -69,8 +79,17 @@ export function EmailSignUpForm() {
         </span>
       </label>
 
-      <input type="hidden" name="turnstileToken" value={token} />
-      <Turnstile onVerify={setToken} onExpire={() => setToken("")} />
+      {humanVerified ? (
+        <p className="flex items-center gap-2 text-sm text-lilac/70">
+          <ShieldCheck size={16} className="text-cyan" aria-hidden="true" />
+          Verified. You are all set.
+        </p>
+      ) : (
+        <>
+          <input type="hidden" name="turnstileToken" value={token} />
+          <Turnstile onVerify={setToken} onExpire={() => setToken("")} />
+        </>
+      )}
 
       <SubmitButton>Create account</SubmitButton>
     </form>

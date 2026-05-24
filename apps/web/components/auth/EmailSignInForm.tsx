@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useFormState } from "react-dom";
+import { ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { SubmitButton } from "./SubmitButton";
 import { Turnstile } from "./Turnstile";
@@ -9,7 +10,11 @@ import { signInAction, type AuthActionState } from "@/lib/auth/actions";
 
 const initialState: AuthActionState = {};
 
-export function EmailSignInForm() {
+export function EmailSignInForm({
+  humanVerified = false,
+}: {
+  humanVerified?: boolean;
+}) {
   const [state, formAction] = useFormState(signInAction, initialState);
   const [token, setToken] = useState("");
 
@@ -41,8 +46,17 @@ export function EmailSignInForm() {
         error={state.fieldErrors?.password}
         required
       />
-      <input type="hidden" name="turnstileToken" value={token} />
-      <Turnstile onVerify={setToken} onExpire={() => setToken("")} />
+      {humanVerified ? (
+        <p className="flex items-center gap-2 text-sm text-lilac/70">
+          <ShieldCheck size={16} className="text-cyan" aria-hidden="true" />
+          Verified. You are all set.
+        </p>
+      ) : (
+        <>
+          <input type="hidden" name="turnstileToken" value={token} />
+          <Turnstile onVerify={setToken} onExpire={() => setToken("")} />
+        </>
+      )}
 
       <SubmitButton>Sign in</SubmitButton>
     </form>

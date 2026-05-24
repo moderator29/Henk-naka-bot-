@@ -28,15 +28,22 @@ export function VerifyGate({ next = "/signup" }: { next?: string }) {
     router.push(next);
   }, [next, router]);
 
-  const onVerify = useCallback(() => {
-    setVerified(true);
-    try {
-      sessionStorage.setItem("aurora.verified", String(Date.now()));
-    } catch {
-      // sessionStorage may be unavailable; non-fatal.
-    }
-    setTimeout(proceed, 700);
-  }, [proceed]);
+  const onVerify = useCallback(
+    (token: string) => {
+      setVerified(true);
+      // Register the pass server-side so /signup trusts it and never asks the
+      // user to verify again. We proceed regardless: if this fails, the sign-up
+      // form falls back to its own inline check.
+      void fetch("/api/auth/human-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      })
+        .catch(() => {})
+        .finally(() => setTimeout(proceed, 600));
+    },
+    [proceed]
+  );
 
   // Safety net: never hard-stuck if the widget is slow or misconfigured.
   useEffect(() => {
