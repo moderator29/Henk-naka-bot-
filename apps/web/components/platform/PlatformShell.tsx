@@ -10,7 +10,6 @@ import {
   Lock,
   User,
   Settings,
-  Bell,
   Search,
   Sparkles,
   LogOut,
@@ -19,6 +18,7 @@ import {
 import { Logo } from "@/components/brand/Logo";
 import { SkipToContent } from "@/components/ui/SkipToContent";
 import { ConnectWallet } from "@/components/web3/ConnectWallet";
+import { NotificationsBell } from "@/components/notifications/NotificationsBell";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -160,13 +160,7 @@ export function PlatformShell({
                 </span>
               )}
           </Link>
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="relative h-10 w-10 rounded-xl flex items-center justify-center text-lilac/70 hover:text-white hover:bg-white/5"
-          >
-            <Bell size={18} />
-          </button>
+          <NotificationsBell />
           <ConnectWallet compact />
         </header>
 
