@@ -33,6 +33,17 @@ export function ConciergeFab() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [messages, open]);
 
+  // The Discovery prompt bar (and anywhere else) can open Aura with a draft.
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      setOpen(true);
+      const text = (e as CustomEvent<string>).detail;
+      if (typeof text === "string" && text.length > 0) setDraft(text);
+    };
+    window.addEventListener("aurora:concierge-open", onOpen);
+    return () => window.removeEventListener("aurora:concierge-open", onOpen);
+  }, []);
+
   const send = async (e: FormEvent) => {
     e.preventDefault();
     const text = draft.trim();
@@ -129,7 +140,7 @@ export function ConciergeFab() {
         className={cn(
           "fixed bottom-20 lg:bottom-6 right-4 lg:right-6 z-40 h-14 w-14 rounded-full",
           "bg-gradient-primary text-white shadow-glow-lg flex items-center justify-center",
-          "transition-transform hover:scale-105 active:scale-95 animate-pulse-glow",
+          "transition-transform hover:scale-105 active:scale-95",
           open && "hidden"
         )}
       >

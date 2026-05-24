@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type Variants } from "framer-motion";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
 import type { ReactNode } from "react";
 
 interface ScrollRevealProps {
@@ -19,9 +19,9 @@ const baseVariants = (offset: number, delay: number): Variants => ({
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.5,
+      duration: 0.42,
       delay,
-      ease: [0.16, 1, 0.3, 1],
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 });
@@ -39,6 +39,14 @@ export function ScrollReveal({
   as = "div",
 }: ScrollRevealProps) {
   const MotionTag = motion[as];
+  const reduce = useReducedMotion();
+
+  // Reduced motion: render in place, no transform or fade.
+  if (reduce) {
+    const Tag = as;
+    return <Tag className={className}>{children}</Tag>;
+  }
+
   return (
     <MotionTag
       initial="hidden"
