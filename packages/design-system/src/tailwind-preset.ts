@@ -10,6 +10,7 @@ export const auroraPreset = {
     extend: {
       colors: {
         plum: { DEFAULT: colors.plum, 50: "#1A0833", 900: "#0A0218" },
+        "plum-2": colors.plumRaised,
         imperial: {
           DEFAULT: colors.imperial,
           light: "#3D1580",
@@ -27,6 +28,8 @@ export const auroraPreset = {
         },
         lilac: { DEFAULT: colors.lilac, dark: "#C9B0E8" },
         cyan: { DEFAULT: colors.cyan, dark: "#3AB5E0" },
+        muted: colors.muted,
+        faint: colors.faint,
       },
       fontFamily: {
         display: ["var(--font-display)", "system-ui", "sans-serif"],
@@ -40,14 +43,23 @@ export const auroraPreset = {
           "linear-gradient(90deg, #FF1F8F 0%, #B847FF 50%, #5DD6FF 100%)",
       },
       boxShadow: {
+        e1: shadows.e1,
+        e2: shadows.e2,
+        e3: shadows.e3,
+        e4: shadows.e4,
+        "glow-magenta": shadows.glowMagenta,
         glow: shadows.glow,
         "glow-lg": shadows.glowLg,
         "glow-orchid": shadows.glowOrchid,
         "glow-cyan": shadows.glowCyan,
         glass: shadows.glass,
       },
+      borderRadius: {
+        pill: "999px",
+      },
       backdropBlur: {
         glass: "20px",
+        shell: "16px",
       },
       animation: {
         "aurora-drift-1": "aurora-drift-1 40s ease-in-out infinite",

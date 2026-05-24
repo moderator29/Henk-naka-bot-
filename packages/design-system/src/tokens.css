@@ -1,42 +1,77 @@
 /**
- * Aurora tokens — CSS variable mirror of src/tokens.ts.
+ * Aurora tokens — CSS variable mirror of src/tokens.ts (Part 5 design system).
  * Imported once from the app's globals.css; available everywhere.
  */
 
 :root {
   /* colors */
-  --color-plum: #0f0420;
-  --color-imperial: #2a0e5a;
-  --color-magenta: #ff1f8f;
-  --color-orchid: #b847ff;
-  --color-lilac: #e9d5ff;
-  --color-cyan: #5dd6ff;
+  --color-plum: #0f0420; /* base */
+  --color-plum-2: #16092e; /* raised surfaces */
+  --color-imperial: #2a0e5a; /* deep accent */
+  --color-magenta: #ff1f8f; /* primary */
+  --color-orchid: #b847ff; /* primary 2 */
+  --color-lilac: #e9d5ff; /* soft body text */
+  --color-cyan: #5dd6ff; /* rare accent */
+  --color-muted: #7a6b95; /* secondary text */
+  --color-faint: #5a4d75; /* captions */
   --color-white: #ffffff;
 
   /* gradients */
   --gradient-primary: linear-gradient(135deg, #ff1f8f 0%, #b847ff 100%);
-  --gradient-hero: linear-gradient(
-    90deg,
-    #ff1f8f 0%,
-    #b847ff 50%,
-    #5dd6ff 100%
-  );
+  --gradient-hero: linear-gradient(90deg, #ff1f8f 0%, #b847ff 50%, #5dd6ff 100%);
 
   /* radii */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+  --radius-sm: 0.625rem; /* 10px */
+  --radius-md: 1rem; /* 16px */
+  --radius-lg: 1.25rem; /* 20px */
+  --radius-xl: 1.75rem; /* 28px */
   --radius-2xl: 2rem;
+  --radius-pill: 999px;
 
-  /* shadows */
+  /* elevation — soft, layered, never harsh */
+  --shadow-e1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-e2: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-e3: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-e4: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --glow-magenta: 0 0 40px rgba(255, 31, 143, 0.25);
+  --glow-orchid: 0 0 40px rgba(184, 71, 255, 0.22);
+
+  /* glass recipe — one material everywhere */
+  --glass-bg: rgba(22, 9, 46, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-featured: rgba(255, 31, 143, 0.2);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --glass-blur: 20px; /* cards / modals */
+  --shell-blur: 16px; /* persistent shell chrome */
+
+  /* motion — easing curves */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* motion — durations */
+  --dur-fast: 140ms; /* hover, press, toggle, tooltip */
+  --dur-base: 240ms; /* most UI */
+  --dur-page: 320ms; /* route transitions */
+  --dur-slow: 420ms; /* section reveals, modals */
+
+  /* retained aliases used by existing components */
   --shadow-glow: 0 0 24px rgba(255, 31, 143, 0.35);
   --shadow-glow-lg: 0 0 48px rgba(255, 31, 143, 0.45);
-  --shadow-glass: 0 8px 32px rgba(15, 4, 32, 0.4),
+  --shadow-glass: 0 8px 24px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
-
-  /* motion */
-  --motion-fast: 150ms;
-  --motion-base: 250ms;
+  --motion-fast: 140ms;
+  --motion-base: 240ms;
   --motion-moderate: 400ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-page: 0ms;
+    --dur-slow: 0ms;
+    --motion-fast: 0ms;
+    --motion-base: 0ms;
+    --motion-moderate: 0ms;
+  }
 }

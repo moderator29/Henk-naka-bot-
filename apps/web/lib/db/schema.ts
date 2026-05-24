@@ -39,6 +39,7 @@ export const users = pgTable(
     dateOfBirth: date("date_of_birth"),
     isCreator: boolean("is_creator").default(false).notNull(),
     isVerified: boolean("is_verified").default(false).notNull(),
+    isDemo: boolean("is_demo").default(false).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -122,6 +123,7 @@ export const posts = pgTable(
     media: jsonb("media"),
     tierRequired: uuid("tier_required").references(() => subscriptionTiers.id),
     category: text("category"),
+    isDemo: boolean("is_demo").default(false).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -306,6 +308,7 @@ export const marketplaceListings = pgTable(
     tokenId: text("token_id").notNull(),
     priceNsfw: numeric("price_nsfw", { precision: 36, scale: 6 }).notNull(),
     status: text("status").default("active").notNull(),
+    isDemo: boolean("is_demo").default(false).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
