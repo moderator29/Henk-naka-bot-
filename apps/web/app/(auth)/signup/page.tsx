@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { Card } from "@/components/ui/Card";
 import { GradientText } from "@/components/brand/GradientText";
@@ -15,9 +14,9 @@ export const metadata: Metadata = {
 export default function SignupPage() {
   const humanVerified = hasHumanVerified();
   return (
-    <Card variant="glass" className="p-8">
+    <Card variant="glass" className="p-6 sm:p-8 edge-light">
       <h1 className="font-display text-3xl font-bold text-white mb-1">
-        Join <GradientText>Pleasure Coin</GradientText>
+        Create your <GradientText>account</GradientText>
       </h1>
       <p className="text-sm text-lilac/70 mb-6">
         One account for the whole ecosystem.
@@ -31,13 +30,6 @@ export default function SignupPage() {
       <AuthDivider label="or with email" />
 
       <EmailSignUpForm humanVerified={humanVerified} />
-
-      <p className="mt-6 text-sm text-lilac/70 text-center">
-        Already have an account?{" "}
-        <Link href="/login" className="text-magenta hover:text-magenta-light font-medium">
-          Sign in
-        </Link>
-      </p>
     </Card>
   );
 }
