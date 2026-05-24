@@ -85,17 +85,53 @@ RainbowKit needs wagmi v2 (not v3). `parseSiweMessage`/`verifySiweMessage`/
     `components/analytics/AnalyticsProvider.tsx`; manual pageviews, autocapture
     off). **104 tests passing.**
 
+12. `claude/aurora-realtime-dms` — Supabase Realtime DM delivery
+    (`lib/messaging/useRealtimeMessages.ts`, `queries.ts`, `actions.ts`,
+    `ThreadContainer`); messages pages now server-fetch + live-subscribe.
+13. `claude/aurora-e2e` — Playwright critical-flow specs in `apps/web/e2e/`
+    (marketing, auth, docs, platform). Run via `pnpm --filter web e2e:install`
+    then `e2e` (browser CDN blocked in this sandbox; runs in CI/locally).
+14. `claude/aurora-landing` — full landing sections (Hero, LiveTicker w/ real
+    CoinGecko+CMC via `lib/market/token-stats.ts`, Ecosystem, AIShowcase,
+    CreatorsCarousel, StakingCTA, Journey).
+15. `claude/aurora-token-page` — `/token` (Recharts PriceChart w/ timeframe
+    selector + `/api/market/price-history`, real metric cards) and `/journey`.
+16. `claude/aurora-creator-profile` — flagship `/creators/[username]`
+    (CreatorHeader parallax + counters, TierSelector, ContentTabs,
+    CatchMeUpButton). Real Supabase data via `lib/creators/queries.ts`, else a
+    labeled `SAMPLE_PREVIEW_DATA` preview behind a visible banner.
+
 > Always branch off the NEWEST pushed branch — check `git branch -r` and
-> `git log`. Latest is `claude/aurora-observability`.
+> `git log`. Latest is `claude/aurora-creator-profile`. 106 unit tests + e2e
+> specs; every branch typecheck + build verified.
 
 ## NEXT UP (TODO)
 
-- **#11 Supabase Realtime** wiring for DMs (channels on `messages`)
-- **#12 Playwright** critical-flow tests
-- **PHASE 2:** full landing sections (LiveTicker w/ CoinGecko + CMC fallback,
-  Ecosystem, AIShowcase, Creators carousel, StakingCTA, Journey), `/token`
-  (Recharts chart + market data), `/journey`, `/creators/[username]` flagship
-  profile, Explore real content, notifications shell
+- **Rest of PHASE 2:** Explore real content (trending/categories driven by
+  Supabase queries, AI "For You" placeholder), notifications shell (bell
+  dropdown + `notifications` table reads).
+- **PHASE 3 (largest remaining):** five AI cornerstones via `/api/ai/*`
+  streaming routes —
+  - Discovery Concierge (FAB + conversational feed builder)
+  - Creator Co-Pilot wired to the REAL `/messages` surface for reply suggestions
+  - Smart Search (Claude parse → Supabase filters, pg_trgm fallback) — there's a
+    search input in the platform top bar + docs sidebar already
+  - Earnings Forecaster (Supabase Edge Function + Claude narrative)
+  - Subscription Intelligence (cron + summaries + Resend)
+  - Shared AI plumbing already scaffolded in `lib/ai/README.md`: client,
+    versioned prompts in `lib/ai/prompts/`, Zod output schemas, Upstash rate
+    limits. The CatchMeUpButton on creator profiles is waiting on this
+    (PENDING_AI_SUMMARY).
+- **Then:** Creator Dashboard (Overview/Content Studio/Analytics/Earnings/
+  Tiers/Fans/Co-Pilot), Profile + Settings panels, full motion + perf pass
+  (Lighthouse targets §10), Vercel deploy.
+
+## Known PENDING labels in the tree (grep for these)
+
+`PENDING_CONTRACT_ADDRESS` (staking + NFT), `PENDING_SUPABASE_AUTH`,
+`PENDING_SUPABASE_REALTIME`, `PENDING_WAGMI` (now activated, none left),
+`PENDING_WC_PROJECT_ID`, `PENDING_REAL_LOGO_ASSET`,
+`PLACEHOLDER_PENDING_3D_ASSETS`, `PENDING_AI_SUMMARY`, `SAMPLE_PREVIEW_DATA`.
 - **PHASE 3:** five AI cornerstones via `/api/ai/*` streaming routes (prompts
   versioned in `lib/ai/prompts/`, Zod output schemas, Upstash rate limits) —
   Discovery Concierge, Creator Co-Pilot wired to the REAL `/messages` surface,
