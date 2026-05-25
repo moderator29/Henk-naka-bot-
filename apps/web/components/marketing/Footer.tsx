@@ -26,6 +26,7 @@ const linkGroups = [
   {
     title: "About",
     links: [
+      { href: "/pleasureland", label: "Pleasureland" },
       { href: "/journey", label: "Journey" },
       { href: "/docs", label: "Documentation" },
       { href: "/legal/terms", label: "Terms" },
