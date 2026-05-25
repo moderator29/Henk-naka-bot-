@@ -1,201 +1,246 @@
-# Project Aurora — Session Handoff (COMPLETE, current)
+# Project Aurora — Session Handoff (current)
 
-> Read this FIRST. The owner is also sending you a fresh prompt this session —
-> wait for it and treat it as the priority instruction set, but everything in
-> here is the live state of the build. The two source docs live beside this
-> file:
+> Read this FIRST. The owner usually also sends a fresh prompt for the session —
+> wait for it and treat it as the priority instruction set, but everything here
+> is the live state of the build. Source docs live beside this file:
 > - `docs/project/01-build-prompt-and-rpd.md` (original build prompt + full RPD)
 > - `docs/project/02-mid-build-update.md` (nav/messaging/onboarding/docs/logo)
+>
+> Last updated after commit `4eba2e9` (messaging end-to-end). Always run
+> `git log --oneline -1` to confirm the true latest.
 
 ## THE OWNER'S RULES (non-negotiable, enforce every commit)
 
-1. **NO AI attribution anywhere** — commits, code, comments, package metadata.
-   Commits are authored by the owner. BEFORE YOUR FIRST COMMIT run:
+1. **NO AI attribution anywhere** — commits, code, comments, package metadata,
+   PR titles/bodies. Commits are authored by the owner. BEFORE YOUR FIRST COMMIT:
    ```
    git config user.name "moderator29"
    git config user.email "Phantomfcalls@gmail.com"
    ```
-   Verify every commit shows that author.
-2. **NO AI "tells" in copy.** The owner specifically flagged em-dashes (—),
-   spaced hyphens used as dashes, and double underscores in user-facing text.
-   Do not use em-dashes. Keep prose warm and human (commas, periods). A sweep
-   already removed them; do not reintroduce.
-3. **The OWNER runs ALL SQL in Supabase.** You only ever commit `.sql` files to
-   `supabase/migrations/`. NEVER execute DDL, NEVER call the Supabase MCP
-   (a non-owner Supabase MCP is connected in this environment — ignore it).
-4. **Branch-per-work-unit, merge in batches.** Create `claude/aurora-<name>`
-   off the LATEST state, build, verify, then push to `main` AND the default
-   branch `claude/setup-pleasure-coin-v2-54I9T` (both must stay in sync — the
-   default branch is what Vercel deploys). Owner asked to "merge after ~10
-   works"; in practice merge each verified batch.
-5. **No fake data masquerading as real.** Demo/sample content is allowed
-   because the OWNER explicitly asked for it (to feel the vibe), but it must be
-   clearly labeled (a "Demo"/"Preview" marker) and only shown when live data is
-   empty. Stubs carry PENDING_* labels.
-6. **ALWAYS keep Vercel green.** Before every merge run, in order:
-   `pnpm turbo run typecheck` + `pnpm --filter web test` +
-   `pnpm --filter web build`. The build must say "Compiled successfully" with
-   no errors. Watch for the classic trap (below).
+   Verify every commit shows that author. Do NOT put the model name anywhere
+   that gets pushed to the repo.
+2. **NO AI "tells" in copy.** No em-dashes (—), no spaced hyphens used as
+   dashes, no double underscores in user-facing text. Warm, human prose
+   (commas, periods). A sweep already removed them; do not reintroduce.
+3. **The OWNER runs ALL SQL in Supabase.** You ONLY ever commit `.sql` files to
+   `supabase/migrations/` (and mirror into `supabase/schema.sql`). NEVER execute
+   DDL. NEVER call the Supabase MCP — a non-owner Supabase MCP is connected in
+   this environment; ignore it completely.
+4. **Branch + sync.** Develop on the designated branch the owner gives you
+   (most recently `claude/zen-newton-NVqhQ`), build, verify, then push to that
+   branch AND fast-forward `main` AND `claude/setup-pleasure-coin-v2-54I9T`
+   (the default branch Vercel deploys). All three stay in sync.
+5. **No fake data masquerading as real.** Demo/sample content is allowed (owner
+   asked for it to feel the vibe) but must be clearly labeled ("Demo"/"Preview")
+   and only shown when live data is empty (`is_demo` / `isPreview`). Stubs carry
+   `PENDING_*` labels. Never present fabricated numbers as real.
+6. **ALWAYS keep Vercel green.** Before every push run, in order:
+   typecheck + test + build. Build must say "Compiled successfully" with no
+   errors. From `apps/web`: `npx tsc --noEmit` · `npx vitest run` · `npm run build`.
+   (Monorepo equivalents: `pnpm turbo run typecheck`, `pnpm --filter web test`,
+   `pnpm --filter web build`.)
 7. TypeScript strict, no `any` without justification. Mobile-first. WCAG AA.
    `prefers-reduced-motion` respected. Real integrations only, env-gated.
-8. Audit each branch against the RPD before pushing (not just typecheck).
-9. Maintain a live TODO inline in every message. Don't stop until complete.
+8. **Audit each change against the RPD/prompts before pushing** — not just
+   typecheck. The owner has flagged shallow audits before; go deep.
+9. Maintain a live TODO inline in every message. Work autonomously; don't stop
+   mid-task to checkpoint unless you hit a real blocker or a risky action.
 
-## THE DESIGN QUALITY BAR (non-negotiable, applies to every screen)
+## THE DESIGN QUALITY BAR (every screen)
 
-Sleek and restrained. The standard is Linear, Apple, Vercel, and Stripe, not a
-flashy crypto site. Subtle aurora only (it is an accent, never the main event).
-In-app feel comes first: the platform should feel like a polished native
-product, not a marketing page. Generous whitespace, calm typography, quiet
-motion (respect prefers-reduced-motion), tight and consistent spacing. When in
-doubt, do less. Polish over spectacle on every screen.
+Sleek and restrained. The standard is Linear, Apple, Vercel, Stripe — not a
+flashy crypto site. Subtle aurora only (accent, never the main event; it keeps
+moving gently even under reduced-motion via the `.aurora-blob` exemption).
+In-app feel first: a polished native product, not a marketing page. Generous
+whitespace, calm typography, quiet motion, tight consistent spacing. When in
+doubt, do less.
 
 ## VERCEL TRAPS already hit + fixed (do not repeat)
 
-- **Server Components must NOT pass function props to Client Components.**
-  This crashes prerender on Vercel (it didn't locally because the sandbox can't
-  reach CoinGecko, so the data path never rendered). `StatTicker` uses a
-  serializable `formatPreset` string instead of a `format` fn from server
-  components. Apply the same pattern anywhere a server page feeds a client
-  widget.
-- **React 18 here** — use `useFormState`/`useFormStatus` (react-dom), NOT
-  `useActionState` (React 19).
-- **RainbowKit needs wagmi v2** (not v3). `viem/siwe` for SIWE helpers.
-- Optional wallet deps (`@react-native-async-storage/async-storage`,
-  `pino-pretty`, `lokijs`, `encoding`) and OpenTelemetry warnings are silenced
-  in `apps/web/next.config.mjs` (webpack externals/alias false + ignoreWarnings).
-  Build is warning-free; keep it that way.
-- CoinGecko public price endpoint needs NO API key (works on Vercel keyless).
+- **Server Components must NOT pass function props to Client Components.** Crashes
+  prerender on Vercel (passes locally because the sandbox can't reach CoinGecko,
+  so the data path never renders). `StatTicker` takes a serializable
+  `formatPreset` string, not a `format` fn. Apply the same pattern anywhere a
+  server page feeds a client widget.
+- **`"use server"` files may ONLY export async functions.** Types/constants in a
+  server-action file break the build ("Failed to collect page data"). Put shared
+  types in a plain module (e.g. `lib/engagement/types.ts`, `lib/profile/settings.ts`).
+- **`Record<Union, ...>` maps must cover every union member.** Adding a
+  `NotificationType` means updating BOTH icon maps (`NotificationsBell.tsx` and
+  `notifications/page.tsx`).
+- **React 18 here** — `useFormState`/`useFormStatus` (react-dom), NOT
+  `useActionState`. **RainbowKit + wagmi v2** (not v3); `viem/siwe` for SIWE.
+- **`noUncheckedIndexedAccess` is on** — `arr[0]` is `T | undefined`; assert
+  (`arr[0]!`) only when you know it's populated (e.g. after a length check).
+- Watch top-level-declaration order in modules (a TDZ bug shipped once:
+  `let order = 0` was used by `DEMO_LISTINGS` before it was initialized).
+- Optional wallet deps + OpenTelemetry warnings are silenced in
+  `apps/web/next.config.mjs`. Keep the build warning-free.
+- CoinGecko public price/OHLC endpoints need NO API key (work on Vercel keyless).
 
 ## REPO + STACK
 
 - Repo: `moderator29/Henk-naka-bot-`. Working dir `/home/user/Henk-naka-bot-`.
-- `main` and `claude/setup-pleasure-coin-v2-54I9T` (default/deploy branch) are
-  kept in sync and hold the full project.
 - pnpm + turbo monorepo: `apps/web` + `packages/{design-system,contracts}`.
-- Next.js 14.2.35 App Router · TS strict · Tailwind (preset in design-system)
-  · Drizzle + Supabase · wagmi v2 + RainbowKit + viem (Polygon) · Framer Motion
-  · Recharts · Anthropic SDK · Sentry + PostHog · Vitest + Playwright.
+- Next.js 14 App Router · TS strict · Tailwind · Supabase (Auth/Postgres/RLS/
+  Storage/Realtime) + Drizzle mirror · wagmi v2 + RainbowKit + viem (Polygon) ·
+  Framer Motion · Recharts · Anthropic SDK · Upstash · Resend · Sentry + PostHog
+  · Vitest + Playwright.
+- Baseline: **tsc 0 errors · 124 unit tests pass (26 files) · build compiles green.**
 
-## DONE (all merged to main + deploy branch)
+## DONE (merged to main + deploy branch + dev branch)
 
-**Foundation/infra:** monorepo, design tokens, brand primitives
-(AuroraBackground w/ mouse parallax + ambient particles, GradientText, Logo
-w/ PENDING_REAL_LOGO_ASSET placeholder, BrandIcon w/ PLACEHOLDER_PENDING_3D_ASSETS),
-base UI (Button, Card, Input, Modal, Toast, Skeleton, StatTicker, ScrollReveal,
-SkipToContent), layout shells, page transitions (app/template.tsx).
+**Foundation:** monorepo, design tokens, brand primitives (AuroraBackground,
+GradientText, Logo, BrandIcon), base UI (Button, Card, Input, Modal, Toast,
+Skeleton, StatTicker, ScrollReveal, SkipToContent), layout shells, page
+transitions, `app/error.tsx`, `app/not-found.tsx`.
 
-**Data:** full Drizzle schema + migrations `0001`–`0004` (schema+RLS+pg_trgm,
-messaging, onboarding flag, auth-user trigger). All awaiting OWNER to run.
+**Auth (fully working when env is set):** email+password, Google OAuth, **SIWE
+wallet sign-in that mints a real Supabase session** (`/api/auth/verify` →
+admin magiclink → verifyOtp writes cookies). 18+ age gate (DOB, `requireAdult`),
+middleware route gating (`PROTECTED_PREFIXES` → `/login?next=`), Turnstile on
+verify/sign-in/sign-up with real server-side siteverify + signed human-check
+cookie. Branded Supabase auth email HTML delivered to owner. `/verify` cinematic
+gate; the "Having trouble? Continue" bypass was removed.
 
-**Auth:** email+password, Google OAuth, SIWE wallet (server nonce+verify real),
-age gate (18+ DOB, requireAdult), middleware session refresh.
-**Cloudflare Turnstile:** `/verify` full-page cinematic gate ("Get Started" →
-verify → signup), inline Turnstile on sign-in/sign-up with real server-side
-siteverify (`lib/auth/turnstile.ts`). Needs `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
-+ `TURNSTILE_SECRET_KEY`; dev passthrough until set (PENDING_TURNSTILE_KEYS).
+**Platform shell:** glass NavRail (Home leftmost, Discover second), top context
+bar, layered content panel, **mobile bottom tab bar incl. Pveels**. Default
+landing is Home (Feed).
 
-**Wallet:** wagmi+RainbowKit on Polygon, ConnectWallet in top bar, live $NSFW
-balance reads (real on-chain).
+**Surfaces:** Explore (real trending + demo fallback), Feed (real posts + demo
+fallback, PostCard with real like/save/comment + on-chain tip), flagship
+`/creators/[username]` (now with a working **Message** button), `/messages`
+(real Supabase Realtime DMs — see below), `/notifications` + bell, `/profile`
+(real data, tabs, edit-profile + avatar upload, settings/filters), `/compose`
+(real post creation: caption + emoji + image/file upload → posts + `post-media`),
+`/pveels` reels, `/staking` (typed mock until contract addr), `/marketplace`
+(typed mock), `/trade` (full $NSFW terminal: real CoinGecko candlestick chart +
+live price, wallet-connect swap via 0x, treasury fee), `/pleasureland`,
+`/token`, `/journey`, `/docs` (long, covers everything), legal pages
+(`/legal/{terms,privacy,dmca}`).
 
-**Marketing:** full landing (Hero, LiveTicker via CoinGecko/CMC, Ecosystem,
-AIShowcase, animated Creators marquee, StakingCTA, Journey), `/token`
-(Recharts price chart + timeframe), `/journey`, `/docs` (11 real sections,
-sidebar, search, ToC).
+**Engagement:** real follow/like/save/comment writes under RLS;
+notification creation (writes `actor_name` into payload); on-chain $NSFW tips
+(wagmi ERC-20 transfer) + tip notifications.
 
-**Platform:** Discovery-first nav; **floating bottom nav** (Home · Pveels ·
-elevated **+** create · Messages · Profile); Explore (real trending creators +
-demo fallback); Feed (REAL posts from followed creators, demo fallback,
-animated PostCard w/ like/save micro-interactions); flagship
-`/creators/[username]`; `/messages` with Supabase Realtime DMs;
-`/notifications` + bell dropdown; `/profile` (real profile/posts/follower
-counts, tabs, **edit-profile** w/ avatar upload); `/compose` (REAL post
-creation: caption + emoji picker + image/file upload → posts table +
-`post-media` storage); **`/pveels`** vertical reels (demo clips, TikTok-style
-rail; real video is post-MVP).
+**Messaging (commit `4eba2e9`, end-to-end):** Realtime socket is now authorized
+with the user's JWT before subscribing (RLS no longer drops events);
+`startConversation` finds-or-creates the canonical pair; Message button on
+creator profiles opens the thread; `markConversationRead` clears receipts on
+view; inbox resolves peer profile + last-message preview + real unread counts.
 
-**Demo content** (owner-requested, labeled): Pleasure Coin, Tim, Paul, Spiral,
-Nova, Aurora in `lib/demo/data.ts`. Toggle off with `NEXT_PUBLIC_DISABLE_DEMO=1`.
+**AI (5 cornerstones wired, honest 503 until `ANTHROPIC_API_KEY` set):**
+Discovery Concierge (streaming), Smart Search, Co-Pilot reply suggestions,
+Creator Dashboard + **Earnings Forecaster**, **Subscription Intelligence**
+(Catch-Me-Up summary + renewal-reminder cron + Resend emails). Shared AI
+plumbing: env-gated client, Upstash rate limits, SSE, Zod schemas, versioned
+prompts. AI routes are auth + rate-limit guarded.
 
-**AI (3 of 5 cornerstones live):**
-- Discovery Concierge — streaming `/api/ai/concierge` + Aura FAB.
-- Smart Search — `/api/ai/search` (Claude parse → Supabase, pg_trgm fallback)
-  wired to the top-bar search.
-- Creator Co-Pilot reply suggestions — `/api/ai/copilot/replies` on the real
-  `/messages` thread.
-- Shared AI plumbing: `lib/ai/` client (env-gated), Upstash rate limits, SSE,
-  Zod schemas, versioned prompts. 503 (not fake) when ANTHROPIC_API_KEY unset.
+**Landing additions:** 18+ age-gate welcome card, "Pleasure Network … powered by
+Pleasure Coin ($NSFW)" mission band, 69B total supply (landing + docs),
+enriched Ecosystem (Pleasurely/PleasureNifty bullets, no "Visit" buttons),
+12-week staking rules. "Project Aurora" text removed from landing.
 
-**Observability:** Sentry + PostHog, both env-gated. **e2e:** Playwright specs.
-**Tests:** 112 unit (Vitest) + e2e specs. Build warning-free.
+**Email:** `lib/email/resend.ts` (welcome / password-changed / account-deletion /
+renewal / creator-post), all env-gated REST.
 
-## NOT DONE (next up, priority order)
+**Observability + tests:** Sentry + PostHog env-gated; Vitest (124) + Playwright.
 
-0. **Wallet sign-in does NOT complete a session.** `/api/auth/verify` verifies
-   the SIWE signature but returns `session: null` (PENDING_SUPABASE_AUTH) — it
-   never mints a Supabase session. Email + Google auth fully work; wallet
-   "sign in/up" only verifies. Finish: with the service role, upsert a users
-   row keyed by wallet_address and mint a session (admin.generateLink /
-   setSession / a custom JWT), then set the auth cookie.
-1. **Earnings Forecaster** (AI #4, RPD §3.4): `/api/ai/forecast` — stat model
-   over last 90d (revenue/cadence/churn/tips) + Claude narrative + scenario
-   sliders. Surface on a creator dashboard/earnings panel.
-2. **Subscription Intelligence** (AI #5, RPD §3.5): per-creator "since last
-   visit" summaries + renewal reminders. Supabase cron (`app/api/cron/*`) +
-   Claude + Resend. Wire the creator-profile `CatchMeUpButton`
-   (PENDING_AI_SUMMARY) to it.
-3. **Creator Dashboard** (RPD §6.3): Overview, Content Studio, Analytics,
-   Earnings (+Forecaster), Tiers, Fans, Co-Pilot conversation surface.
-   NOTE: Co-Pilot is currently ONLY DM reply suggestions. Still to build:
-   best posting times, 3 caption variations, pricing benchmarks, conversion
-   analysis, weekly digest, one-click apply.
-4. **Real engagement**: like/save/comment/tip writes to Supabase + on-chain
-   tips (wagmi useWriteContract on $NSFW); real follow/subscribe actions.
-   There are NO engagement action files yet (like/save/follow are local-only
-   UI state). This is also where notification CREATION lives — the
-   notifications surface is read-only today; nothing writes notifications.
-5. **Staking + NFT marketplace** live wiring — BLOCKED on contract addresses
-   from Tim & Paul (PENDING_CONTRACT_ADDRESS). UIs built against typed mocks.
-   Also missing: NFT detail page, My NFTs tab, token-page holder-distribution
-   visual.
-6. Settings panels (notifications/privacy/wallets/AI prefs), content
-   moderation queue, GDPR export/delete, age re-confirmation on suspicious
-   flows (§9.1).
-7. Resend transactional email (owner setting it up).
-8. **`/pleasureland` surface** (RPD §2.1) — a styled in-platform metaverse
-   launch page does NOT exist; Ecosystem cards point Pleasureland → /explore.
-9. **Onboarding completion** persists to localStorage, not yet
-   `user_preferences` server-side (PENDING_SUPABASE_AUTH).
-10. **Test backfill (honest gap).** "Test as you go" slipped during the rapid
-    feature push. NO unit tests yet for: PostCard, Composer/EmojiPicker,
-    ProfileView/EditProfileForm, PveelsFeed, VerifyGate/Turnstile,
-    PlatformBottomNav, CreatorCard, demo data. Playwright specs don't cover
-    /compose, /pveels, /verify, /profile. 23 test files exist (112 unit tests).
+## AUDIT STATUS (answers "was messaging all the errors?")
+
+NO — messaging was one (the largest, Critical) deferred batch, not the whole
+audit. ~18 audit agents ran across the platform. **Most findings were fixed in
+commit `b2218ac`** ("resolve audit findings across the platform", 34 files).
+Messaging was deferred from that batch and fixed in `4eba2e9`. The items in
+"NOT DONE / DEFERRED" below are the remaining known gaps the audit surfaced or
+that are honestly still open. There is no claim that the codebase is bug-free —
+it is **green** (typecheck/tests/build) and the known functional gaps are listed.
+
+## NOT DONE / DEFERRED (next up, priority order)
+
+1. **Feed media never renders.** `lib/posts/queries.ts` `SELECT` omits `media`,
+   and `FeedPost`/`mapRow` have no media field — uploaded post images never show
+   in the feed. Add `media` to the select, the `PostRow` type, `FeedPost`, and
+   render it in `PostCard`. (Compose DOES upload to the `post-media` bucket; the
+   read side just drops it.)
+2. **Perf / bundle:** wagmi + RainbowKit live in the root `app/providers.tsx`,
+   so the wallet bundle ships on marketing pages too. Move wallet providers to a
+   platform-only boundary, dynamic-import the Recharts/candlestick chart, and
+   reduce stacked `backdrop-filter` layers.
+3. **Compose upload validation:** `lib/posts/actions.ts` accepts files with only
+   a `size > 0` check — add max-size + MIME/type allowlist (images/video) before
+   upload.
+4. **Per-message read ticks:** unread COUNTS now work, but sent bubbles don't
+   show a "Read" indicator (`getThreadMessages` doesn't select `read_at`). Thread
+   `read_at` through if you want read receipts on individual bubbles.
+5. **Account deletion** uses a typed-phrase confirm (kept intentionally for
+   OAuth/wallet users), no password re-auth. Add re-auth for password users if
+   desired.
+6. **Misc polish from audit:** a few low-contrast `lilac/40–50` text spots;
+   Journey "SURVIVED" stamps; marketing nav "Staking" bounces logged-out users
+   to login (expected, but could deep-link).
+7. **Brand assets (BLOCKED on tooling/network):** square favicon + apple-icon +
+   opaque iOS icon, real logo-mark crop, real `opengraph-image` (the source logo
+   is non-square 854×666 and there's no image tooling / allowlisted network in
+   the sandbox). Owner must supply square assets or open the network.
+8. **Staking + NFT marketplace live wiring** — BLOCKED on contract addresses
+   (`PENDING_CONTRACT_ADDRESS`). UIs built against typed mocks. Also missing: NFT
+   detail page, My NFTs tab, token-page holder-distribution visual.
+
+## DATABASE — migration status
+
+All in `supabase/migrations/` (owner runs them; also mirrored in
+`supabase/schema.sql`):
+- `0001_initial_schema` · `0002_messaging` · `0003_onboarding` ·
+  `0004_auth_user_trigger` · `0005_demo_flags` · `0006_user_names`
+  (first/last + updated `handle_new_auth_user` trigger) · `0007_user_settings`
+  (settings jsonb) · `0008_delete_cascades` (tip/subscription/post FK cascades).
+
+**Owner must run any not-yet-applied migrations — at minimum confirm 0005–0008
+are applied.** No new SQL is required for the messaging fix (0002 already has the
+canonical-pair index + recipient mark-read RLS).
 
 ## OWNER ACTION ITEMS (so things work live)
 
-- Run migrations `0001`–`0004` in Supabase (owner runs all SQL).
-- Create PUBLIC storage buckets: `post-media` (post images/files) and
-  `avatars` (profile pictures).
-- Set Vercel env (see `.env.example`): Supabase URL/anon/service + DATABASE_URL,
-  ANTHROPIC_API_KEY, Turnstile site+secret, WalletConnect, Alchemy, Upstash,
-  Sentry, PostHog, Resend, CoinGecko (optional), CMC (optional).
-- Real logo → drop processed files in `apps/web/public/brand/logo/` and flip
-  flags in `logo-manifest.ts`. Real 3D icons → `public/brand/icons/` +
-  `brand-icon-manifest.ts`. Contract addresses when ready.
-- Default branch is `claude/setup-pleasure-coin-v2-54I9T`; optionally rename to
-  `main` in GitHub Settings → Branches (cosmetic).
+- **Run migrations** `0001`–`0008` in Supabase (confirm 0005–0008 applied).
+- **Storage buckets** (public): `post-media`, `avatars`.
+- **Supabase Auth:** enable "Confirm email"; paste the branded email templates.
+- **Turnstile:** add domains (the deploy domain, `*.vercel.app`, `localhost`) in
+  the Cloudflare dashboard.
+- **Env keys** (Vercel — see `.env.example`; names below are exact, do not
+  rename `GOLDRUSH_API_KEY` / `ZEROX_API_KEY`):
+  - Core: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+    `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `NEXT_PUBLIC_APP_URL`.
+  - AI: `ANTHROPIC_API_KEY` (+ optional `ANTHROPIC_MODEL`),
+    `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`.
+  - Auth/security: `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`,
+    `CRON_SECRET`.
+  - Wallet/chain: `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID`, `ALCHEMY_API_KEY`,
+    `ALCHEMY_POLYGON_RPC_URL`.
+  - Trade: `NEXT_PUBLIC_TREASURY_WALLET`, `NEXT_PUBLIC_SWAP_FEE_BPS`,
+    `ZEROX_API_KEY` (0x dashboard.0x.org), `GOLDRUSH_API_KEY` (GoldRush
+    Foundational API, Direct access), optional `COINGECKO_API_KEY` /
+    `COINMARKETCAP_API_KEY` + `CMC_NSFW_ID`.
+  - Email: `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_FROM_NAME`.
+  - Observability (optional): `NEXT_PUBLIC_SENTRY_DSN`, `NEXT_PUBLIC_POSTHOG_KEY`,
+    `NEXT_PUBLIC_POSTHOG_HOST`.
+  - Contracts when ready: `NEXT_PUBLIC_STAKING_CONTRACT_ADDRESS`,
+    `NEXT_PUBLIC_NFT_CONTRACT_ADDRESSES`.
+- **Brand assets:** drop square favicon/apple-icon/og-image + processed logo into
+  `apps/web/public/brand/` and flip the manifest flags.
+- Demo content toggles off with `NEXT_PUBLIC_DISABLE_DEMO=1`.
 
 ## HOW TO RESUME
 
 ```
 cd /home/user/Henk-naka-bot-
 git config user.name "moderator29" && git config user.email "Phantomfcalls@gmail.com"
-git fetch && git checkout main && git pull --ff-only origin main
+git fetch origin
+git checkout claude/zen-newton-NVqhQ && git pull --ff-only origin claude/zen-newton-NVqhQ
 pnpm install
-pnpm --filter web test        # confirm green baseline (112)
-git checkout -b claude/aurora-<next-work>
-# build → typecheck → test → build → commit → push to main + deploy branch
+cd apps/web && npx vitest run        # confirm green baseline (124)
+# build a change → tsc → vitest → build → commit (owner author) →
+# push dev branch, then fast-forward main + claude/setup-pleasure-coin-v2-54I9T
 ```
-Latest merged commit on main: see `git log --oneline -1`. Always branch off the
-newest main.
+Recommended next task: **feed media rendering (#1)** — small, high-impact, and
+unblocks real uploaded images showing in the feed. Then the perf/bundle split (#2).
