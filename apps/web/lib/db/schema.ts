@@ -42,6 +42,7 @@ export const users = pgTable(
     isCreator: boolean("is_creator").default(false).notNull(),
     isVerified: boolean("is_verified").default(false).notNull(),
     isDemo: boolean("is_demo").default(false).notNull(),
+    accountStatus: text("account_status").default("active").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -129,6 +130,7 @@ export const posts = pgTable(
     }),
     category: text("category"),
     isDemo: boolean("is_demo").default(false).notNull(),
+    moderationStatus: text("moderation_status").default("active").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -377,9 +379,123 @@ export const messages = pgTable(
   })
 );
 
+// --------------------------------------------------------------------------
+// Roles, moderation & admin (mirrors 0011_roles_and_admin.sql)
+// --------------------------------------------------------------------------
+
+export const userRoles = pgTable("user_roles", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  role: text("role").default("user").notNull(),
+  grantedAt: timestamp("granted_at", { withTimezone: true }).defaultNow().notNull(),
+  grantedBy: uuid("granted_by").references(() => users.id),
+});
+
+export const adminAuditLog = pgTable(
+  "admin_audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    actorId: uuid("actor_id").references(() => users.id),
+    action: text("action").notNull(),
+    targetType: text("target_type"),
+    targetId: text("target_id"),
+    detail: jsonb("detail"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({ createdIdx: index("admin_audit_created_idx").on(t.createdAt) })
+);
+
+export const reports = pgTable(
+  "reports",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    reporterId: uuid("reporter_id").references(() => users.id, { onDelete: "set null" }),
+    targetType: text("target_type").notNull(),
+    targetId: text("target_id").notNull(),
+    reason: text("reason").notNull(),
+    detail: text("detail"),
+    status: text("status").default("open").notNull(),
+    resolvedBy: uuid("resolved_by").references(() => users.id),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({ statusIdx: index("reports_status_idx").on(t.status, t.createdAt) })
+);
+
+export const blocks = pgTable(
+  "blocks",
+  {
+    blockerId: uuid("blocker_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    blockedId: uuid("blocked_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.blockerId, t.blockedId] }) })
+);
+
+export const mutes = pgTable(
+  "mutes",
+  {
+    muterId: uuid("muter_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    mutedId: uuid("muted_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.muterId, t.mutedId] }) })
+);
+
+export const creatorApplications = pgTable(
+  "creator_applications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: text("status").default("pending").notNull(),
+    displayName: text("display_name"),
+    categories: text("categories").array(),
+    payoutWallet: text("payout_wallet"),
+    bio: text("bio"),
+    reviewedBy: uuid("reviewed_by").references(() => users.id),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    reviewNote: text("review_note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({ statusIdx: index("creator_apps_status_idx").on(t.status, t.createdAt) })
+);
+
+export const platformSettings = pgTable("platform_settings", {
+  key: text("key").primaryKey(),
+  value: jsonb("value"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedBy: uuid("updated_by").references(() => users.id),
+});
+
+export const announcements = pgTable(
+  "announcements",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    audience: text("audience").default("all").notNull(),
+    createdBy: uuid("created_by").references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({ createdIdx: index("announcements_created_idx").on(t.createdAt) })
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Post = typeof posts.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type Conversation = typeof conversations.$inferSelect;
 export type Message = typeof messages.$inferSelect;
+export type UserRole = typeof userRoles.$inferSelect;
+export type Report = typeof reports.$inferSelect;

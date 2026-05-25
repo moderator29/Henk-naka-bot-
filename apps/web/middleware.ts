@@ -22,6 +22,8 @@ const PROTECTED_PREFIXES = [
   "/compose",
   "/notifications",
   "/creators",
+  "/subscriptions",
+  "/admin",
 ];
 
 function isProtected(path: string): boolean {
