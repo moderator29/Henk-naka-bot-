@@ -7,25 +7,40 @@ import { BadgeCheck, Heart, Plus, Coins, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { StatTicker } from "@/components/ui/StatTicker";
 import { useToast } from "@/components/ui/Toast";
+import { SubscribeModal } from "@/components/creator/SubscribeModal";
+import { TipModal } from "@/components/feed/TipModal";
 import { toggleFollow } from "@/lib/engagement/actions";
 import { startConversation } from "@/lib/messaging/actions";
 import { formatNumber } from "@/lib/utils";
 import type { CreatorProfileData } from "@/lib/creators/types";
+import type { ViewerRelation } from "@/lib/creators/queries";
 
 /**
- * Cover with parallax scroll + floating profile card (RPD §6.2). Follow writes
- * through to Supabase (toggleFollow); Subscribe / Tip persist once those flows
- * are wired. Optimistic, reverts only if the user isn't signed in.
+ * Cover with parallax scroll + floating profile card (RPD §6.2). Follow,
+ * Subscribe, and Tip all write through to Supabase / on-chain. Follow and
+ * subscribe state are hydrated from the viewer's real relationship.
  */
-export function CreatorHeader({ creator }: { creator: CreatorProfileData }) {
+export function CreatorHeader({
+  creator,
+  relation,
+}: {
+  creator: CreatorProfileData;
+  relation?: ViewerRelation;
+}) {
   const router = useRouter();
   const { push } = useToast();
   const { scrollY } = useScroll();
   const coverY = useTransform(scrollY, [0, 400], [0, 120]);
   const coverScale = useTransform(scrollY, [0, 400], [1, 1.15]);
-  const [following, setFollowing] = useState(false);
+  const [following, setFollowing] = useState(relation?.following ?? false);
+  const [tipOpen, setTipOpen] = useState(false);
+  const [subTier, setSubTier] = useState<string | null>(null);
   const [, startFollow] = useTransition();
   const [messaging, startMessage] = useTransition();
+
+  const subscribed = (relation?.subscribedTierIds.length ?? 0) > 0;
+  const primaryTierId =
+    creator.tiers.find((t) => t.highlighted)?.id ?? creator.tiers[0]?.id ?? null;
 
   const onFollow = () => {
     const next = !following;
@@ -119,7 +134,23 @@ export function CreatorHeader({ creator }: { creator: CreatorProfileData }) {
               >
                 {following ? "Following" : "Follow"}
               </Button>
-              <Button leftIcon={<Heart size={16} />}>Subscribe</Button>
+              {subscribed ? (
+                <Button
+                  variant="glass"
+                  leftIcon={<BadgeCheck size={16} />}
+                  onClick={() => router.push("/subscriptions")}
+                >
+                  Subscribed
+                </Button>
+              ) : (
+                <Button
+                  leftIcon={<Heart size={16} />}
+                  disabled={!primaryTierId}
+                  onClick={() => primaryTierId && setSubTier(primaryTierId)}
+                >
+                  Subscribe
+                </Button>
+              )}
               {creator.id && (
                 <Button
                   variant="glass"
@@ -131,7 +162,12 @@ export function CreatorHeader({ creator }: { creator: CreatorProfileData }) {
                   <MessageCircle size={16} />
                 </Button>
               )}
-              <Button variant="glass" size="icon" aria-label="Tip">
+              <Button
+                variant="glass"
+                size="icon"
+                aria-label="Tip"
+                onClick={() => setTipOpen(true)}
+              >
                 <Coins size={16} />
               </Button>
             </div>
@@ -149,6 +185,21 @@ export function CreatorHeader({ creator }: { creator: CreatorProfileData }) {
           </div>
         </div>
       </div>
+
+      {subTier && (
+        <SubscribeModal
+          tierId={subTier}
+          onClose={() => setSubTier(null)}
+          onSubscribed={() => router.refresh()}
+        />
+      )}
+      {tipOpen && (
+        <TipModal
+          username={creator.username}
+          creatorName={creator.displayName}
+          onClose={() => setTipOpen(false)}
+        />
+      )}
     </div>
   );
 }

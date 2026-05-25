@@ -28,6 +28,9 @@ export interface FeedPost {
   likes: number;
   comments: number;
   createdAt: string | Date;
+  /** Whether the signed-in viewer has already liked / saved this post. */
+  likedByMe?: boolean;
+  savedByMe?: boolean;
 }
 
 /**
@@ -36,8 +39,8 @@ export interface FeedPost {
  * context; real like/save/tip wire to Supabase + on-chain in a later pass.
  */
 export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }) {
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [liked, setLiked] = useState(post.likedByMe ?? false);
+  const [saved, setSaved] = useState(post.savedByMe ?? false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [tipOpen, setTipOpen] = useState(false);
   const reduce = useReducedMotion();
@@ -190,7 +193,9 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
           <motion.span animate={liked ? { scale: [1, 1.35, 1] } : {}} transition={{ duration: 0.3 }}>
             <Heart size={18} fill={liked ? "currentColor" : "none"} />
           </motion.span>
-          {formatNumber(post.likes + (liked ? 1 : 0))}
+          {formatNumber(
+            post.likes + ((liked ? 1 : 0) - (post.likedByMe ? 1 : 0))
+          )}
         </button>
         <button
           type="button"

@@ -11,7 +11,13 @@ import type { CreatorTier } from "@/lib/creators/types";
  * Visual tier cards with one-tap subscribe (RPD §6.2). Subscribing opens the
  * on-chain $NSFW payment flow; USD-priced tiers convert at the live token rate.
  */
-export function TierSelector({ tiers }: { tiers: CreatorTier[] }) {
+export function TierSelector({
+  tiers,
+  subscribedTierIds = [],
+}: {
+  tiers: CreatorTier[];
+  subscribedTierIds?: string[];
+}) {
   const [activeTier, setActiveTier] = useState<string | null>(null);
 
   if (tiers.length === 0) {
@@ -68,13 +74,19 @@ export function TierSelector({ tiers }: { tiers: CreatorTier[] }) {
                 </li>
               ))}
             </ul>
-            <Button
-              className="mt-6 w-full"
-              variant={tier.highlighted ? "primary" : "glass"}
-              onClick={() => setActiveTier(tier.id)}
-            >
-              Subscribe
-            </Button>
+            {subscribedTierIds.includes(tier.id) ? (
+              <Button className="mt-6 w-full" variant="glass" disabled>
+                <Check size={16} /> Subscribed
+              </Button>
+            ) : (
+              <Button
+                className="mt-6 w-full"
+                variant={tier.highlighted ? "primary" : "glass"}
+                onClick={() => setActiveTier(tier.id)}
+              >
+                Subscribe
+              </Button>
+            )}
           </div>
         ))}
       </div>

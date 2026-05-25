@@ -4,7 +4,7 @@ import { CreatorHeader } from "@/components/creator/CreatorHeader";
 import { TierSelector } from "@/components/creator/TierSelector";
 import { ContentTabs } from "@/components/creator/ContentTabs";
 import { CatchMeUpButton } from "@/components/creator/CatchMeUpButton";
-import { getCreatorByUsername } from "@/lib/creators/queries";
+import { getCreatorByUsername, getViewerRelation, type ViewerRelation } from "@/lib/creators/queries";
 import { SAMPLE_PREVIEW_DATA } from "@/lib/creators/sample";
 import { demoCreatorProfile, demoEnabled } from "@/lib/demo/data";
 
@@ -29,6 +29,9 @@ export default async function CreatorProfilePage({
   const real = await getCreatorByUsername(params.username);
   const demo = demoEnabled() ? demoCreatorProfile(params.username) : null;
   const creator = real ?? demo ?? SAMPLE_PREVIEW_DATA;
+  const relation: ViewerRelation = real?.id
+    ? await getViewerRelation(real.id)
+    : { following: false, subscribedTierIds: [] };
 
   return (
     <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-6">
@@ -42,7 +45,7 @@ export default async function CreatorProfilePage({
         </div>
       )}
 
-      <CreatorHeader creator={creator} />
+      <CreatorHeader creator={creator} relation={relation} />
 
       <div className="mx-4 sm:mx-8 mt-8 grid lg:grid-cols-[1fr_340px] gap-8 pb-12">
         <div className="order-2 lg:order-1">
@@ -55,7 +58,10 @@ export default async function CreatorProfilePage({
             <h2 className="font-display text-lg font-semibold text-white mb-3">
               Subscription tiers
             </h2>
-            <TierSelector tiers={creator.tiers} />
+            <TierSelector
+              tiers={creator.tiers}
+              subscribedTierIds={relation.subscribedTierIds}
+            />
           </div>
           {creator.categories.length > 0 && (
             <div className="flex flex-wrap gap-2">

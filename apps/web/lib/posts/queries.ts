@@ -1,5 +1,32 @@
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/auth/session";
 import type { FeedPost } from "@/components/feed/PostCard";
+
+type DbClient = ReturnType<typeof createClient>;
+
+/**
+ * Hydrate each post with whether the viewer already liked / saved it, so the
+ * UI reflects real state on load instead of always starting "unliked".
+ */
+async function applyViewerState(
+  supabase: DbClient,
+  posts: FeedPost[],
+  userId: string | null
+): Promise<FeedPost[]> {
+  if (!userId || posts.length === 0) return posts;
+  const ids = posts.map((p) => p.id);
+  const [{ data: likes }, { data: saves }] = await Promise.all([
+    supabase.from("likes").select("post_id").eq("user_id", userId).in("post_id", ids),
+    supabase.from("saves").select("post_id").eq("user_id", userId).in("post_id", ids),
+  ]);
+  const liked = new Set((likes ?? []).map((l) => l.post_id as string));
+  const saved = new Set((saves ?? []).map((s) => s.post_id as string));
+  return posts.map((p) => ({
+    ...p,
+    likedByMe: liked.has(p.id),
+    savedByMe: saved.has(p.id),
+  }));
+}
 
 /**
  * Real post reads from Supabase. All run under the caller's session so RLS
@@ -90,7 +117,9 @@ export async function getFeedPosts(userId: string | null): Promise<FeedPost[]> {
         .order("created_at", { ascending: false })
         .limit(40);
       const rows = (data as unknown as PostRow[]) ?? [];
-      if (rows.length > 0) return rows.map(mapRow);
+      if (rows.length > 0) {
+        return applyViewerState(supabase, rows.map(mapRow), userId);
+      }
     }
   }
 
@@ -101,7 +130,8 @@ export async function getFeedPosts(userId: string | null): Promise<FeedPost[]> {
     .is("tier_required", null)
     .order("created_at", { ascending: false })
     .limit(40);
-  return ((data as unknown as PostRow[]) ?? []).map(mapRow);
+  const posts = ((data as unknown as PostRow[]) ?? []).map(mapRow);
+  return applyViewerState(supabase, posts, userId);
 }
 
 /** A specific user's own posts (for their profile). */
@@ -114,5 +144,7 @@ export async function getUserPosts(userId: string): Promise<FeedPost[]> {
     .eq("creator_id", userId)
     .order("created_at", { ascending: false })
     .limit(40);
-  return ((data as unknown as PostRow[]) ?? []).map(mapRow);
+  const posts = ((data as unknown as PostRow[]) ?? []).map(mapRow);
+  const viewer = await getSessionUser().catch(() => null);
+  return applyViewerState(supabase, posts, viewer?.id ?? null);
 }

@@ -1,5 +1,53 @@
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/auth/session";
 import type { CreatorProfileData, CreatorTier, CreatorPostCard } from "./types";
+
+export interface ViewerRelation {
+  following: boolean;
+  /** Tier ids the viewer holds an active subscription to (this creator). */
+  subscribedTierIds: string[];
+}
+
+/**
+ * The signed-in viewer's relationship to a creator, so the profile reflects
+ * real state (Following vs Follow, Subscribed vs Subscribe) on load.
+ */
+export async function getViewerRelation(
+  creatorId: string
+): Promise<ViewerRelation> {
+  const empty: ViewerRelation = { following: false, subscribedTierIds: [] };
+  if (!configured()) return empty;
+  const viewer = await getSessionUser().catch(() => null);
+  if (!viewer) return empty;
+
+  const supabase = createClient();
+  const [{ data: follow }, { data: tiers }] = await Promise.all([
+    supabase
+      .from("follows")
+      .select("following_id")
+      .eq("follower_id", viewer.id)
+      .eq("following_id", creatorId)
+      .maybeSingle(),
+    supabase
+      .from("subscription_tiers")
+      .select("id")
+      .eq("creator_id", creatorId),
+  ]);
+
+  const tierIds = (tiers ?? []).map((t) => t.id as string);
+  let subscribedTierIds: string[] = [];
+  if (tierIds.length > 0) {
+    const { data: subs } = await supabase
+      .from("subscriptions")
+      .select("tier_id")
+      .eq("fan_id", viewer.id)
+      .in("tier_id", tierIds)
+      .gt("expires_at", new Date().toISOString());
+    subscribedTierIds = (subs ?? []).map((s) => s.tier_id as string);
+  }
+
+  return { following: !!follow, subscribedTierIds };
+}
 
 /**
  * Fetches a real creator profile by username from Supabase. Returns null when
