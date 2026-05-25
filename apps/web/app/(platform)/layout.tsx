@@ -1,6 +1,7 @@
 import { PlatformShell } from "@/components/platform/PlatformShell";
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 import { ConciergeFab } from "@/components/ai/ConciergeFab";
+import { WalletProviders } from "@/components/web3/WalletProviders";
 import { getSessionUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -29,10 +30,12 @@ export default async function PlatformLayout({
   }
 
   return (
-    <PlatformShell>
-      <OnboardingGate initiallyComplete={onboardingDone} />
-      {children}
-      <ConciergeFab />
-    </PlatformShell>
+    <WalletProviders>
+      <PlatformShell>
+        <OnboardingGate initiallyComplete={onboardingDone} />
+        {children}
+        <ConciergeFab />
+      </PlatformShell>
+    </WalletProviders>
   );
 }

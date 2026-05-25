@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { AuroraBackground } from "@/components/brand/AuroraBackground";
 import { Logo } from "@/components/brand/Logo";
 import { TradeTerminal } from "@/components/trade/TradeTerminal";
+import { WalletProviders } from "@/components/web3/WalletProviders";
 
 export const metadata: Metadata = {
   title: "Trade $NSFW",
@@ -40,7 +41,9 @@ export default function TradePage() {
             wallet to trade on Polygon.
           </p>
         </div>
-        <TradeTerminal />
+        <WalletProviders>
+          <TradeTerminal />
+        </WalletProviders>
       </main>
     </div>
   );

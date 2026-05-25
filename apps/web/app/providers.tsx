@@ -2,16 +2,14 @@
 
 import { type ReactNode, useState, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { WagmiProvider } from "wagmi";
-import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { ToastProvider } from "@/components/ui/Toast";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
-import { wagmiConfig } from "@/lib/web3/wagmi";
-import "@rainbow-me/rainbowkit/styles.css";
 
 /**
- * Top-level providers: wagmi (wallet state) → React Query (server + on-chain
- * read caching) → RainbowKit (brand-themed connect modal) → Toast.
+ * Root providers, shared by every route: React Query (server + on-chain read
+ * caching), Toast, Analytics. The wallet stack (wagmi + RainbowKit) is NOT
+ * here, it lives in WalletProviders and is mounted only on the routes that use
+ * a wallet, so the marketing pages and docs never ship the wallet bundle.
  */
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -27,24 +25,12 @@ export function Providers({ children }: { children: ReactNode }) {
   );
 
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
-          theme={darkTheme({
-            accentColor: "#FF1F8F",
-            accentColorForeground: "#FFFFFF",
-            borderRadius: "large",
-            fontStack: "system",
-            overlayBlur: "large",
-          })}
-        >
-          <ToastProvider>
-            <Suspense fallback={null}>
-              <AnalyticsProvider>{children}</AnalyticsProvider>
-            </Suspense>
-          </ToastProvider>
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <Suspense fallback={null}>
+          <AnalyticsProvider>{children}</AnalyticsProvider>
+        </Suspense>
+      </ToastProvider>
+    </QueryClientProvider>
   );
 }
