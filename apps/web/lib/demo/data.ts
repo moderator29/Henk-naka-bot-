@@ -1,5 +1,6 @@
 import type { TrendingCreator } from "@/lib/explore/queries";
 import type { CreatorProfileData } from "@/lib/creators/types";
+import { accentFor, type PveelView } from "@/lib/pveels/types";
 
 /**
  * DEMO content. Owner-requested sample creators + posts so the platform feels
@@ -183,6 +184,112 @@ export const DEMO_POSTS: DemoPost[] = [
     minutesAgo: 540,
   },
 ];
+
+/**
+ * Demo Pveels. Clean, branded placeholder clips (an animated aurora canvas, no
+ * real video and never any adult content) so the short-video surface feels
+ * alive before real creators post. Labeled "Demo" and only shown when the live
+ * `pveels` table is empty; purged on first real signup (purge_demo_content).
+ */
+interface DemoPveelSeed {
+  id: string;
+  username: string;
+  name: string;
+  verified: boolean;
+  caption: string;
+  category: string;
+  hashtags: string[];
+  likes: number;
+  comments: number;
+  saves: number;
+  views: number;
+}
+
+const DEMO_PVEEL_SEEDS: DemoPveelSeed[] = [
+  {
+    id: "demo-pv-1",
+    username: "spiral",
+    name: "Spiral",
+    verified: true,
+    caption: "Light bending in real time. Full piece drops Friday for subscribers.",
+    category: "Art",
+    hashtags: ["light", "loop"],
+    likes: 18400,
+    comments: 932,
+    saves: 2100,
+    views: 142000,
+  },
+  {
+    id: "demo-pv-2",
+    username: "nova",
+    name: "Nova",
+    verified: false,
+    caption: "3am soundscape. Headphones on, lights off.",
+    category: "Music",
+    hashtags: ["ambient", "latenight"],
+    likes: 9120,
+    comments: 410,
+    saves: 880,
+    views: 64000,
+  },
+  {
+    id: "demo-pv-3",
+    username: "aurora",
+    name: "Aurora",
+    verified: true,
+    caption: "Six creators you should know this week. Tap my profile for the list.",
+    category: "Curation",
+    hashtags: ["curated", "discover"],
+    likes: 24500,
+    comments: 1320,
+    saves: 4300,
+    views: 210000,
+  },
+  {
+    id: "demo-pv-4",
+    username: "tim",
+    name: "Tim",
+    verified: true,
+    caption: "Behind the scenes wiring the Concierge live. It builds a feed from one sentence.",
+    category: "BTS",
+    hashtags: ["buildinpublic"],
+    likes: 7300,
+    comments: 288,
+    saves: 540,
+    views: 51000,
+  },
+];
+
+export function demoPveels(): PveelView[] {
+  return DEMO_PVEEL_SEEDS.map((s, i) => ({
+    id: s.id,
+    creatorUsername: s.username,
+    creatorName: s.name,
+    verified: s.verified,
+    caption: s.caption,
+    category: s.category,
+    hashtags: s.hashtags,
+    visibility: "public",
+    tierRequired: null,
+    gated: false,
+    playbackUrl: null,
+    posterUrl: null,
+    durationSeconds: null,
+    width: null,
+    height: null,
+    allowComments: true,
+    allowTips: true,
+    likes: s.likes,
+    comments: s.comments,
+    saves: s.saves,
+    views: s.views,
+    liked: false,
+    saved: false,
+    createdAt: new Date(Date.now() - (i + 1) * 3_600_000).toISOString(),
+    isDemo: true,
+    accent: accentFor(s.id),
+  }));
+}
 
 export function findDemoCreator(username: string): DemoCreator | undefined {
   return DEMO_CREATORS.find((c) => c.username === username);
