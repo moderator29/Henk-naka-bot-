@@ -7,9 +7,11 @@ import { AccountSettings } from "@/components/settings/AccountSettings";
 import { PasswordSettings } from "@/components/settings/PasswordSettings";
 import { PreferencesSettings } from "@/components/settings/PreferencesSettings";
 import { ConnectedWallets } from "@/components/settings/ConnectedWallets";
+import { SubscriptionsSettings } from "@/components/settings/SubscriptionsSettings";
 import { DataExport } from "@/components/settings/DataExport";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { DEFAULT_SETTINGS, type UserSettings } from "@/lib/profile/settings";
+import { getMySubscriptions } from "@/lib/subscriptions/actions";
 import { getSessionUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -28,6 +30,7 @@ export default async function SettingsPage() {
   let initial = { displayName: "", username: "", bio: "", country: "" };
   let prefs: UserSettings = DEFAULT_SETTINGS;
   let linkedWallet: string | null = null;
+  const subscriptions = me ? await getMySubscriptions() : [];
   if (me && configured()) {
     const supabase = createClient();
     const [{ data }, { data: pref }] = await Promise.all([
@@ -79,6 +82,7 @@ export default async function SettingsPage() {
 
       <AccountSettings initial={initial} />
       <ConnectedWallets linkedAddress={linkedWallet} />
+      <SubscriptionsSettings subscriptions={subscriptions} />
       <PreferencesSettings initial={prefs} />
       <PasswordSettings />
       <DataExport />

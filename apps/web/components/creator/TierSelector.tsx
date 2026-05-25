@@ -1,16 +1,28 @@
 "use client";
 
+import { useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn, formatNumber } from "@/lib/utils";
+import { SubscribeSheet } from "@/components/subscriptions/SubscribeSheet";
 import type { CreatorTier } from "@/lib/creators/types";
 
 /**
- * Visual tier cards with one-tap subscribe (RPD §6.2). The subscribe action
- * triggers the $NSFW approval + tx flow once auth + the subscribe contract
- * path are wired (Phase 3), labeled at the call site.
+ * Visual tier cards with one-tap subscribe. Opens the SubscribeSheet, which
+ * runs the real on-chain $NSFW payment and records the subscription. Preview
+ * (demo) creators show a clear preview state in the sheet.
  */
-export function TierSelector({ tiers }: { tiers: CreatorTier[] }) {
+export function TierSelector({
+  tiers,
+  creatorName,
+  isPreview = false,
+}: {
+  tiers: CreatorTier[];
+  creatorName: string;
+  isPreview?: boolean;
+}) {
+  const [active, setActive] = useState<CreatorTier | null>(null);
+
   if (tiers.length === 0) {
     return (
       <div className="glass rounded-2xl p-6 text-sm text-lilac/60">
@@ -56,11 +68,21 @@ export function TierSelector({ tiers }: { tiers: CreatorTier[] }) {
           <Button
             className="mt-6 w-full"
             variant={tier.highlighted ? "primary" : "glass"}
+            onClick={() => setActive(tier)}
           >
             Subscribe
           </Button>
         </div>
       ))}
+
+      {active && (
+        <SubscribeSheet
+          tier={active}
+          creatorName={creatorName}
+          isPreview={isPreview}
+          onClose={() => setActive(null)}
+        />
+      )}
     </div>
   );
 }

@@ -20,6 +20,7 @@ import { StatTicker } from "@/components/ui/StatTicker";
 import { Modal, ModalContent } from "@/components/ui/Modal";
 import { PostCard, type FeedPost } from "@/components/feed/PostCard";
 import { EditProfileForm } from "@/components/profile/EditProfileForm";
+import { SubscriberBadge } from "@/components/subscriptions/SubscriberBadge";
 import { useToast } from "@/components/ui/Toast";
 import { cn, relativeTime } from "@/lib/utils";
 
@@ -35,6 +36,7 @@ interface ProfileViewProps {
   signedIn: boolean;
   email: string | null;
   isCreator?: boolean;
+  isSubscriber?: boolean;
   profile?: {
     displayName: string | null;
     username: string | null;
@@ -63,6 +65,7 @@ export function ProfileView({
   signedIn,
   email,
   isCreator = false,
+  isSubscriber = false,
   profile,
   posts = [],
   mediaPosts = [],
@@ -125,6 +128,7 @@ export function ProfileView({
                 {isCreator && (
                   <BadgeCheck size={20} className="text-cyan flex-shrink-0" aria-label="Creator" />
                 )}
+                {isSubscriber && <SubscriberBadge withLabel className="ml-1 flex-shrink-0" />}
               </div>
               <p className="text-sm text-lilac/60">@{username}</p>
               <p className="mt-2 text-sm text-lilac/80 max-w-lg">

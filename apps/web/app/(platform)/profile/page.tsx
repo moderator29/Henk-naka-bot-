@@ -30,6 +30,7 @@ export default async function ProfilePage() {
   let likedPosts: Awaited<ReturnType<typeof getUserLikedPosts>> = [];
   let followerCount = 0;
   let followingCount = 0;
+  let isSubscriber = false;
 
   if (me && configured()) {
     const supabase = createClient();
@@ -40,6 +41,7 @@ export default async function ProfilePage() {
       userLikes,
       followers,
       following,
+      subs,
     ] = await Promise.all([
       supabase
         .from("users")
@@ -62,6 +64,11 @@ export default async function ProfilePage() {
         .from("follows")
         .select("following_id", { count: "exact", head: true })
         .eq("follower_id", me.id),
+      supabase
+        .from("subscriptions")
+        .select("id", { count: "exact", head: true })
+        .eq("fan_id", me.id)
+        .gt("expires_at", new Date().toISOString()),
     ]);
     if (row) {
       profile = {
@@ -76,6 +83,7 @@ export default async function ProfilePage() {
     likedPosts = userLikes;
     followerCount = followers.count ?? 0;
     followingCount = following.count ?? 0;
+    isSubscriber = (subs.count ?? 0) > 0;
   }
 
   return (
@@ -83,6 +91,7 @@ export default async function ProfilePage() {
       signedIn={!!me}
       email={me?.email ?? null}
       isCreator={isCreator}
+      isSubscriber={isSubscriber}
       profile={profile}
       posts={posts}
       mediaPosts={mediaPosts}

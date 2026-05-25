@@ -10,6 +10,8 @@ export type NotificationType =
   | "tip"
   | "like"
   | "comment"
+  | "pveel_like"
+  | "pveel_comment"
   | "post"
   | "message"
   | "system";
@@ -39,6 +41,10 @@ export function describeNotification(n: AppNotification): string {
       return `${actor} liked your post`;
     case "comment":
       return `${actor} commented on your post`;
+    case "pveel_like":
+      return `${actor} liked your Pveel`;
+    case "pveel_comment":
+      return `${actor} commented on your Pveel`;
     case "post":
       return `${actor} posted something new`;
     case "message":

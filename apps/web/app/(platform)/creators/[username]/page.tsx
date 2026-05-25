@@ -55,7 +55,11 @@ export default async function CreatorProfilePage({
             <h2 className="font-display text-lg font-semibold text-white mb-3">
               Subscription tiers
             </h2>
-            <TierSelector tiers={creator.tiers} />
+            <TierSelector
+              tiers={creator.tiers}
+              creatorName={creator.displayName}
+              isPreview={creator.isPreview}
+            />
           </div>
           {creator.categories.length > 0 && (
             <div className="flex flex-wrap gap-2">

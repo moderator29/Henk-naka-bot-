@@ -25,6 +25,8 @@ const ICONS: Record<NotificationType, LucideIcon> = {
   tip: Coins,
   like: Heart,
   comment: MessageCircle,
+  pveel_like: Heart,
+  pveel_comment: MessageCircle,
   message: MessageCircle,
   post: FileText,
   system: Info,
