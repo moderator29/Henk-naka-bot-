@@ -10,6 +10,7 @@ import {
   Lock,
   Coins,
   User,
+  Search,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { AuroraBackground } from "@/components/brand/AuroraBackground";
@@ -24,6 +25,7 @@ import { PlatformBottomNav } from "@/components/platform/PlatformBottomNav";
 const nav: RailItem[] = [
   { href: "/feed", label: "Home", icon: Home },
   { href: "/explore", label: "Discover", icon: Compass },
+  { href: "/search", label: "Search", icon: Search },
   { href: "/pveels", label: "Pveels", icon: Clapperboard },
   { href: "/messages", label: "Messages", icon: MessageCircle },
   { href: "/marketplace", label: "Marketplace", icon: Diamond },
