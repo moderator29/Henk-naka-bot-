@@ -46,7 +46,7 @@ export function PlatformBottomNav() {
   return (
     <nav
       aria-label="Primary"
-      className="lg:hidden fixed bottom-4 inset-x-4 z-40"
+      className="lg:hidden fixed bottom-[calc(env(safe-area-inset-bottom,0px)+1rem)] inset-x-4 z-40"
     >
       <div className="relative mx-auto max-w-md">
         <div className="glass-chrome edge-light rounded-full shadow-e3 flex items-center justify-between px-3 h-16">

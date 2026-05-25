@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { BadgeCheck, Heart, MessageCircle, Bookmark, Coins, Lock } from "lucide-react";
 import { toggleLike, toggleSave } from "@/lib/engagement/actions";
+import { useToast } from "@/components/ui/Toast";
 import { Comments } from "./Comments";
 import { TipModal } from "./TipModal";
 import { cn, formatNumber, relativeTime } from "@/lib/utils";
@@ -49,15 +50,31 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
   // Demo posts aren't in the database; keep their interactions local-only.
   const isReal = !post.id.startsWith("demo");
 
+  const { push } = useToast();
+
   const onLike = () => {
     const next = !liked;
     setLiked(next);
-    if (isReal) startTransition(() => void toggleLike(post.id, next));
+    if (!isReal) return;
+    startTransition(async () => {
+      const res = await toggleLike(post.id, next);
+      if (!res.ok) {
+        setLiked(!next); // revert the optimistic toggle
+        if (res.needsAuth) push({ tone: "error", title: "Sign in to like posts" });
+      }
+    });
   };
   const onSave = () => {
     const next = !saved;
     setSaved(next);
-    if (isReal) startTransition(() => void toggleSave(post.id, next));
+    if (!isReal) return;
+    startTransition(async () => {
+      const res = await toggleSave(post.id, next);
+      if (!res.ok) {
+        setSaved(!next);
+        if (res.needsAuth) push({ tone: "error", title: "Sign in to save posts" });
+      }
+    });
   };
 
   return (

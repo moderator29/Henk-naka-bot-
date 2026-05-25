@@ -8,8 +8,9 @@ import type { StoredMediaItem } from "./media";
  * Real post reads from Supabase. Rows are readable so gated posts can show a
  * locked preview; media is resolved server-side: public posts get their public
  * URLs, gated posts get short-lived signed URLs ONLY when the viewer is
- * entitled (otherwise the post renders locked with no media). Returns empty
- * when Supabase isn't configured, so callers fall back to the demo feed.
+ * entitled (otherwise the post renders locked with no media). Real like/comment
+ * counts come from embedded aggregates. Returns empty when Supabase isn't
+ * configured, so callers fall back to the demo feed.
  */
 
 function configured() {
@@ -33,10 +34,12 @@ interface PostRow {
     display_name: string | null;
     is_verified: boolean;
   } | null;
+  likes: { count: number }[] | null;
+  comments: { count: number }[] | null;
 }
 
 const SELECT =
-  "id, caption, category, tier_required, visibility, created_at, creator_id, media, users!inner(username, display_name, is_verified)";
+  "id, caption, category, tier_required, visibility, created_at, creator_id, media, users!inner(username, display_name, is_verified), likes(count), comments(count)";
 
 async function resolveMedia(
   stored: StoredMediaItem[] | null,
@@ -84,8 +87,8 @@ async function mapRow(r: PostRow, access: ViewerAccess): Promise<FeedPost> {
     caption: r.caption ?? "",
     category: r.category ?? "",
     gated: isGated && !entitled,
-    likes: 0,
-    comments: 0,
+    likes: r.likes?.[0]?.count ?? 0,
+    comments: r.comments?.[0]?.count ?? 0,
     createdAt: r.created_at,
     media,
   };
