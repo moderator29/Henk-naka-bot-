@@ -6,6 +6,7 @@ import { ReplayOnboardingAction } from "@/components/onboarding/ReplayOnboarding
 import { AccountSettings } from "@/components/settings/AccountSettings";
 import { PasswordSettings } from "@/components/settings/PasswordSettings";
 import { PreferencesSettings } from "@/components/settings/PreferencesSettings";
+import { PrivacySettings } from "@/components/settings/PrivacySettings";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { DEFAULT_SETTINGS, type UserSettings } from "@/lib/profile/settings";
 import { getSessionUser } from "@/lib/auth/session";
@@ -25,18 +26,20 @@ export default async function SettingsPage() {
 
   let initial = { displayName: "", username: "", bio: "", country: "" };
   let prefs: UserSettings = DEFAULT_SETTINGS;
+  let dmPermission: "everyone" | "mutuals" = "everyone";
   if (me && configured()) {
     const supabase = createClient();
     const [{ data }, { data: pref }] = await Promise.all([
       supabase
         .from("users")
-        .select("display_name, username, bio, country")
+        .select("display_name, username, bio, country, dm_permission")
         .eq("id", me.id)
         .maybeSingle<{
           display_name: string | null;
           username: string | null;
           bio: string | null;
           country: string | null;
+          dm_permission: string | null;
         }>(),
       supabase
         .from("user_preferences")
@@ -51,6 +54,7 @@ export default async function SettingsPage() {
         bio: data.bio ?? "",
         country: data.country ?? "",
       };
+      dmPermission = data.dm_permission === "mutuals" ? "mutuals" : "everyone";
     }
     if (pref?.settings) {
       prefs = {
@@ -73,6 +77,7 @@ export default async function SettingsPage() {
       </header>
 
       <AccountSettings initial={initial} />
+      <PrivacySettings dmPermission={dmPermission} />
       <PreferencesSettings initial={prefs} />
       <PasswordSettings />
 
