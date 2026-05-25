@@ -23,6 +23,7 @@ export function EditProfileForm({ initial, onClose }: EditProfileFormProps) {
   const [username, setUsername] = useState(initial.username);
   const [bio, setBio] = useState(initial.bio);
   const [avatar, setAvatar] = useState<File | null>(null);
+  const [cover, setCover] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -51,6 +52,7 @@ export function EditProfileForm({ initial, onClose }: EditProfileFormProps) {
       fd.set("username", username);
       fd.set("bio", bio);
       if (avatar) fd.set("avatar", avatar);
+      if (cover) fd.set("cover", cover);
       const res = await updateProfile(fd);
       if (!res.ok) {
         if (res.fieldErrors) setFieldErrors(res.fieldErrors);
@@ -128,13 +130,25 @@ export function EditProfileForm({ initial, onClose }: EditProfileFormProps) {
           </div>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="avatar" className="text-sm font-medium text-lilac/80">
-              Avatar
+              Profile photo
             </label>
             <input
               id="avatar"
               type="file"
               accept="image/*"
               onChange={(e) => setAvatar(e.target.files?.[0] ?? null)}
+              className="text-sm text-lilac/70 file:mr-3 file:rounded-lg file:border-0 file:bg-white/5 file:px-3 file:py-1.5 file:text-lilac"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="cover" className="text-sm font-medium text-lilac/80">
+              Cover photo
+            </label>
+            <input
+              id="cover"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setCover(e.target.files?.[0] ?? null)}
               className="text-sm text-lilac/70 file:mr-3 file:rounded-lg file:border-0 file:bg-white/5 file:px-3 file:py-1.5 file:text-lilac"
             />
           </div>
