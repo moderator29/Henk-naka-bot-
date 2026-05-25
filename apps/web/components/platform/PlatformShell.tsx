@@ -10,6 +10,7 @@ import {
   Lock,
   Coins,
   User,
+  Bookmark,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { AuroraBackground } from "@/components/brand/AuroraBackground";
@@ -19,6 +20,7 @@ import { NotificationsBell } from "@/components/notifications/NotificationsBell"
 import { SmartSearch } from "@/components/ai/SmartSearch";
 import { NavRail, type RailItem } from "@/components/platform/NavRail";
 import { PlatformBottomNav } from "@/components/platform/PlatformBottomNav";
+import { MoreMenu } from "@/components/platform/MoreMenu";
 
 /** Discovery first, Feed second; routes that exist today. */
 const nav: RailItem[] = [
@@ -26,6 +28,7 @@ const nav: RailItem[] = [
   { href: "/explore", label: "Discover", icon: Compass },
   { href: "/pveels", label: "Pveels", icon: Clapperboard },
   { href: "/messages", label: "Messages", icon: MessageCircle },
+  { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
   { href: "/marketplace", label: "Marketplace", icon: Diamond },
   { href: "/staking", label: "Staking", icon: Lock },
   { href: "/token", label: "Token", icon: Coins },
@@ -89,6 +92,7 @@ export function PlatformShell({
             </Link>
             <NotificationsBell />
             <ConnectWallet compact />
+            <MoreMenu />
           </header>
 
           <main

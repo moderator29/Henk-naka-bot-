@@ -207,6 +207,45 @@ export async function getPveels(userId: string | null): Promise<PveelItem[]> {
   return items;
 }
 
+/** Posts the user has bookmarked (saved), newest save first. */
+export async function getBookmarkedPosts(userId: string): Promise<FeedPost[]> {
+  if (!configured()) return [];
+  const supabase = createClient();
+  const { data: saves } = await supabase
+    .from("saves")
+    .select("post_id, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(60);
+  const ids = (saves ?? []).map((s) => s.post_id as string);
+  if (ids.length === 0) return [];
+  const { data } = await supabase.from("posts").select(SELECT).in("id", ids);
+  const byId = new Map<string, FeedPost>();
+  for (const p of ((data as unknown as PostRow[]) ?? []).map(mapRow)) byId.set(p.id, p);
+  // Preserve save order.
+  const ordered = ids.map((id) => byId.get(id)).filter((p): p is FeedPost => !!p);
+  return applyViewerState(supabase, ordered, userId);
+}
+
+/** A user's liked posts (for the profile Likes tab), newest like first. */
+export async function getLikedPosts(userId: string): Promise<FeedPost[]> {
+  if (!configured()) return [];
+  const supabase = createClient();
+  const { data: likes } = await supabase
+    .from("likes")
+    .select("post_id, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(60);
+  const ids = (likes ?? []).map((l) => l.post_id as string);
+  if (ids.length === 0) return [];
+  const { data } = await supabase.from("posts").select(SELECT).in("id", ids);
+  const byId = new Map<string, FeedPost>();
+  for (const p of ((data as unknown as PostRow[]) ?? []).map(mapRow)) byId.set(p.id, p);
+  const ordered = ids.map((id) => byId.get(id)).filter((p): p is FeedPost => !!p);
+  return applyViewerState(supabase, ordered, userId);
+}
+
 /** A specific user's own posts (for their profile). */
 export async function getUserPosts(userId: string): Promise<FeedPost[]> {
   if (!configured()) return [];
