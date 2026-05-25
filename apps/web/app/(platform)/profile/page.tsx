@@ -4,6 +4,7 @@ import {
   getUserMediaPosts,
   getUserLikedPosts,
 } from "@/lib/posts/queries";
+import { getCreatorPveels } from "@/lib/pveels/queries";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileView } from "@/components/profile/ProfileView";
 
@@ -28,6 +29,7 @@ export default async function ProfilePage() {
   let posts: Awaited<ReturnType<typeof getUserPosts>> = [];
   let mediaPosts: Awaited<ReturnType<typeof getUserMediaPosts>> = [];
   let likedPosts: Awaited<ReturnType<typeof getUserLikedPosts>> = [];
+  let pveels: Awaited<ReturnType<typeof getCreatorPveels>> = [];
   let followerCount = 0;
   let followingCount = 0;
   let isSubscriber = false;
@@ -39,6 +41,7 @@ export default async function ProfilePage() {
       userPosts,
       userMedia,
       userLikes,
+      creatorPveels,
       followers,
       following,
       subs,
@@ -56,6 +59,7 @@ export default async function ProfilePage() {
       getUserPosts(me.id),
       getUserMediaPosts(me.id),
       getUserLikedPosts(me.id),
+      getCreatorPveels(me.id, me.id),
       supabase
         .from("follows")
         .select("follower_id", { count: "exact", head: true })
@@ -81,6 +85,7 @@ export default async function ProfilePage() {
     posts = userPosts;
     mediaPosts = userMedia;
     likedPosts = userLikes;
+    pveels = creatorPveels;
     followerCount = followers.count ?? 0;
     followingCount = following.count ?? 0;
     isSubscriber = (subs.count ?? 0) > 0;
@@ -96,6 +101,7 @@ export default async function ProfilePage() {
       posts={posts}
       mediaPosts={mediaPosts}
       likedPosts={likedPosts}
+      pveels={pveels}
       followerCount={followerCount}
       followingCount={followingCount}
     />

@@ -13,21 +13,27 @@ import {
   Lock,
   Image as ImageIcon,
   Heart,
+  Clapperboard,
+  Play,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { StatTicker } from "@/components/ui/StatTicker";
 import { Modal, ModalContent } from "@/components/ui/Modal";
 import { PostCard, type FeedPost } from "@/components/feed/PostCard";
+import { PveelsFeed } from "@/components/pveels/PveelsFeed";
 import { EditProfileForm } from "@/components/profile/EditProfileForm";
 import { SubscriberBadge } from "@/components/subscriptions/SubscriberBadge";
 import { useToast } from "@/components/ui/Toast";
-import { cn, relativeTime } from "@/lib/utils";
+import { cn, formatNumber, relativeTime } from "@/lib/utils";
+import type { PveelView } from "@/lib/pveels/types";
 
-type Tab = "posts" | "media" | "likes";
+type Tab = "posts" | "pveels" | "media" | "likes";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "posts", label: "Posts" },
+  { id: "pveels", label: "Pveels" },
   { id: "media", label: "Media" },
   { id: "likes", label: "Likes" },
 ];
@@ -45,6 +51,7 @@ interface ProfileViewProps {
   posts?: FeedPost[];
   mediaPosts?: FeedPost[];
   likedPosts?: FeedPost[];
+  pveels?: PveelView[];
   followerCount?: number;
   followingCount?: number;
 }
@@ -70,12 +77,14 @@ export function ProfileView({
   posts = [],
   mediaPosts = [],
   likedPosts = [],
+  pveels = [],
   followerCount = 0,
   followingCount = 0,
 }: ProfileViewProps) {
   const [tab, setTab] = useState<Tab>("posts");
   const [editing, setEditing] = useState(false);
   const [selected, setSelected] = useState<FeedPost | null>(null);
+  const [pveelsOpen, setPveelsOpen] = useState(false);
   const { push } = useToast();
 
   const displayName =
@@ -218,6 +227,26 @@ export function ProfileView({
             />
           ))}
 
+        {tab === "pveels" &&
+          (pveels.length > 0 ? (
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
+              {pveels.map((p) => (
+                <PveelTile key={p.id} pveel={p} onOpen={() => setPveelsOpen(true)} />
+              ))}
+            </div>
+          ) : (
+            <EmptyTab
+              icon={<Clapperboard size={28} />}
+              title="No Pveels yet"
+              body="Short videos you post show up here."
+              action={
+                <Button asChild leftIcon={<Plus size={16} />}>
+                  <Link href="/pveels/create">Create a Pveel</Link>
+                </Button>
+              }
+            />
+          ))}
+
         {tab === "media" &&
           (mediaPosts.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -279,7 +308,49 @@ export function ProfileView({
           </ModalContent>
         </Modal>
       )}
+
+      {/* Pveels viewer scoped to this creator's clips */}
+      {pveelsOpen && (
+        <div className="fixed inset-0 z-50 bg-plum">
+          <button
+            type="button"
+            onClick={() => setPveelsOpen(false)}
+            aria-label="Close"
+            className="absolute top-4 left-4 z-[60] h-10 w-10 rounded-full glass-strong grid place-items-center text-white"
+          >
+            <X size={18} />
+          </button>
+          <div className="h-full px-4 sm:px-6 lg:px-8 pt-6">
+            <PveelsFeed forYou={pveels} following={[]} signedIn={signedIn} />
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function PveelTile({ pveel, onOpen }: { pveel: PveelView; onOpen: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="group relative aspect-[9/16] rounded-xl overflow-hidden glass edge-light"
+      style={{
+        background: `linear-gradient(135deg, ${pveel.accent[0]}, ${pveel.accent[1]})`,
+      }}
+    >
+      {pveel.posterUrl && (
+        // eslint-disable-next-line @next/next/no-img-element -- creator poster from storage
+        <img src={pveel.posterUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+      )}
+      <span className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+      <span className="absolute top-1.5 left-1.5 text-white/90">
+        {pveel.gated ? <Lock size={14} /> : <Play size={14} fill="currentColor" />}
+      </span>
+      <span className="absolute bottom-1.5 left-1.5 text-[0.65rem] font-medium text-white inline-flex items-center gap-1">
+        <Play size={10} fill="currentColor" /> {formatNumber(pveel.views)}
+      </span>
+    </button>
   );
 }
 
