@@ -1,10 +1,39 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Composer } from "@/components/feed/Composer";
+import { getSessionUser } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
+import type { TierOption } from "@/components/compose/AudienceSelector";
 
 export const metadata = { title: "Create a post" };
 
-export default function ComposePage() {
+function configured() {
+  return (
+    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+}
+
+export default async function ComposePage() {
+  const me = await getSessionUser();
+  if (!me) redirect("/login?next=/compose");
+
+  let tiers: TierOption[] = [];
+  if (configured()) {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("subscription_tiers")
+      .select("id, name")
+      .eq("creator_id", me.id)
+      .eq("is_active", true)
+      .order("price_nsfw", { ascending: true });
+    tiers = ((data ?? []) as { id: string; name: string }[]).map((t) => ({
+      id: t.id,
+      name: t.name,
+    }));
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <header className="mb-6 flex items-center gap-3">
@@ -19,7 +48,7 @@ export default function ComposePage() {
           Create a <span className="text-gradient">post</span>
         </h1>
       </header>
-      <Composer />
+      <Composer tiers={tiers} />
     </div>
   );
 }

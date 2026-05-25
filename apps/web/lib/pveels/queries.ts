@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { signGatedUrl } from "@/lib/media/sign";
 import { loadViewerAccess, isEntitled, type ViewerAccess } from "@/lib/entitlement";
 import { accentFor, type PveelView, type PveelVisibility } from "./types";
 
@@ -13,9 +13,6 @@ import { accentFor, type PveelView, type PveelVisibility } from "./types";
  * GATED FILE CONVENTION: a gated pveel stores the object PATH inside the
  * `gated-media` bucket in `video_url`; a public pveel stores a full public URL.
  */
-
-const GATED_BUCKET = "gated-media";
-const SIGNED_TTL_SECONDS = 60 * 60;
 
 function configured() {
   return (
@@ -54,21 +51,6 @@ interface PveelRow {
 
 const SELECT =
   "id, creator_id, video_url, poster_url, caption, category, hashtags, visibility, tier_required, duration_seconds, width, height, allow_comments, allow_tips, view_count, like_count, comment_count, save_count, created_at, is_demo, users!inner(username, display_name, is_verified)";
-
-/** Issues a short-lived signed URL for a gated file (service role, after the
- * entitlement check upstream). Returns null when the service key is absent. */
-async function signGatedUrl(path: string): Promise<string | null> {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
-  try {
-    const admin = createAdminClient();
-    const { data } = await admin.storage
-      .from(GATED_BUCKET)
-      .createSignedUrl(path, SIGNED_TTL_SECONDS);
-    return data?.signedUrl ?? null;
-  } catch {
-    return null;
-  }
-}
 
 async function mapRow(
   r: PveelRow,

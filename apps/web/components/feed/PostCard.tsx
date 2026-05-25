@@ -10,8 +10,14 @@ import { TipModal } from "./TipModal";
 import { cn, formatNumber, relativeTime } from "@/lib/utils";
 
 export interface PostMedia {
+  /** "image" | "video" */
+  type: "image" | "video";
+  /** Resolved, fetchable URL (public, or signed for gated when entitled). */
   url: string;
-  type: string;
+  /** Small thumbnail for grids; falls back to url. */
+  thumb?: string;
+  /** Poster frame for video. */
+  poster?: string;
 }
 
 export interface FeedPost {
@@ -100,15 +106,20 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
         <p className="text-[0.95rem] leading-relaxed text-lilac/90">
           {post.caption}
         </p>
-        {post.gated && (
-          <div className="mt-3 relative overflow-hidden rounded-xl border border-magenta/20 bg-plum/60 h-40 grid place-items-center">
+        {post.gated ? (
+          <Link
+            href={`/creators/${post.creatorUsername}`}
+            className="mt-3 relative block overflow-hidden rounded-xl border border-magenta/20 bg-plum/60 h-40 grid place-items-center"
+          >
             <div className="absolute inset-0 bg-gradient-to-br from-magenta/10 to-orchid/10" />
             <div className="relative text-center">
               <Lock size={22} className="mx-auto text-magenta mb-2" />
               <p className="text-sm font-medium text-white">Subscriber-only</p>
               <p className="text-xs text-lilac/60">Subscribe to unlock this post</p>
             </div>
-          </div>
+          </Link>
+        ) : (
+          post.media && post.media.length > 0 && <PostMediaBlock media={post.media} />
         )}
       </div>
 
@@ -174,5 +185,43 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
         />
       )}
     </motion.article>
+  );
+}
+
+/** Renders a post's images/videos: one full-bleed item, or a 2-col grid for
+ * multiple. Grids use thumbnails; video shows its poster until played. */
+function PostMediaBlock({ media }: { media: PostMedia[] }) {
+  const single = media.length === 1;
+  return (
+    <div className={cn("mt-3 grid gap-1.5 rounded-xl overflow-hidden", single ? "grid-cols-1" : "grid-cols-2")}>
+      {media.slice(0, 4).map((m, i) => (
+        <div
+          key={i}
+          className={cn(
+            "relative bg-plum/60 overflow-hidden",
+            single ? "max-h-[32rem]" : "aspect-square"
+          )}
+        >
+          {m.type === "video" ? (
+            <video
+              src={m.url}
+              poster={m.poster ?? m.thumb}
+              controls
+              playsInline
+              preload="none"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element -- user media from Supabase storage
+            <img
+              src={single ? m.url : m.thumb ?? m.url}
+              alt=""
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
+          )}
+        </div>
+      ))}
+    </div>
   );
 }

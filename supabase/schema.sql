@@ -535,11 +535,10 @@ create policy subs_fan_update on public.subscriptions for update using (auth.uid
 -- Posts (public posts open; gated posts need an active subscription; author controls)
 drop policy if exists posts_public_read on public.posts;
 drop policy if exists posts_owner_write on public.posts;
-create policy posts_public_read on public.posts for select using (
-  tier_required is null
-  or auth.uid() = creator_id
-  or public.has_active_subscription(auth.uid(), tier_required)
-);
+-- Rows are world-readable so gated posts can render a locked preview; the
+-- gated FILE is protected in the private `gated-media` bucket (signed URLs only
+-- after an entitlement check), so the media is never exposed to non-subscribers.
+create policy posts_public_read on public.posts for select using (true);
 create policy posts_owner_write on public.posts for all using (auth.uid() = creator_id) with check (auth.uid() = creator_id);
 
 -- Likes / saves / comments
