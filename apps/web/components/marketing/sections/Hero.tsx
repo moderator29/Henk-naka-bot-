@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Wallet } from "lucide-react";
 import { GradientText } from "@/components/brand/GradientText";
-import { BrandIcon } from "@/components/brand/BrandIcon";
 import { Button } from "@/components/ui/Button";
 
 const headline = ["The", "creator", "platform", "of", "tomorrow."];
@@ -65,11 +65,7 @@ export function Hero() {
               </Link>
             </Button>
             <Button size="lg" variant="glass" asChild>
-              <Link
-                href="https://app.sushi.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <Link href="/trade">
                 <Wallet size={18} /> Buy $NSFW
               </Link>
             </Button>
@@ -83,7 +79,14 @@ export function Hero() {
           className="relative hidden lg:flex items-center justify-center"
         >
           <div className="absolute inset-0 -m-20 rounded-full bg-magenta/20 blur-3xl animate-pulse-glow" />
-          <BrandIcon name="rocket" size={240} />
+          <Image
+            src="/brand/logo/logo-full.png"
+            alt="Pleasure Coin"
+            width={854}
+            height={666}
+            priority
+            className="relative w-[min(26rem,80%)] h-auto drop-shadow-[0_0_60px_rgba(255,31,143,0.45)]"
+          />
         </motion.div>
       </div>
     </section>

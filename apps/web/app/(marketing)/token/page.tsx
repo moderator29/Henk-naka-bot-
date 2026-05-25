@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { AuroraBackground } from "@/components/brand/AuroraBackground";
@@ -68,7 +69,13 @@ export default async function TokenPage() {
             </div>
           </div>
           <div className="hidden lg:flex justify-center">
-            <BrandIcon name="rocket" size={200} />
+            <Image
+              src="/brand/logo/logo-mark.png"
+              alt="Pleasure Coin"
+              width={854}
+              height={666}
+              className="w-56 h-auto drop-shadow-[0_0_50px_rgba(255,31,143,0.4)]"
+            />
           </div>
         </div>
       </section>

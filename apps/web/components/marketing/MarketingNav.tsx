@@ -17,7 +17,7 @@ const navLinks = [
   { href: "/#faq", label: "FAQ" },
 ];
 
-export function MarketingNav() {
+export function MarketingNav({ signedIn = false }: { signedIn?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -52,12 +52,20 @@ export function MarketingNav() {
         </ul>
 
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/login">Sign in</Link>
-          </Button>
-          <Button variant="primary" size="sm" asChild>
-            <Link href="/verify?next=/signup">Get Started</Link>
-          </Button>
+          {signedIn ? (
+            <Button variant="primary" size="sm" asChild>
+              <Link href="/feed">Open app</Link>
+            </Button>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/login">Sign in</Link>
+              </Button>
+              <Button variant="primary" size="sm" asChild>
+                <Link href="/verify?next=/signup">Get Started</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         <button
@@ -93,12 +101,20 @@ export function MarketingNav() {
                 </li>
               ))}
               <li className="flex gap-2 pt-2">
-                <Button variant="ghost" size="md" asChild className="flex-1">
-                  <Link href="/login">Sign in</Link>
-                </Button>
-                <Button variant="primary" size="md" asChild className="flex-1">
-                  <Link href="/verify?next=/signup">Get Started</Link>
-                </Button>
+                {signedIn ? (
+                  <Button variant="primary" size="md" asChild className="flex-1">
+                    <Link href="/feed">Open app</Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="ghost" size="md" asChild className="flex-1">
+                      <Link href="/login">Sign in</Link>
+                    </Button>
+                    <Button variant="primary" size="md" asChild className="flex-1">
+                      <Link href="/verify?next=/signup">Get Started</Link>
+                    </Button>
+                  </>
+                )}
               </li>
             </ul>
           </motion.div>
