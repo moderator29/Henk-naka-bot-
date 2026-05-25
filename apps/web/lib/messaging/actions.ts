@@ -83,6 +83,37 @@ export async function startConversation(
   }
 
   const supabase = createClient();
+
+  // Enforce the recipient's DM permission: "mutuals" means they only accept new
+  // conversations from people they follow back.
+  const { data: recipient } = await supabase
+    .from("users")
+    .select("dm_permission")
+    .eq("id", parsed.data.otherUserId)
+    .maybeSingle<{ dm_permission: string | null }>();
+  if (recipient?.dm_permission === "mutuals") {
+    const [{ data: iFollow }, { data: followsMe }] = await Promise.all([
+      supabase
+        .from("follows")
+        .select("following_id")
+        .eq("follower_id", user.id)
+        .eq("following_id", parsed.data.otherUserId)
+        .maybeSingle(),
+      supabase
+        .from("follows")
+        .select("follower_id")
+        .eq("follower_id", parsed.data.otherUserId)
+        .eq("following_id", user.id)
+        .maybeSingle(),
+    ]);
+    if (!iFollow || !followsMe) {
+      return {
+        ok: false,
+        error: "This person only accepts messages from people they follow back.",
+      };
+    }
+  }
+
   const [a, b] = [user.id, parsed.data.otherUserId].sort();
 
   const findExisting = () =>
@@ -110,6 +141,46 @@ export async function startConversation(
     if (again) return { ok: true, conversationId: again.id };
   }
   return { ok: false, error: "Could not start the conversation." };
+}
+
+export interface DmUser {
+  id: string;
+  username: string | null;
+  displayName: string | null;
+  avatarUrl: string | null;
+}
+
+/** Search users to start a new conversation with (excludes self). */
+export async function searchDmUsers(query: string): Promise<DmUser[]> {
+  const q = query.trim();
+  if (q.length < 1) return [];
+  let user;
+  try {
+    user = await requireAdult();
+  } catch {
+    return [];
+  }
+  // Strip characters that carry meaning in a PostgREST or() filter / ilike.
+  const safe = q.replace(/[,()*%\\]/g, "").slice(0, 60);
+  if (!safe) return [];
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("users")
+    .select("id, username, display_name, avatar_url")
+    .or(`username.ilike.%${safe}%,display_name.ilike.%${safe}%`)
+    .neq("id", user.id)
+    .limit(12);
+  return ((data ?? []) as Array<{
+    id: string;
+    username: string | null;
+    display_name: string | null;
+    avatar_url: string | null;
+  }>).map((u) => ({
+    id: u.id,
+    username: u.username,
+    displayName: u.display_name,
+    avatarUrl: u.avatar_url,
+  }));
 }
 
 /**

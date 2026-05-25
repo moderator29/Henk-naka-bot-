@@ -29,6 +29,7 @@ create table if not exists public.users (
   is_creator boolean not null default false,
   is_verified boolean not null default false,
   is_demo boolean not null default false,
+  dm_permission text not null default 'everyone' check (dm_permission in ('everyone','mutuals')),
   created_at timestamptz not null default now(),
   last_active_at timestamptz
 );

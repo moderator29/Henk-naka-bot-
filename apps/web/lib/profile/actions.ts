@@ -224,6 +224,29 @@ export async function setupProfile(
   return { ok: true };
 }
 
+/** Who can start a DM with the user: everyone, or only mutual follows. */
+export async function setDmPermission(
+  value: "everyone" | "mutuals"
+): Promise<{ ok: boolean; error?: string }> {
+  if (value !== "everyone" && value !== "mutuals") {
+    return { ok: false, error: "Invalid option." };
+  }
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me) return { ok: false, error: "Sign in first." };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("users")
+    .update({ dm_permission: value })
+    .eq("id", me.id);
+  return { ok: !error, error: error ? "Could not save." : undefined };
+}
+
 /** Persist notification / AI / language preferences to user_preferences. */
 export async function updatePreferences(
   formData: FormData

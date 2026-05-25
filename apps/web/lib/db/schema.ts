@@ -43,6 +43,7 @@ export const users = pgTable(
     isVerified: boolean("is_verified").default(false).notNull(),
     isDemo: boolean("is_demo").default(false).notNull(),
     accountStatus: text("account_status").default("active").notNull(),
+    dmPermission: text("dm_permission").default("everyone").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
