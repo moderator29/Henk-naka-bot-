@@ -9,6 +9,7 @@ import { StatTicker } from "@/components/ui/StatTicker";
 import { useToast } from "@/components/ui/Toast";
 import { SubscribeModal } from "@/components/creator/SubscribeModal";
 import { TipModal } from "@/components/feed/TipModal";
+import { UserActions } from "@/components/safety/UserActions";
 import { toggleFollow } from "@/lib/engagement/actions";
 import { startConversation } from "@/lib/messaging/actions";
 import { formatNumber } from "@/lib/utils";
@@ -170,6 +171,9 @@ export function CreatorHeader({
               >
                 <Coins size={16} />
               </Button>
+              {creator.id && (
+                <UserActions userId={creator.id} username={creator.username} />
+              )}
             </div>
           </div>
 

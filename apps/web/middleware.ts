@@ -23,6 +23,7 @@ const PROTECTED_PREFIXES = [
   "/notifications",
   "/creators",
   "/subscriptions",
+  "/become-creator",
   "/admin",
 ];
 

@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { BadgeCheck, Heart, MessageCircle, Bookmark, Coins, Lock } from "lucide-react";
+import { BadgeCheck, Heart, MessageCircle, Bookmark, Coins, Lock, Flag } from "lucide-react";
 import { toggleLike, toggleSave } from "@/lib/engagement/actions";
 import { getGatedMedia } from "@/lib/posts/actions";
 import { useToast } from "@/components/ui/Toast";
 import { Comments } from "./Comments";
 import { TipModal } from "./TipModal";
+import { ReportDialog } from "@/components/safety/ReportDialog";
 import { cn, formatNumber, relativeTime } from "@/lib/utils";
 
 export interface PostMedia {
@@ -43,6 +44,7 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
   const [saved, setSaved] = useState(post.savedByMe ?? false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [tipOpen, setTipOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const reduce = useReducedMotion();
   const [, startTransition] = useTransition();
   // Demo posts aren't in the database; keep their interactions local-only.
@@ -231,6 +233,16 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
         >
           <Coins size={18} />
         </button>
+        {isReal && (
+          <button
+            type="button"
+            onClick={() => setReportOpen(true)}
+            className="inline-flex items-center text-lilac/40 hover:text-lilac/80 transition-colors"
+            aria-label="Report post"
+          >
+            <Flag size={16} />
+          </button>
+        )}
       </footer>
 
       {commentsOpen && isReal && <Comments postId={post.id} />}
@@ -240,6 +252,14 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
           creatorName={post.creatorName}
           postId={post.id}
           onClose={() => setTipOpen(false)}
+        />
+      )}
+      {reportOpen && (
+        <ReportDialog
+          targetType="post"
+          targetId={post.id}
+          label="Report post"
+          onClose={() => setReportOpen(false)}
         />
       )}
     </motion.article>

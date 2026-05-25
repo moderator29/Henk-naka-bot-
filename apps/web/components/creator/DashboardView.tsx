@@ -58,7 +58,7 @@ export function DashboardView({ data }: { data: DashboardData }) {
             </p>
           </div>
           <Button asChild>
-            <Link href="/settings">Get started</Link>
+            <Link href="/become-creator">Get started</Link>
           </Button>
         </Card>
       </div>
