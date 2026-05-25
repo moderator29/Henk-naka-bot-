@@ -5,6 +5,7 @@ import {
   animate,
   useInView,
   useMotionValue,
+  useReducedMotion,
   useTransform,
 } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -73,14 +74,20 @@ export function StatTicker({
     return unsub;
   }, [rounded]);
 
+  const reduce = useReducedMotion();
+
   useEffect(() => {
     if (!inView) return;
+    if (reduce) {
+      mv.set(value); // respect reduced motion: jump to the value, no count-up
+      return;
+    }
     const controls = animate(mv, value, {
       duration,
       ease: [0.16, 1, 0.3, 1],
     });
     return () => controls.stop();
-  }, [inView, value, duration, mv]);
+  }, [inView, value, duration, mv, reduce]);
 
   return (
     <span ref={ref} className={cn("tabular-nums", className)}>

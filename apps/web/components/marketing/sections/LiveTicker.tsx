@@ -72,5 +72,5 @@ function Stat({ label, children }: { label: string; children: React.ReactNode })
 }
 
 function Dash() {
-  return <span className="text-lilac/40 text-base">, </span>;
+  return <span className="text-lilac/40 text-base">—</span>;
 }

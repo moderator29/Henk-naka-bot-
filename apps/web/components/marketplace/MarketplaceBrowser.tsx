@@ -64,7 +64,8 @@ export function MarketplaceBrowser() {
       if (cats.size > 0 && !cats.has(x.category)) return false;
       if (status !== "all" && x.status !== status) return false;
       if (collection !== "all" && x.collection !== collection) return false;
-      if (x.priceNsfw > maxPrice) return false;
+      // 5000 is the slider ceiling = "no cap"; only filter below it.
+      if (maxPrice < 5000 && x.priceNsfw > maxPrice) return false;
       return true;
     });
     r = [...r].sort((a, b) => {
@@ -343,7 +344,7 @@ function ListModal({ open, onClose, onCreate }: { open: boolean; onClose: () => 
       status,
       seed,
       popularity: 50,
-      createdOrder: 9999,
+      createdOrder: 9000 + Date.now() % 100000,
       traits: [
         { trait_type: "Collection", value: collection },
         { trait_type: "Category", value: category },

@@ -83,6 +83,7 @@ export function Comments({ postId }: { postId: string }) {
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
+          aria-label="Add a comment"
           placeholder="Add a comment…"
           maxLength={1000}
           className="flex-1 h-10 rounded-xl bg-plum/60 border border-white/10 px-3 text-sm text-white placeholder:text-lilac/40 focus:border-magenta/50 focus:outline-none focus:ring-2 focus:ring-magenta/20"

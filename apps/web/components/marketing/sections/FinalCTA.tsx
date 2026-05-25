@@ -25,7 +25,6 @@ export function FinalCTA() {
                 size="lg"
                 variant="glass"
                 asChild
-                rightIcon={<ArrowRight size={18} />}
                 className="bg-plum/30 hover:bg-plum/40 border-white/30"
               >
                 <Link
@@ -33,7 +32,7 @@ export function FinalCTA() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Buy $NSFW now
+                  Buy $NSFW now <ArrowRight size={18} />
                 </Link>
               </Button>
               <Button

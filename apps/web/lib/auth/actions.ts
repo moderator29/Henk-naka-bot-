@@ -211,6 +211,11 @@ export async function forgotPasswordAction(
     return { fieldErrors: fieldErrorsFrom(parsed.error.issues) };
   }
 
+  const human = await passedHumanCheck(formData);
+  if (!human.ok) {
+    return { error: human.error ?? "Please complete the verification." };
+  }
+
   const supabase = createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(
     parsed.data.email,

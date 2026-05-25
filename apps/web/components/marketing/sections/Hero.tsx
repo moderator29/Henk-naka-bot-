@@ -59,16 +59,18 @@ export function Hero() {
             transition={{ delay: 0.7, duration: 0.5 }}
             className="mt-10 flex flex-col sm:flex-row gap-4"
           >
-            <Button size="lg" asChild rightIcon={<ArrowRight size={18} />}>
-              <Link href="/verify?next=/signup">Get Started</Link>
+            <Button size="lg" asChild>
+              <Link href="/verify?next=/signup">
+                Get Started <ArrowRight size={18} />
+              </Link>
             </Button>
-            <Button size="lg" variant="glass" asChild leftIcon={<Wallet size={18} />}>
+            <Button size="lg" variant="glass" asChild>
               <Link
                 href="https://app.sushi.com"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Buy $NSFW
+                <Wallet size={18} /> Buy $NSFW
               </Link>
             </Button>
           </motion.div>

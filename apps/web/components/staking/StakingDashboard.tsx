@@ -66,11 +66,12 @@ export function StakingDashboard() {
   const [busyUnstake, setBusyUnstake] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
-  // Live tick for countdowns + reward accrual.
+  // Live tick for countdowns + reward accrual — only while positions exist.
   useEffect(() => {
+    if (positions.length === 0) return;
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [positions.length]);
 
   const userStaked = positions.reduce((s, p) => s + p.amount, 0);
   const pendingRewards = positions.reduce((s, p) => s + accruedRewards(p, now), 0);
@@ -106,6 +107,8 @@ export function StakingDashboard() {
     } catch {
       setStakeStage("error");
       push({ tone: "error", title: "Stake failed", description: "Something went wrong. Try again." });
+      await wait(1500);
+      setStakeStage("idle");
     }
   }
 

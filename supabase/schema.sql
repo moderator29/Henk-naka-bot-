@@ -57,7 +57,7 @@ create table if not exists public.subscription_tiers (
 create table if not exists public.subscriptions (
   id uuid primary key default gen_random_uuid(),
   fan_id uuid not null references public.users(id) on delete cascade,
-  tier_id uuid not null references public.subscription_tiers(id),
+  tier_id uuid not null references public.subscription_tiers(id) on delete cascade,
   started_at timestamptz not null default now(),
   expires_at timestamptz not null,
   auto_renew boolean not null default true,
@@ -69,7 +69,7 @@ create table if not exists public.posts (
   creator_id uuid not null references public.users(id) on delete cascade,
   caption text,
   media jsonb,
-  tier_required uuid references public.subscription_tiers(id),
+  tier_required uuid references public.subscription_tiers(id) on delete set null,
   category text,
   is_demo boolean not null default false,
   created_at timestamptz not null default now(),
@@ -100,10 +100,10 @@ create table if not exists public.comments (
 
 create table if not exists public.tips (
   id uuid primary key default gen_random_uuid(),
-  from_user uuid not null references public.users(id),
-  to_user uuid not null references public.users(id),
+  from_user uuid not null references public.users(id) on delete cascade,
+  to_user uuid not null references public.users(id) on delete cascade,
   amount_nsfw numeric(36,6) not null,
-  post_id uuid references public.posts(id),
+  post_id uuid references public.posts(id) on delete set null,
   tx_hash text,
   created_at timestamptz not null default now()
 );

@@ -19,6 +19,9 @@ export async function GET(req: Request) {
   if (req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ ok: false, error: "Service role not configured." }, { status: 503 });
+  }
 
   const admin = createAdminClient();
   const now = Date.now();

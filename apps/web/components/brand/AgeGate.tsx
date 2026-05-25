@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { AuroraBackground } from "@/components/brand/AuroraBackground";
 
 const KEY = "pc.agegate";
 
@@ -59,10 +58,9 @@ export function AgeGate() {
           aria-modal="true"
           aria-label="Age verification"
         >
-          <div className="absolute inset-0 -z-10">
-            <AuroraBackground variant="orchid" intensity="hero" />
-            <div className="absolute inset-0 bg-plum/70" />
-          </div>
+          {/* Solid backdrop over the page (the marketing layout already runs the
+              ambient aurora behind everything; no need for a second instance). */}
+          <div className="absolute inset-0 -z-10 bg-plum/90 backdrop-blur-xl" />
 
           <motion.div
             initial={{ opacity: 0, y: 18, scale: 0.97 }}

@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdult } from "@/lib/auth/session";
 
@@ -81,5 +82,8 @@ export async function createPost(formData: FormData): Promise<CreatePostResult> 
   if (error || !data) {
     return { ok: false, error: "Could not publish. Try again." };
   }
+  // Invalidate the surfaces that list the new post so it shows immediately.
+  revalidatePath("/feed");
+  revalidatePath("/profile");
   return { ok: true, postId: data.id as string };
 }

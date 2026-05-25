@@ -8,6 +8,8 @@ export type NotificationType =
   | "follow"
   | "subscribe"
   | "tip"
+  | "like"
+  | "comment"
   | "post"
   | "message"
   | "system";
@@ -29,8 +31,14 @@ export function describeNotification(n: AppNotification): string {
       return `${actor} started following you`;
     case "subscribe":
       return `${actor} subscribed to your tier`;
-    case "tip":
-      return `${actor} tipped you${n.payload?.amount ? ` ${n.payload.amount} $NSFW` : ""}`;
+    case "tip": {
+      const amt = (n.payload?.amountNsfw as string | number) ?? (n.payload?.amount as string | number);
+      return `${actor} tipped you${amt ? ` ${amt} $NSFW` : ""}`;
+    }
+    case "like":
+      return `${actor} liked your post`;
+    case "comment":
+      return `${actor} commented on your post`;
     case "post":
       return `${actor} posted something new`;
     case "message":

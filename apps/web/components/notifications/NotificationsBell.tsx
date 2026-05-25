@@ -23,6 +23,8 @@ const ICONS: Record<NotificationType, LucideIcon> = {
   follow: UserPlus,
   subscribe: Heart,
   tip: Coins,
+  like: Heart,
+  comment: MessageCircle,
   message: MessageCircle,
   post: FileText,
   system: Info,

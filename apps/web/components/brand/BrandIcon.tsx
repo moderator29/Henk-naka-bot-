@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   Rocket,
   Heart,
@@ -77,6 +77,8 @@ export function BrandIcon({
   const tint = accent[name];
   const hasRender = brandIconHasRender(name);
   const Glyph = glyphs[name];
+  const reduce = useReducedMotion();
+  const float = motionless || reduce;
 
   return (
     <motion.div
@@ -98,7 +100,7 @@ export function BrandIcon({
         transformStyle: "preserve-3d",
         perspective: "600px",
       }}
-      animate={motionless ? undefined : { rotateY: [-5, 5, -5], y: [0, -4, 0] }}
+      animate={float ? undefined : { rotateY: [-5, 5, -5], y: [0, -4, 0] }}
       transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       whileHover={{
         scale: 1.05,

@@ -23,9 +23,11 @@ export function OnboardingGate({
     }
   }, [initiallyComplete]);
 
-  const finish = () => {
+  // Returns the promise so OnboardingFlow awaits persistence (and the welcome
+  // email) before it navigates away.
+  const finish = async () => {
+    await completeOnboarding();
     setShouldShow(false);
-    void completeOnboarding();
   };
 
   if (!shouldShow) return null;

@@ -69,6 +69,7 @@ export function FAQ() {
                   type="button"
                   onClick={() => setOpen(isOpen ? null : i)}
                   aria-expanded={isOpen}
+                  aria-controls={`faq-panel-${i}`}
                   className="w-full flex items-center justify-between gap-4 px-5 py-5 text-left"
                 >
                   <span className="font-medium text-white">{item.q}</span>
@@ -83,6 +84,8 @@ export function FAQ() {
                 <AnimatePresence initial={false}>
                   {isOpen && (
                     <motion.div
+                      id={`faq-panel-${i}`}
+                      role="region"
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}

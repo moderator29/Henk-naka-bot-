@@ -100,7 +100,7 @@ export const subscriptions = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     tierId: uuid("tier_id")
       .notNull()
-      .references(() => subscriptionTiers.id),
+      .references(() => subscriptionTiers.id, { onDelete: "cascade" }),
     startedAt: timestamp("started_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -123,7 +123,9 @@ export const posts = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     caption: text("caption"),
     media: jsonb("media"),
-    tierRequired: uuid("tier_required").references(() => subscriptionTiers.id),
+    tierRequired: uuid("tier_required").references(() => subscriptionTiers.id, {
+      onDelete: "set null",
+    }),
     category: text("category"),
     isDemo: boolean("is_demo").default(false).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -193,13 +195,13 @@ export const comments = pgTable(
 export const tips = pgTable("tips", {
   id: uuid("id").primaryKey().defaultRandom(),
   fromUser: uuid("from_user")
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   toUser: uuid("to_user")
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   amountNsfw: numeric("amount_nsfw", { precision: 36, scale: 6 }).notNull(),
-  postId: uuid("post_id").references(() => posts.id),
+  postId: uuid("post_id").references(() => posts.id, { onDelete: "set null" }),
   txHash: text("tx_hash"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()

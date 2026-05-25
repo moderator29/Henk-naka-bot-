@@ -37,7 +37,16 @@ async function notify(
   if (recipientId === actorId) return;
   try {
     const admin = createAdminClient();
-    await admin.from("notifications").insert({ user_id: recipientId, type, payload });
+    // Resolve the actor's name so the notification reads "<name> ..." not "Someone".
+    const { data: actor } = await admin
+      .from("users")
+      .select("display_name, username")
+      .eq("id", actorId)
+      .maybeSingle<{ display_name: string | null; username: string | null }>();
+    const actor_name = actor?.display_name ?? actor?.username ?? "Someone";
+    await admin
+      .from("notifications")
+      .insert({ user_id: recipientId, type, payload: { ...payload, actor_name } });
   } catch {
     // No service key configured, or insert failed: notifications are best-effort.
   }

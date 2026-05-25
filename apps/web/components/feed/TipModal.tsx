@@ -102,6 +102,7 @@ export function TipModal({
             <div className="relative">
               <input
                 inputMode="decimal"
+                aria-label="Tip amount in $NSFW"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
                 placeholder="0.0"

@@ -1,14 +1,25 @@
 import { NextResponse } from "next/server";
+import { getSessionUser } from "@/lib/auth/session";
+import { checkAILimit } from "@/lib/ai/ratelimit";
 
 /**
  * Earnings Forecaster narrative (AI #1, RPD §3.4). The statistical projection
  * runs client-side from real creator data; this endpoint produces the plain-
- * language narrative over those numbers with Claude.
+ * language narrative over those numbers with Claude. Auth-gated + rate-limited.
  *
  * Honest behavior: until ANTHROPIC_API_KEY is set, this returns 503 (never a
  * fake narrative), matching the other AI cornerstones. PENDING_ANTHROPIC_KEY.
  */
 export async function POST(req: Request) {
+  const user = await getSessionUser();
+  if (!user) {
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+  const limit = await checkAILimit("forecaster", user.id);
+  if (!limit.success) {
+    return NextResponse.json({ ok: false, error: "Daily limit reached." }, { status: 429 });
+  }
+
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key || key.startsWith("PENDING")) {
     return NextResponse.json(

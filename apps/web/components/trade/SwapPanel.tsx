@@ -85,6 +85,14 @@ export function SwapPanel() {
   const handled = useRef(false);
 
   const amountNum = Number(amount) || 0;
+  // Safe parse: amount can be partial ("1.", "") mid-typing — never throw at render.
+  const sellRaw = useMemo(() => {
+    try {
+      return parseUnits(amount || "0", sell.decimals);
+    } catch {
+      return 0n;
+    }
+  }, [amount, sell.decimals]);
   const debounced = useRef<ReturnType<typeof setTimeout>>();
 
   // Fetch a quote (debounced) whenever the amount/side/connection changes.
@@ -96,7 +104,7 @@ export function SwapPanel() {
     debounced.current = setTimeout(async () => {
       setQuoting(true);
       try {
-        const sellAmount = parseUnits(amount, sell.decimals).toString();
+        const sellAmount = sellRaw.toString();
         const res = await fetch(
           `/api/trade/quote?sellToken=${sell.address}&buyToken=${buy.address}&sellAmount=${sellAmount}&taker=${address}&slippageBps=100`
         );
@@ -129,7 +137,7 @@ export function SwapPanel() {
     : 0;
   const needsApproval =
     !!quote?.issues?.allowance?.spender &&
-    (allowance.data === undefined || (allowance.data as bigint) < parseUnits(amount || "0", sell.decimals));
+    (allowance.data === undefined || (allowance.data as bigint) < sellRaw);
   const busy = approving || sending || confirming || quoting;
 
   async function act() {
@@ -191,6 +199,7 @@ export function SwapPanel() {
         <div className="relative">
           <input
             inputMode="decimal"
+            aria-label={`Amount of ${sell.symbol} to pay`}
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
             placeholder="0.0"

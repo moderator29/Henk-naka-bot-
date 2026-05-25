@@ -98,6 +98,7 @@ export function TradeTerminal() {
         <button
           type="button"
           onClick={copy}
+          aria-label="Copy contract address"
           className="ml-auto inline-flex items-center gap-1.5 text-xs text-lilac/50 hover:text-white font-mono"
         >
           {NSFW.address.slice(0, 6)}…{NSFW.address.slice(-4)}
