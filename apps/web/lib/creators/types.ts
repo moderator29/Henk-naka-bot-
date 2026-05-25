@@ -8,6 +8,7 @@ export interface CreatorTier {
   id: string;
   name: string;
   priceNsfw: number;
+  priceUsd?: number | null;
   benefits: string[];
   highlighted?: boolean;
 }

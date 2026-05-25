@@ -8,6 +8,7 @@ import {
   PanelLeft,
   PanelLeftClose,
   Plus,
+  Heart,
   Settings,
   LogOut,
   type LucideIcon,
@@ -148,6 +149,18 @@ export function NavRail({
         })}
       </nav>
 
+      <Link
+        href="/subscriptions"
+        title={collapsed ? "Subscriptions" : undefined}
+        aria-current={isActive(pathname, "/subscriptions") ? "page" : undefined}
+        className={cn(
+          "flex items-center h-11 rounded-xl text-lilac/65 hover:text-white hover:bg-white/5 transition-colors",
+          collapsed ? "justify-center px-0" : "px-3 gap-3"
+        )}
+      >
+        <Heart size={20} aria-hidden="true" />
+        {!collapsed && <span>Subscriptions</span>}
+      </Link>
       <Link
         href="/settings"
         title={collapsed ? "Settings" : undefined}

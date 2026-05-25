@@ -80,6 +80,7 @@ export const subscriptionTiers = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     priceNsfw: numeric("price_nsfw", { precision: 36, scale: 6 }).notNull(),
+    priceUsd: numeric("price_usd", { precision: 12, scale: 2 }),
     benefits: jsonb("benefits"),
     isActive: boolean("is_active").default(true).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })

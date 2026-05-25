@@ -49,6 +49,7 @@ create table if not exists public.subscription_tiers (
   creator_id uuid not null references public.users(id) on delete cascade,
   name text not null,
   price_nsfw numeric(36,6) not null,
+  price_usd numeric(12,2),
   benefits jsonb,
   is_active boolean not null default true,
   created_at timestamptz not null default now()

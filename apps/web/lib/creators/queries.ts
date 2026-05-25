@@ -56,7 +56,7 @@ export async function getCreatorByUsername(
         .maybeSingle<ProfileRow>(),
       supabase
         .from("subscription_tiers")
-        .select("id, name, price_nsfw, benefits")
+        .select("id, name, price_nsfw, price_usd, benefits")
         .eq("creator_id", user.id)
         .eq("is_active", true),
       supabase
@@ -75,6 +75,7 @@ export async function getCreatorByUsername(
     id: t.id as string,
     name: t.name as string,
     priceNsfw: Number(t.price_nsfw),
+    priceUsd: t.price_usd != null ? Number(t.price_usd) : null,
     benefits: Array.isArray(t.benefits) ? (t.benefits as string[]) : [],
   }));
 
