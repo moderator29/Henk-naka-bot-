@@ -19,10 +19,12 @@ import {
   X,
   Send,
   Plus,
+  Flag,
 } from "lucide-react";
 import { cn, formatNumber, relativeTime } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { TipModal } from "@/components/feed/TipModal";
+import { ReportModal } from "@/components/moderation/ReportModal";
 import {
   togglePveelLike,
   togglePveelSave,
@@ -188,6 +190,7 @@ function PveelCard({
   const [expanded, setExpanded] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [tipOpen, setTipOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const hasVideo = !!pveel.playbackUrl && !pveel.gated;
 
@@ -400,6 +403,11 @@ function PveelCard({
           <RailButton label="Share" ariaLabel="Share" onClick={() => share(pveel, push)}>
             <Share2 size={24} />
           </RailButton>
+          {!pveel.isDemo && (
+            <RailButton label="Report" ariaLabel="Report" onClick={() => setReportOpen(true)}>
+              <Flag size={22} />
+            </RailButton>
+          )}
         </div>
 
         {/* Scrub bar */}
@@ -426,6 +434,14 @@ function PveelCard({
           username={pveel.creatorUsername}
           creatorName={pveel.creatorName}
           onClose={() => setTipOpen(false)}
+        />
+      )}
+      {reportOpen && (
+        <ReportModal
+          targetType="pveel"
+          targetId={pveel.id}
+          targetLabel="Pveel"
+          onClose={() => setReportOpen(false)}
         />
       )}
     </section>

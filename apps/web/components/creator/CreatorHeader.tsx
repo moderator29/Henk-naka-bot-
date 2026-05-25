@@ -3,10 +3,11 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { BadgeCheck, Heart, Plus, Coins, MessageCircle, MoreHorizontal, Ban, Link2 } from "lucide-react";
+import { BadgeCheck, Heart, Plus, Coins, MessageCircle, MoreHorizontal, Ban, Link2, Flag } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { StatTicker } from "@/components/ui/StatTicker";
 import { useToast } from "@/components/ui/Toast";
+import { ReportModal } from "@/components/moderation/ReportModal";
 import { toggleFollow } from "@/lib/engagement/actions";
 import { startConversation } from "@/lib/messaging/actions";
 import { blockUser, unblockUser } from "@/lib/privacy/actions";
@@ -36,6 +37,7 @@ export function CreatorHeader({
   const [menuOpen, setMenuOpen] = useState(false);
   const [blocked, setBlocked] = useState(initiallyBlocked);
   const [blocking, setBlocking] = useState(false);
+  const [reporting, setReporting] = useState(false);
 
   const copyLink = async () => {
     setMenuOpen(false);
@@ -198,6 +200,9 @@ export function CreatorHeader({
                         <button type="button" role="menuitem" onClick={copyLink} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-lilac/85 hover:bg-white/5">
                           <Link2 size={14} /> Copy link
                         </button>
+                        <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); setReporting(true); }} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-lilac/85 hover:bg-white/5">
+                          <Flag size={14} /> Report
+                        </button>
                         <button type="button" role="menuitem" disabled={blocking} onClick={onBlock} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-red-300 hover:bg-red-500/10 disabled:opacity-50">
                           <Ban size={14} /> {blocked ? "Unblock" : "Block"}
                         </button>
@@ -221,6 +226,15 @@ export function CreatorHeader({
           </div>
         </div>
       </div>
+
+      {reporting && creator.id && (
+        <ReportModal
+          targetType="user"
+          targetId={creator.id}
+          targetLabel={creator.displayName}
+          onClose={() => setReporting(false)}
+        />
+      )}
     </div>
   );
 }

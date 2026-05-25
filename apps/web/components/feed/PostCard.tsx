@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { BadgeCheck, Heart, MessageCircle, Bookmark, Coins, Lock } from "lucide-react";
+import { BadgeCheck, Heart, MessageCircle, Bookmark, Coins, Lock, Flag } from "lucide-react";
 import { toggleLike, toggleSave } from "@/lib/engagement/actions";
 import { useToast } from "@/components/ui/Toast";
+import { ReportModal } from "@/components/moderation/ReportModal";
 import { Comments } from "./Comments";
 import { TipModal } from "./TipModal";
 import { cn, formatNumber, relativeTime } from "@/lib/utils";
@@ -45,6 +46,7 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
   const [saved, setSaved] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [tipOpen, setTipOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const reduce = useReducedMotion();
   const [, startTransition] = useTransition();
   // Demo posts aren't in the database; keep their interactions local-only.
@@ -116,6 +118,16 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
           <span className="text-[0.65rem] uppercase tracking-wider text-cyan border border-cyan/20 rounded-full px-2 py-0.5">
             {post.category}
           </span>
+        )}
+        {isReal && (
+          <button
+            type="button"
+            onClick={() => setReportOpen(true)}
+            aria-label="Report post"
+            className="text-lilac/40 hover:text-magenta transition-colors"
+          >
+            <Flag size={15} />
+          </button>
         )}
       </header>
 
@@ -199,6 +211,14 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
           creatorName={post.creatorName}
           postId={post.id}
           onClose={() => setTipOpen(false)}
+        />
+      )}
+      {reportOpen && (
+        <ReportModal
+          targetType="post"
+          targetId={post.id}
+          targetLabel="post"
+          onClose={() => setReportOpen(false)}
         />
       )}
     </motion.article>
