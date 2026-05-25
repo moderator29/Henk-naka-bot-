@@ -1,28 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { OnboardingFlow } from "./OnboardingFlow";
-import { isOnboardingComplete } from "./OnboardingFlow";
+import { OnboardingFlow, isOnboardingComplete } from "./OnboardingFlow";
+import { completeOnboarding } from "@/lib/onboarding/actions";
 
 /**
- * Mounts the OnboardingFlow exactly once when a brand-new user enters the
- * platform. Wraps platform pages at the layout level so the flow shows on
- * the first platform paint, not the marketing surface.
- *
- * Server-side persistence in user_preferences.onboarding_completed is added
- * once auth is wired (sub-branch #8). Until then, completion is recorded
- * in localStorage so the flow doesn't reshow on refresh.
- * PENDING_SUPABASE_AUTH.
+ * Mounts the OnboardingFlow once for a new user on the first platform paint.
+ * Completion is the source of truth in user_preferences.onboarding_completed
+ * (passed in from the server layout); localStorage is a client-side cache so
+ * the flow never re-shows mid-session.
  */
-export function OnboardingGate() {
+export function OnboardingGate({
+  initiallyComplete = false,
+}: {
+  initiallyComplete?: boolean;
+}) {
   const [shouldShow, setShouldShow] = useState(false);
 
   useEffect(() => {
-    if (!isOnboardingComplete()) {
+    if (!initiallyComplete && !isOnboardingComplete()) {
       setShouldShow(true);
     }
-  }, []);
+  }, [initiallyComplete]);
+
+  const finish = () => {
+    setShouldShow(false);
+    void completeOnboarding();
+  };
 
   if (!shouldShow) return null;
-  return <OnboardingFlow onComplete={() => setShouldShow(false)} onSkip={() => setShouldShow(false)} />;
+  return <OnboardingFlow onComplete={finish} onSkip={finish} />;
 }
