@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { BadgeCheck, Heart, MessageCircle, Bookmark, Coins, Lock } from "lucide-react";
+import { toggleLike, toggleSave } from "@/lib/engagement/actions";
 import { cn, formatNumber, relativeTime } from "@/lib/utils";
 
 export interface FeedPost {
@@ -28,6 +29,20 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const reduce = useReducedMotion();
+  const [, startTransition] = useTransition();
+  // Demo posts aren't in the database; keep their interactions local-only.
+  const isReal = !post.id.startsWith("demo");
+
+  const onLike = () => {
+    const next = !liked;
+    setLiked(next);
+    if (isReal) startTransition(() => void toggleLike(post.id, next));
+  };
+  const onSave = () => {
+    const next = !saved;
+    setSaved(next);
+    if (isReal) startTransition(() => void toggleSave(post.id, next));
+  };
 
   return (
     <motion.article
@@ -90,7 +105,7 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
       <footer className="mt-4 flex items-center gap-6 text-sm">
         <button
           type="button"
-          onClick={() => setLiked((v) => !v)}
+          onClick={onLike}
           className={cn(
             "inline-flex items-center gap-1.5 transition-colors",
             liked ? "text-magenta" : "text-lilac/60 hover:text-white"
@@ -109,7 +124,7 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
         </span>
         <button
           type="button"
-          onClick={() => setSaved((v) => !v)}
+          onClick={onSave}
           className={cn(
             "inline-flex items-center gap-1.5 transition-colors ml-auto",
             saved ? "text-cyan" : "text-lilac/60 hover:text-white"

@@ -1,23 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { BadgeCheck, Heart, Plus, Coins } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { StatTicker } from "@/components/ui/StatTicker";
+import { toggleFollow } from "@/lib/engagement/actions";
 import { formatNumber } from "@/lib/utils";
 import type { CreatorProfileData } from "@/lib/creators/types";
 
 /**
- * Cover with parallax scroll + floating profile card (RPD §6.2). Follow /
- * Subscribe / Tip are interactive locally; they persist once auth + the
- * subscribe/tip flows are wired (Phase 3). Labeled in-handler.
+ * Cover with parallax scroll + floating profile card (RPD §6.2). Follow writes
+ * through to Supabase (toggleFollow); Subscribe / Tip persist once those flows
+ * are wired. Optimistic, reverts only if the user isn't signed in.
  */
 export function CreatorHeader({ creator }: { creator: CreatorProfileData }) {
   const { scrollY } = useScroll();
   const coverY = useTransform(scrollY, [0, 400], [0, 120]);
   const coverScale = useTransform(scrollY, [0, 400], [1, 1.15]);
   const [following, setFollowing] = useState(false);
+  const [, startFollow] = useTransition();
+
+  const onFollow = () => {
+    const next = !following;
+    setFollowing(next);
+    startFollow(async () => {
+      const res = await toggleFollow(creator.username, next);
+      if (res.needsAuth) setFollowing(!next);
+    });
+  };
 
   return (
     <div className="relative">
@@ -83,7 +94,7 @@ export function CreatorHeader({ creator }: { creator: CreatorProfileData }) {
             <div className="flex items-center gap-2 flex-shrink-0">
               <Button
                 variant={following ? "glass" : "secondary"}
-                onClick={() => setFollowing((v) => !v)}
+                onClick={onFollow}
                 leftIcon={following ? <BadgeCheck size={16} /> : <Plus size={16} />}
               >
                 {following ? "Following" : "Follow"}
