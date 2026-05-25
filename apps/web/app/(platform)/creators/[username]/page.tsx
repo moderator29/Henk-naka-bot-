@@ -50,7 +50,7 @@ export default async function CreatorProfilePage({
         </div>
 
         <aside className="order-1 lg:order-2 flex flex-col gap-6">
-          <CatchMeUpButton displayName={creator.displayName} />
+          <CatchMeUpButton displayName={creator.displayName} username={creator.username} />
           <div>
             <h2 className="font-display text-lg font-semibold text-white mb-3">
               Subscription tiers
