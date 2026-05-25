@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { ThreadView, type ThreadMessage } from "./ThreadView";
 import { useRealtimeMessages } from "@/lib/messaging/useRealtimeMessages";
-import { sendMessage } from "@/lib/messaging/actions";
+import { sendMessage, markConversationRead } from "@/lib/messaging/actions";
 
 /**
  * Wires a thread to live data: seeds with server-rendered messages, subscribes
@@ -37,6 +37,13 @@ export function ThreadContainer({
     conversationId,
     initialMessages
   );
+
+  // Clear unread receipts whenever the thread is open and a new inbound
+  // message arrives. markConversationRead only touches messages we received.
+  useEffect(() => {
+    if (!meId) return;
+    void markConversationRead(conversationId);
+  }, [conversationId, meId, messages.length]);
 
   const onSend = useCallback(
     async (body: string) => {

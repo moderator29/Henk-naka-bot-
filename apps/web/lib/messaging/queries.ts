@@ -26,6 +26,22 @@ interface ConversationRow {
   last_message_at: string | null;
 }
 
+interface ParticipantRow {
+  id: string;
+  username: string | null;
+  display_name: string | null;
+  avatar_url: string | null;
+  is_verified: boolean;
+}
+
+interface PreviewMessageRow {
+  conversation_id: string;
+  sender_id: string;
+  body: string | null;
+  created_at: string;
+  read_at: string | null;
+}
+
 export async function listConversations(): Promise<ConversationPreview[]> {
   if (!supabaseConfigured()) return [];
   const me = await getSessionUser();
@@ -37,20 +53,62 @@ export async function listConversations(): Promise<ConversationPreview[]> {
     .select("id, participant_a, participant_b, last_message_at")
     .order("last_message_at", { ascending: false, nullsFirst: false });
 
-  if (error || !data) return [];
+  if (error || !data || data.length === 0) return [];
 
-  // Shape into previews. The other participant's profile + last-message text
-  // are resolved in a follow-up join once profiles are seeded; for now we
-  // return the thread skeleton (no fabricated names/messages).
-  return (data as ConversationRow[]).map((row) => {
-    const otherId =
-      row.participant_a === me.id ? row.participant_b : row.participant_a;
+  const rows = data as ConversationRow[];
+  const otherIdFor = (row: ConversationRow) =>
+    row.participant_a === me.id ? row.participant_b : row.participant_a;
+
+  const otherIds = Array.from(new Set(rows.map(otherIdFor)));
+  const convIds = rows.map((r) => r.id);
+
+  // One round-trip each for the other participants' public profiles and the
+  // recent messages across all threads, so we avoid an N+1 per conversation.
+  const [{ data: users }, { data: msgs }] = await Promise.all([
+    supabase
+      .from("users")
+      .select("id, username, display_name, avatar_url, is_verified")
+      .in("id", otherIds),
+    supabase
+      .from("messages")
+      .select("conversation_id, sender_id, body, created_at, read_at")
+      .in("conversation_id", convIds)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  const userById = new Map(
+    ((users ?? []) as ParticipantRow[]).map((u) => [u.id, u])
+  );
+
+  const lastByConv = new Map<string, { body: string; createdAt: string }>();
+  const unreadByConv = new Map<string, number>();
+  for (const m of (msgs ?? []) as PreviewMessageRow[]) {
+    if (!lastByConv.has(m.conversation_id)) {
+      lastByConv.set(m.conversation_id, {
+        body: m.body ?? "",
+        createdAt: m.created_at,
+      });
+    }
+    if (m.sender_id !== me.id && m.read_at == null) {
+      unreadByConv.set(
+        m.conversation_id,
+        (unreadByConv.get(m.conversation_id) ?? 0) + 1
+      );
+    }
+  }
+
+  return rows.map((row) => {
+    const other = userById.get(otherIdFor(row));
+    const last = lastByConv.get(row.id);
     return {
       id: row.id,
-      displayName: otherId.slice(0, 8),
-      lastMessage: "",
-      lastMessageAt: row.last_message_at ?? new Date().toISOString(),
-      unreadCount: 0,
+      displayName: other?.display_name ?? other?.username ?? "Member",
+      avatarUrl: other?.avatar_url ?? null,
+      verified: !!other?.is_verified,
+      lastMessage: last?.body ?? "",
+      lastMessageAt:
+        row.last_message_at ?? last?.createdAt ?? new Date().toISOString(),
+      unreadCount: unreadByConv.get(row.id) ?? 0,
     } satisfies ConversationPreview;
   });
 }

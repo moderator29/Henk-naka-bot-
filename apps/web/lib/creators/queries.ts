@@ -91,6 +91,7 @@ export async function getCreatorByUsername(
     : 0;
 
   return {
+    id: user.id,
     username: user.username ?? username,
     displayName: user.display_name ?? username,
     tagline: profile?.tagline ?? "",

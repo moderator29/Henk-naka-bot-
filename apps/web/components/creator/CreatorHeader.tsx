@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { BadgeCheck, Heart, Plus, Coins } from "lucide-react";
+import { BadgeCheck, Heart, Plus, Coins, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { StatTicker } from "@/components/ui/StatTicker";
+import { useToast } from "@/components/ui/Toast";
 import { toggleFollow } from "@/lib/engagement/actions";
+import { startConversation } from "@/lib/messaging/actions";
 import { formatNumber } from "@/lib/utils";
 import type { CreatorProfileData } from "@/lib/creators/types";
 
@@ -15,11 +18,14 @@ import type { CreatorProfileData } from "@/lib/creators/types";
  * are wired. Optimistic, reverts only if the user isn't signed in.
  */
 export function CreatorHeader({ creator }: { creator: CreatorProfileData }) {
+  const router = useRouter();
+  const { push } = useToast();
   const { scrollY } = useScroll();
   const coverY = useTransform(scrollY, [0, 400], [0, 120]);
   const coverScale = useTransform(scrollY, [0, 400], [1, 1.15]);
   const [following, setFollowing] = useState(false);
   const [, startFollow] = useTransition();
+  const [messaging, startMessage] = useTransition();
 
   const onFollow = () => {
     const next = !following;
@@ -27,6 +33,20 @@ export function CreatorHeader({ creator }: { creator: CreatorProfileData }) {
     startFollow(async () => {
       const res = await toggleFollow(creator.username, next);
       if (res.needsAuth) setFollowing(!next);
+    });
+  };
+
+  const onMessage = () => {
+    if (!creator.id) return;
+    startMessage(async () => {
+      const res = await startConversation(creator.id!);
+      if (res.ok && res.conversationId) {
+        router.push(`/messages/${res.conversationId}`);
+      } else if (res.needsAuth) {
+        push({ tone: "error", title: "Sign in to send a message" });
+      } else {
+        push({ tone: "error", title: res.error ?? "Could not open chat" });
+      }
     });
   };
 
@@ -100,6 +120,17 @@ export function CreatorHeader({ creator }: { creator: CreatorProfileData }) {
                 {following ? "Following" : "Follow"}
               </Button>
               <Button leftIcon={<Heart size={16} />}>Subscribe</Button>
+              {creator.id && (
+                <Button
+                  variant="glass"
+                  size="icon"
+                  aria-label="Message"
+                  onClick={onMessage}
+                  loading={messaging}
+                >
+                  <MessageCircle size={16} />
+                </Button>
+              )}
               <Button variant="glass" size="icon" aria-label="Tip">
                 <Coins size={16} />
               </Button>

@@ -21,6 +21,9 @@ export interface CreatorPostCard {
 }
 
 export interface CreatorProfileData {
+  /** The creator's user id. Present only for real, onboarded creators (used
+   * to start a DM); undefined for the labeled preview/demo profiles. */
+  id?: string;
   username: string;
   displayName: string;
   tagline: string;
