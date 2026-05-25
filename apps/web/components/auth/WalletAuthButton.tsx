@@ -68,12 +68,14 @@ export function WalletAuthButton() {
 
       const result = (await verifyRes.json()) as {
         session: unknown;
+        isNew?: boolean;
         note?: string;
       };
 
       setStatus("done");
       if (result.session) {
-        window.location.href = "/feed";
+        // First-time wallet -> onboarding to set up the profile; returning -> app.
+        window.location.href = result.isNew ? "/onboarding" : "/feed";
       } else {
         setMessage(
           result.note ??

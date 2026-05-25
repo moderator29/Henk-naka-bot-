@@ -281,17 +281,3 @@ export async function resendConfirmationAction(
   }
   return { notice: "Sent. Check your inbox for the confirmation link." };
 }
-
-/** Kicks off Google OAuth; Supabase returns a redirect URL to the provider. */
-export async function signInWithGoogleAction() {
-  const supabase = createClient();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo: `${APP_URL}/auth/callback` },
-  });
-
-  if (error || !data.url) {
-    redirect("/login?error=oauth");
-  }
-  redirect(data.url);
-}

@@ -120,12 +120,21 @@ export async function POST(req: NextRequest) {
     });
     if (otpErr || !sess.session || !sess.user) throw new Error("otp");
 
+    // A wallet-first account is "new" until it has picked a username; route
+    // those into onboarding to set up their profile.
+    const { data: existing } = await admin
+      .from("users")
+      .select("username")
+      .eq("id", sess.user.id)
+      .maybeSingle<{ username: string | null }>();
+    const isNew = !existing?.username;
+
     await admin
       .from("users")
       .update({ wallet_address: address })
       .eq("id", sess.user.id);
 
-    return NextResponse.json({ verified: true, address, session: true });
+    return NextResponse.json({ verified: true, address, session: true, isNew });
   } catch {
     return NextResponse.json(
       {
