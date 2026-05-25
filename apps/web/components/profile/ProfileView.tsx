@@ -24,6 +24,7 @@ import { Modal, ModalContent } from "@/components/ui/Modal";
 import { PostCard, type FeedPost } from "@/components/feed/PostCard";
 import { PveelsFeed } from "@/components/pveels/PveelsFeed";
 import { EditProfileForm } from "@/components/profile/EditProfileForm";
+import { FollowListModal } from "@/components/profile/FollowListModal";
 import { SubscriberBadge } from "@/components/subscriptions/SubscriberBadge";
 import { useToast } from "@/components/ui/Toast";
 import { cn, formatNumber, relativeTime } from "@/lib/utils";
@@ -41,6 +42,7 @@ const TABS: { id: Tab; label: string }[] = [
 interface ProfileViewProps {
   signedIn: boolean;
   email: string | null;
+  userId?: string | null;
   isCreator?: boolean;
   isSubscriber?: boolean;
   profile?: {
@@ -71,6 +73,7 @@ function tileGradient(seed: string): string {
 export function ProfileView({
   signedIn,
   email,
+  userId = null,
   isCreator = false,
   isSubscriber = false,
   profile,
@@ -85,6 +88,7 @@ export function ProfileView({
   const [editing, setEditing] = useState(false);
   const [selected, setSelected] = useState<FeedPost | null>(null);
   const [pveelsOpen, setPveelsOpen] = useState(false);
+  const [followList, setFollowList] = useState<"followers" | "following" | null>(null);
   const { push } = useToast();
 
   const displayName =
@@ -172,8 +176,8 @@ export function ProfileView({
 
           <div className="mt-6 grid grid-cols-3 gap-4 border-t border-white/5 pt-5">
             <Stat label="Posts" value={posts.length} />
-            <Stat label="Followers" value={followerCount} />
-            <Stat label="Following" value={followingCount} />
+            <Stat label="Followers" value={followerCount} onClick={userId ? () => setFollowList("followers") : undefined} />
+            <Stat label="Following" value={followingCount} onClick={userId ? () => setFollowList("following") : undefined} />
           </div>
         </motion.div>
       </div>
@@ -313,6 +317,10 @@ export function ProfileView({
         </Modal>
       )}
 
+      {followList && userId && (
+        <FollowListModal userId={userId} mode={followList} onClose={() => setFollowList(null)} />
+      )}
+
       {/* Pveels viewer scoped to this creator's clips */}
       {pveelsOpen && (
         <div className="fixed inset-0 z-50 bg-plum">
@@ -400,17 +408,33 @@ function PostTile({ post, onOpen }: { post: FeedPost; onOpen: () => void }) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="text-center">
+function Stat({
+  label,
+  value,
+  onClick,
+}: {
+  label: string;
+  value: number;
+  onClick?: () => void;
+}) {
+  const inner = (
+    <>
       <div className="font-display text-xl sm:text-2xl font-semibold text-white">
         <StatTicker value={value} />
       </div>
       <div className="text-[0.7rem] uppercase tracking-wider text-lilac/50 mt-0.5">
         {label}
       </div>
-    </div>
+    </>
   );
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className="text-center rounded-xl py-1 transition-colors hover:bg-white/5">
+        {inner}
+      </button>
+    );
+  }
+  return <div className="text-center">{inner}</div>;
 }
 
 function EmptyTab({

@@ -95,6 +95,7 @@ export default async function ProfilePage() {
     <ProfileView
       signedIn={!!me}
       email={me?.email ?? null}
+      userId={me?.id ?? null}
       isCreator={isCreator}
       isSubscriber={isSubscriber}
       profile={profile}
