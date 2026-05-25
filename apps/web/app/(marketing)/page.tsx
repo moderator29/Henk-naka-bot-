@@ -6,6 +6,8 @@ import { AIShowcase } from "@/components/marketing/sections/AIShowcase";
 import { CreatorsCarousel } from "@/components/marketing/sections/CreatorsCarousel";
 import { StakingCTA } from "@/components/marketing/sections/StakingCTA";
 import { Journey } from "@/components/marketing/sections/Journey";
+import { FAQ } from "@/components/marketing/sections/FAQ";
+import { FinalCTA } from "@/components/marketing/sections/FinalCTA";
 
 export default function LandingPage() {
   return (
@@ -19,6 +21,8 @@ export default function LandingPage() {
       <CreatorsCarousel />
       <StakingCTA />
       <Journey />
+      <FAQ />
+      <FinalCTA />
     </>
   );
 }

@@ -13,6 +13,8 @@ const navLinks = [
   { href: "/token", label: "Token" },
   { href: "/journey", label: "Journey" },
   { href: "/staking", label: "Staking" },
+  { href: "/docs", label: "Docs" },
+  { href: "/#faq", label: "FAQ" },
 ];
 
 export function MarketingNav() {
