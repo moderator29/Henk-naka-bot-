@@ -57,7 +57,7 @@ function memoryAllow(key: string, requests: number, windowMs: number): boolean {
   return true;
 }
 
-const WINDOW_MS: Record<string, number> = {
+const WINDOW_MS: Record<"s" | "m" | "h" | "d", number> = {
   s: 1000,
   m: 60_000,
   h: 3_600_000,
@@ -80,7 +80,7 @@ export async function rateLimit(
     const res = await rl.limit(key);
     return res.success;
   }
-  const [n, unit] = window.split(" ") as [string, keyof typeof WINDOW_MS];
+  const [n, unit] = window.split(" ") as [string, "s" | "m" | "h" | "d"];
   return memoryAllow(key, requests, Number(n) * WINDOW_MS[unit]);
 }
 
