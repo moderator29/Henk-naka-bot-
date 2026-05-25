@@ -240,7 +240,7 @@ export function ProfileView({
             </div>
           </div>
           <Button variant="glass" asChild>
-            <Link href="/settings">Open</Link>
+            <Link href={isCreator ? "/dashboard" : "/settings"}>Open</Link>
           </Button>
         </Card>
       </div>

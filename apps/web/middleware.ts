@@ -16,6 +16,7 @@ const PROTECTED_PREFIXES = [
   "/messages",
   "/marketplace",
   "/staking",
+  "/dashboard",
   "/profile",
   "/settings",
   "/compose",
