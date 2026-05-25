@@ -41,6 +41,7 @@ interface ProfileViewProps {
     bio: string | null;
   } | null;
   posts?: FeedPost[];
+  likedPosts?: FeedPost[];
   followerCount?: number;
   followingCount?: number;
 }
@@ -63,10 +64,12 @@ export function ProfileView({
   isCreator = false,
   profile,
   posts = [],
+  likedPosts = [],
   followerCount = 0,
   followingCount = 0,
 }: ProfileViewProps) {
   const [tab, setTab] = useState<Tab>("posts");
+  const mediaPosts = posts.filter((p) => (p.media?.length ?? 0) > 0);
   const [editing, setEditing] = useState(false);
   const [selected, setSelected] = useState<FeedPost | null>(null);
   const { push } = useToast();
@@ -214,21 +217,35 @@ export function ProfileView({
             />
           ))}
 
-        {tab === "media" && (
-          <EmptyTab
-            icon={<ImageIcon size={28} />}
-            title="No media yet"
-            body="Photo and video posts will appear here."
-          />
-        )}
+        {tab === "media" &&
+          (mediaPosts.length > 0 ? (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {mediaPosts.map((p) => (
+                <PostTile key={p.id} post={p} onOpen={() => setSelected(p)} />
+              ))}
+            </div>
+          ) : (
+            <EmptyTab
+              icon={<ImageIcon size={28} />}
+              title="No media yet"
+              body="Photo and video posts will appear here."
+            />
+          ))}
 
-        {tab === "likes" && (
-          <EmptyTab
-            icon={<Heart size={28} />}
-            title="Nothing liked yet"
-            body="Posts you like will appear here."
-          />
-        )}
+        {tab === "likes" &&
+          (likedPosts.length > 0 ? (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {likedPosts.map((p) => (
+                <PostTile key={p.id} post={p} onOpen={() => setSelected(p)} />
+              ))}
+            </div>
+          ) : (
+            <EmptyTab
+              icon={<Heart size={28} />}
+              title="Nothing liked yet"
+              body="Posts you like will appear here."
+            />
+          ))}
       </div>
 
       {/* Wallet shortcut */}
