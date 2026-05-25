@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { BadgeCheck, Heart, MessageCircle, Bookmark, Coins, Lock } from "lucide-react";
 import { toggleLike, toggleSave } from "@/lib/engagement/actions";
 import { Comments } from "./Comments";
+import { TipModal } from "./TipModal";
 import { cn, formatNumber, relativeTime } from "@/lib/utils";
 
 export interface FeedPost {
@@ -30,6 +31,7 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [tipOpen, setTipOpen] = useState(false);
   const reduce = useReducedMotion();
   const [, startTransition] = useTransition();
   // Demo posts aren't in the database; keep their interactions local-only.
@@ -148,6 +150,7 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
         </button>
         <button
           type="button"
+          onClick={() => setTipOpen(true)}
           className="inline-flex items-center gap-1.5 text-lilac/60 hover:text-magenta transition-colors"
           aria-label="Tip"
         >
@@ -156,6 +159,14 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
       </footer>
 
       {commentsOpen && isReal && <Comments postId={post.id} />}
+      {tipOpen && (
+        <TipModal
+          username={post.creatorUsername}
+          creatorName={post.creatorName}
+          postId={post.id}
+          onClose={() => setTipOpen(false)}
+        />
+      )}
     </motion.article>
   );
 }

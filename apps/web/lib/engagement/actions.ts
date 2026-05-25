@@ -161,6 +161,48 @@ export async function addComment(
   return { ok: true, comment: mapComment(data as unknown as CommentRow) };
 }
 
+export async function getTipRecipient(
+  username: string
+): Promise<{ userId: string; wallet: string | null } | null> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("users")
+    .select("id, wallet_address")
+    .eq("username", username)
+    .maybeSingle<{ id: string; wallet_address: string | null }>();
+  return data ? { userId: data.id, wallet: data.wallet_address } : null;
+}
+
+/** Record an on-chain tip after the wallet transfer confirms. */
+export async function recordTip(
+  toUsername: string,
+  amountNsfw: string,
+  txHash: string,
+  postId?: string
+): Promise<EngagementResult> {
+  const user = await me();
+  if (!user) return { ok: false, needsAuth: true };
+
+  const recipient = await getTipRecipient(toUsername);
+  if (!recipient) return { ok: false };
+
+  const supabase = createClient();
+  const { error } = await supabase.from("tips").insert({
+    from_user: user.id,
+    to_user: recipient.userId,
+    amount_nsfw: amountNsfw,
+    tx_hash: txHash,
+    post_id: postId && !postId.startsWith("demo") ? postId : null,
+  });
+  if (error) return { ok: false };
+  await notify(recipient.userId, user.id, "tip", {
+    amountNsfw,
+    txHash,
+    actorId: user.id,
+  });
+  return { ok: true };
+}
+
 export async function toggleSave(
   postId: string,
   save: boolean
