@@ -7,6 +7,7 @@ import { polygon } from "viem/chains";
 import { SIWE_NONCE_COOKIE } from "@/lib/auth/siwe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit, clientIp } from "@/lib/security/ratelimit";
 
 /**
  * Verifies a SIWE signature, enforces single-use nonce + replay protection,
@@ -38,6 +39,11 @@ const publicClient = createPublicClient({
 });
 
 export async function POST(req: NextRequest) {
+  const allowed = await rateLimit("siwe-verify", clientIp(req.headers), 15, "1 m");
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many attempts" }, { status: 429 });
+  }
+
   let body: z.infer<typeof bodySchema>;
   try {
     body = bodySchema.parse(await req.json());

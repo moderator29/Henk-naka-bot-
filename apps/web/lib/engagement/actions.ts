@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth/session";
+import { rateLimit } from "@/lib/security/ratelimit";
 import type { CommentItem } from "./types";
 
 /**
@@ -191,6 +192,10 @@ export async function recordTip(
 ): Promise<EngagementResult> {
   const user = await me();
   if (!user) return { ok: false, needsAuth: true };
+
+  if (!(await rateLimit("tip-record", user.id, 60, "1 h"))) {
+    return { ok: false };
+  }
 
   const recipient = await getTipRecipient(toUsername);
   if (!recipient) return { ok: false };

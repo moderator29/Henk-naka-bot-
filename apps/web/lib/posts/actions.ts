@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdult, getSessionUser } from "@/lib/auth/session";
+import { rateLimit } from "@/lib/security/ratelimit";
 
 /**
  * Create a post. Real Supabase insert into `posts`. Public media goes to the
@@ -46,6 +47,10 @@ export async function createPost(formData: FormData): Promise<CreatePostResult> 
     user = await requireAdult();
   } catch {
     return { ok: false, error: "Sign in to post." };
+  }
+
+  if (!(await rateLimit("post-create", user.id, 30, "1 h"))) {
+    return { ok: false, error: "You're posting too fast. Try again shortly." };
   }
 
   const parsed = schema.safeParse({
