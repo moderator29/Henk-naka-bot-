@@ -10,6 +10,7 @@ import {
   sendPasswordChangedEmail,
   sendAccountDeletionEmail,
 } from "@/lib/email/resend";
+import type { UserSettings } from "./settings";
 
 /**
  * Profile + account actions for the signed-in user. Profile writes run under
@@ -111,6 +112,42 @@ export async function updateProfile(
     }
     return { ok: false, error: "Could not save. Try again." };
   }
+  return { ok: true };
+}
+
+/** Persist notification / AI / language preferences to user_preferences. */
+export async function updatePreferences(
+  formData: FormData
+): Promise<{ ok: boolean; error?: string }> {
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me) return { ok: false, error: "Sign in first." };
+
+  const on = (k: string) => formData.get(k) === "on";
+  const settings: UserSettings = {
+    notifications: {
+      follows: on("notif_follows"),
+      posts: on("notif_posts"),
+      tips: on("notif_tips"),
+      renewals: on("notif_renewals"),
+    },
+    ai: {
+      concierge: on("ai_concierge"),
+      search: on("ai_search"),
+      copilot: on("ai_copilot"),
+    },
+    language: String(formData.get("language") ?? "en"),
+  };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("user_preferences")
+    .upsert({ user_id: me.id, settings }, { onConflict: "user_id" });
+  if (error) return { ok: false, error: "Could not save preferences." };
   return { ok: true };
 }
 

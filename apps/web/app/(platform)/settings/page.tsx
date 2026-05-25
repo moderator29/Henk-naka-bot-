@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/Button";
 import { ReplayOnboardingAction } from "@/components/onboarding/ReplayOnboardingAction";
 import { AccountSettings } from "@/components/settings/AccountSettings";
 import { PasswordSettings } from "@/components/settings/PasswordSettings";
+import { PreferencesSettings } from "@/components/settings/PreferencesSettings";
 import { DangerZone } from "@/components/settings/DangerZone";
+import { DEFAULT_SETTINGS, type UserSettings } from "@/lib/profile/settings";
 import { getSessionUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -22,24 +24,39 @@ export default async function SettingsPage() {
   const me = await getSessionUser();
 
   let initial = { displayName: "", username: "", bio: "", country: "" };
+  let prefs: UserSettings = DEFAULT_SETTINGS;
   if (me && configured()) {
     const supabase = createClient();
-    const { data } = await supabase
-      .from("users")
-      .select("display_name, username, bio, country")
-      .eq("id", me.id)
-      .maybeSingle<{
-        display_name: string | null;
-        username: string | null;
-        bio: string | null;
-        country: string | null;
-      }>();
+    const [{ data }, { data: pref }] = await Promise.all([
+      supabase
+        .from("users")
+        .select("display_name, username, bio, country")
+        .eq("id", me.id)
+        .maybeSingle<{
+          display_name: string | null;
+          username: string | null;
+          bio: string | null;
+          country: string | null;
+        }>(),
+      supabase
+        .from("user_preferences")
+        .select("settings")
+        .eq("user_id", me.id)
+        .maybeSingle<{ settings: UserSettings | null }>(),
+    ]);
     if (data) {
       initial = {
         displayName: data.display_name ?? "",
         username: data.username ?? "",
         bio: data.bio ?? "",
         country: data.country ?? "",
+      };
+    }
+    if (pref?.settings) {
+      prefs = {
+        notifications: { ...DEFAULT_SETTINGS.notifications, ...pref.settings.notifications },
+        ai: { ...DEFAULT_SETTINGS.ai, ...pref.settings.ai },
+        language: pref.settings.language ?? DEFAULT_SETTINGS.language,
       };
     }
   }
@@ -56,6 +73,7 @@ export default async function SettingsPage() {
       </header>
 
       <AccountSettings initial={initial} />
+      <PreferencesSettings initial={prefs} />
       <PasswordSettings />
 
       <Card className="edge-light flex items-center justify-between gap-4">

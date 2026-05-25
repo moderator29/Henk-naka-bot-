@@ -129,6 +129,7 @@ create table if not exists public.user_preferences (
   categories_interest jsonb,
   creator_affinities jsonb,
   ai_persona_memory jsonb,
+  settings jsonb,
   onboarding_completed boolean not null default false,
   onboarding_completed_at timestamptz,
   updated_at timestamptz not null default now()

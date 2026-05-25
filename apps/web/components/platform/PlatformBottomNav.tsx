@@ -7,7 +7,7 @@ import {
   Compass,
   Home,
   Plus,
-  MessageCircle,
+  Clapperboard,
   User,
   type LucideIcon,
 } from "lucide-react";
@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils";
 /**
  * Mobile glass tab bar (Part 6): the rail's pocket-sized counterpart, same
  * material and edge light, pinned above content with an elevated center "+"
- * that opens the composer. Discover and Feed flank the left, Messages and
- * Profile the right.
+ * that opens the composer. Home and Discover flank the left, Pveels and Profile
+ * the right; Messages and notifications live in the top context bar.
  */
 
 interface NavItem {
@@ -32,7 +32,7 @@ const left: NavItem[] = [
 ];
 
 const right: NavItem[] = [
-  { href: "/messages", label: "Messages", icon: MessageCircle },
+  { href: "/pveels", label: "Pveels", icon: Clapperboard },
   { href: "/profile", label: "Profile", icon: User },
 ];
 

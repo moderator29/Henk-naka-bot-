@@ -252,6 +252,7 @@ export const userPreferences = pgTable("user_preferences", {
   categoriesInterest: jsonb("categories_interest"),
   creatorAffinities: jsonb("creator_affinities"),
   aiPersonaMemory: jsonb("ai_persona_memory"),
+  settings: jsonb("settings"),
   onboardingCompleted: boolean("onboarding_completed").default(false).notNull(),
   onboardingCompletedAt: timestamp("onboarding_completed_at", {
     withTimezone: true,
