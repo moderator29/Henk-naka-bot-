@@ -118,12 +118,16 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "Feed" },
       {
         type: "p",
-        text: "Feed shows posts from creators you follow, newest first. Gated posts are blurred until your subscription tier matches. When your Feed is empty, we'll point you back to Discover.",
+        text: "Feed shows posts from creators you follow, newest first. Subscriber-only posts show a locked preview with a Subscribe prompt until your subscription matches, the media itself stays private, never just visually blurred. When your Feed is empty, we'll point you back to Discover.",
       },
-      { type: "h2", text: "Smart Search" },
+      { type: "h2", text: "Search" },
       {
         type: "p",
-        text: "The search bar at the top reads plain English. Try \"creators under 1k followers who post weekly\" or \"NFTs under 50 $NSFW with a cosplay theme.\" If the AI's confidence is low, it falls back to ordinary text search so you always get something useful.",
+        text: "Search reliably finds any creator by display name or @username, plus posts and Pveels by caption. Open it from the nav, results are live as you type and split into People, Posts, and Pveels tabs, with your recent searches saved.",
+      },
+      {
+        type: "p",
+        text: "The top bar also has Smart Search, which reads plain English. Try \"creators under 1k followers who post weekly\" or \"NFTs under 50 $NSFW with a cosplay theme.\" If the AI's confidence is low, it falls back to ordinary text search so you always get something useful.",
       },
       {
         type: "callout",
@@ -145,7 +149,19 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "Subscribing is the paid tier" },
       {
         type: "p",
-        text: "Creators set their own subscription tiers and prices. Subscribing unlocks gated posts, direct messages with that creator, and any perks they've listed for that tier. You pay in $NSFW from your wallet.",
+        text: "The standard subscription is $20 a month, charged in the equivalent amount of $NSFW (the subscribe screen shows both the $20 and the live $NSFW amount). Creators set their own tier prices around that. Subscribing unlocks that creator's gated posts and Pveels, opens direct messages, and grants the Subscriber badge.",
+      },
+      { type: "h3", text: "What a subscription includes" },
+      {
+        type: "ul",
+        items: [
+          "All subscribers-only posts and Pveels from that creator",
+          "The Subscriber badge on your profile and next to your name",
+          "Direct messages with the creator",
+          "The ability to tip and request content",
+          "Early access to new posts and Pveels, plus exclusive behind-the-scenes",
+          "An ad-free, premium experience and premium AI features",
+        ],
       },
       { type: "h3", text: "Auto-renew" },
       {
@@ -219,22 +235,45 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "Set up your tiers" },
       {
         type: "p",
-        text: "Tiers are how fans subscribe. Most creators run one or two, start with a flagship tier covering everything, optionally add a premium tier with extras (1-on-1 DM time, exclusive series, NFT drops).",
+        text: "Tiers are how fans subscribe. Create them in Settings → Creator tiers: name the tier, set a price in $NSFW, and list the benefits. Your first tier marks your account as a creator. Activate or deactivate any tier at any time.",
+      },
+      { type: "h3", text: "Subscription pricing playbook" },
+      {
+        type: "ul",
+        items: [
+          "Anchor your main tier near the $20/month standard so the value reads instantly",
+          "Run one flagship tier that covers everything, before adding complexity",
+          "Add a premium tier (roughly 2-3x) only when you have extras to gate: 1-on-1 DM time, an exclusive series, early access, NFT drops",
+          "Price the benefits, not the content, list concrete perks fans can see",
+          "Raise prices for new subscribers as demand grows; keep existing fans grandfathered to reward loyalty",
+          "Review conversion in the dashboard monthly and adjust one variable at a time",
+        ],
       },
       {
         type: "callout",
         tone: "tip",
-        text: "Co-Pilot benchmarks pricing against similar creators on the platform and suggests a number for each tier. You can override it any time.",
+        text: "Co-Pilot benchmarks pricing against anonymized aggregates of similar creators and suggests a number for each tier. You can override it any time.",
       },
       { type: "h2", text: "Your first post" },
       {
         type: "p",
-        text: "Upload media, write a caption, pick whether it's public, follower-only, or tier-gated. Co-Pilot will offer three caption variations, playful, intimate, bold, and the best posting time for your specific audience.",
+        text: "Upload media, write a caption, and pick the audience with the buttons: Public, Free followers, Subscribers, or a specific tier. Co-Pilot offers three caption variations, playful, intimate, bold, and the best posting time for your audience.",
       },
-      { type: "h2", text: "Earnings" },
+      { type: "h2", text: "Earnings & payouts (step by step)" },
       {
-        type: "p",
-        text: "Subscription revenue and tips land in your wallet in $NSFW as they happen. The Earnings tab in your Creator Dashboard projects next month's revenue and breaks down what's driving it.",
+        type: "ul",
+        items: [
+          "1. Connect the wallet that receives your earnings in Settings → Connected wallets",
+          "2. Subscription payments and tips settle on-chain in $NSFW directly to that wallet as they happen, there's no platform middleman holding your money",
+          "3. Watch it accrue in your Creator Dashboard: total and recent earnings, top content, and subscriber growth",
+          "4. The Earnings Forecaster projects next month's revenue and breaks down what's driving it",
+          "5. Withdraw or swap your $NSFW from your own wallet whenever you like",
+        ],
+      },
+      {
+        type: "callout",
+        tone: "info",
+        text: "Automated on-chain payout scheduling is on the roadmap and activates once the payout contract address is set (PENDING_CONTRACT_ADDRESS). Until then, earnings still land in your wallet in real time, you just move them yourself.",
       },
     ],
   },
@@ -412,12 +451,17 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "How it works" },
       {
         type: "p",
-        text: "Open Messages from the nav, or the bell. Pick a conversation or start a new one, type, and send. Delivery is instant over a live connection, no refresh needed. Your conversation list orders by most recent so the active threads stay on top.",
+        text: "Open Messages from the nav or the bell. Tap the compose button to start a new conversation, search for anyone by name or @username and pick them. Type and send; delivery is instant over a live connection, no refresh needed. Your conversation list orders by most recent so active threads stay on top.",
       },
-      { type: "h2", text: "Who can message you" },
+      { type: "h3", text: "Read receipts" },
       {
         type: "p",
-        text: "Subscribing to a creator opens a direct channel with them. You stay in control of your inbox, and every message a creator sends is written and sent by them.",
+        text: "Your sent messages show a single tick when sent and a double tick once the other person has read them, updating live as they open the thread. You can also send normal images, voice notes aren't supported.",
+      },
+      { type: "h2", text: "Who can message you, and blocking" },
+      {
+        type: "p",
+        text: "Subscribing to a creator opens a direct channel with them. You stay in control of your inbox, and every message a creator sends is written and sent by them. Block anyone from their profile (the … menu): blocking stops messages both ways, removes the mutual follow, and hides them from your search. Manage your block list in Settings → Profile & privacy.",
       },
       {
         type: "callout",
@@ -438,12 +482,54 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "Watching" },
       {
         type: "p",
-        text: "Open Pveels from the nav, swipe up for the next clip, tap to like, and follow creators you discover without leaving the feed. Gated clips show a clean unlock prompt instead of the video.",
+        text: "Open Pveels from the nav. Each clip autoplays when it's in view and pauses when you scroll on. Swipe up for the next, swipe down to go back.",
       },
-      { type: "h2", text: "For creators" },
+      {
+        type: "ul",
+        items: [
+          "Tap once to pause or play, double-tap to like (the heart bursts)",
+          "Right rail: like, comment, tip in $NSFW, save, and share",
+          "Tap the speaker to unmute, your choice is remembered",
+          "Drag the bar at the bottom to scrub through a clip",
+          "Switch between the For You and Following feeds at the top",
+        ],
+      },
       {
         type: "p",
-        text: "Short video is one of the fastest ways to grow. Post a clip and it surfaces in Pveels and on your profile, turning viewers into followers and subscribers. Keep it on-brand and let the Co-Pilot help you plan a posting cadence.",
+        text: "Subscriber-only clips show an elegant locked preview with a Subscribe prompt, never the underlying video. The file itself is private and only served to you once you subscribe.",
+      },
+      { type: "h2", text: "Creating a Pveel" },
+      {
+        type: "p",
+        text: "Tap the box-shaped create button (the plus) in Pveels to open the creation studio. You can record in-app or upload a clip you already have.",
+      },
+      { type: "h3", text: "Record or upload" },
+      {
+        type: "ul",
+        items: [
+          "Record: use your camera, flip front/back, and capture up to 45 seconds",
+          "Upload: pick an MP4, WebM, or MOV up to 10 MB (45 seconds or less)",
+        ],
+      },
+      { type: "h3", text: "Edit and publish" },
+      {
+        type: "ul",
+        items: [
+          "Cover: scrub to choose the poster frame people see first",
+          "Caption: add your words and #hashtags so it's searchable",
+          "Audience: Public, Free followers, Subscribers, or a specific tier",
+          "Toggles: allow comments and allow tips, your call",
+          "Schedule: post now or pick a date and time for later",
+        ],
+      },
+      {
+        type: "p",
+        text: "When you publish, the clip uploads (to a public bucket for free clips, or a private one for subscriber-only) and a poster is generated automatically. It then appears in Pveels and on your profile's Pveels tab.",
+      },
+      {
+        type: "callout",
+        tone: "tip",
+        text: "Short video is one of the fastest ways to grow. Keep it on-brand and let Co-Pilot suggest captions and a posting cadence.",
       },
     ],
   },
