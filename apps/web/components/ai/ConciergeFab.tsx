@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, X, Send } from "lucide-react";
+import { Sparkles, X, Send, SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +28,12 @@ export function ConciergeFab() {
   const [draft, setDraft] = useState("");
   const [streaming, setStreaming] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const newChat = () => {
+    if (streaming) return;
+    setMessages([{ role: "assistant", content: GREETING }]);
+    setDraft("");
+  };
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -165,14 +171,26 @@ export function ConciergeFab() {
                 </span>
                 <span className="font-display font-semibold text-white">Aura</span>
               </div>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={() => setOpen(false)}
-                className="h-8 w-8 rounded-lg flex items-center justify-center text-lilac/60 hover:text-white hover:bg-white/5"
-              >
-                <X size={16} />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  aria-label="New chat"
+                  title="New chat"
+                  onClick={newChat}
+                  disabled={streaming || messages.length <= 1}
+                  className="h-8 w-8 rounded-lg flex items-center justify-center text-lilac/60 hover:text-white hover:bg-white/5 disabled:opacity-40"
+                >
+                  <SquarePen size={16} />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Close"
+                  onClick={() => setOpen(false)}
+                  className="h-8 w-8 rounded-lg flex items-center justify-center text-lilac/60 hover:text-white hover:bg-white/5"
+                >
+                  <X size={16} />
+                </button>
+              </div>
             </header>
 
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">

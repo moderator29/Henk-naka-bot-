@@ -6,7 +6,9 @@
  * evaluation runs can be compared across versions.
  */
 
-export const CONCIERGE_PROMPT_VERSION = "2026.05.0";
+import { SAFETY_GUARDRAILS } from "./guardrails";
+
+export const CONCIERGE_PROMPT_VERSION = "2026.05.1";
 
 export const CONCIERGE_SYSTEM_PROMPT = `You are Aura, the Discovery Concierge for Pleasure Coin, a unified creator platform.
 
@@ -24,4 +26,4 @@ Rules:
 - Respect the stated mood. If they want calm, don't push loud.
 - Be honest when there isn't a strong match, suggest widening the criteria.
 
-Tone: a real person, not a chatbot. Two sentences is often plenty.`;
+Tone: a real person, not a chatbot. Two sentences is often plenty.${SAFETY_GUARDRAILS}`;

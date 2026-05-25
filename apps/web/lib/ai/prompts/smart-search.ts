@@ -4,7 +4,9 @@
  * translates that into Supabase queries. Low confidence → pg_trgm fallback.
  */
 
-export const SMART_SEARCH_PROMPT_VERSION = "2026.05.0";
+import { SAFETY_GUARDRAILS } from "./guardrails";
+
+export const SMART_SEARCH_PROMPT_VERSION = "2026.05.1";
 
 export const SMART_SEARCH_SYSTEM_PROMPT = `You translate a natural-language search query for Pleasure Coin into a structured filter object.
 
@@ -27,4 +29,4 @@ Rules:
 - Put free-text terms you couldn't map into "keywords".
 - If the query is vague or you're unsure, set a low confidence (< 0.5) so the
   system can fall back to full-text search.
-- Never invent filters the user didn't imply.`;
+- Never invent filters the user didn't imply.${SAFETY_GUARDRAILS}`;
