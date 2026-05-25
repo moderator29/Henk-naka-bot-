@@ -38,7 +38,7 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "Create your account" },
       {
         type: "p",
-        text: "Sign up with email, Google, or your wallet. Wallet sign-in uses a one-tap signature, no password, no email if you don't want one. You can link more methods later from Settings.",
+        text: "Sign up with your email or your wallet. Wallet sign-in uses a one-tap signature, no password, no email if you don't want one. You can link both methods to one account later from Settings.",
       },
       { type: "h2", text: "Verify your age" },
       {

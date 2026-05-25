@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Card } from "@/components/ui/Card";
 import { GradientText } from "@/components/brand/GradientText";
 import { EmailSignUpForm } from "@/components/auth/EmailSignUpForm";
-import { GoogleButton } from "@/components/auth/GoogleButton";
 import { WalletAuthButton } from "@/components/auth/WalletAuthButton";
 import { AuthDivider } from "@/components/auth/AuthDivider";
 import { hasHumanVerified } from "@/lib/auth/human-check";
@@ -23,7 +22,6 @@ export default function SignupPage() {
       </p>
 
       <div className="flex flex-col gap-3">
-        <GoogleButton label="Sign up with Google" />
         <WalletAuthButton />
       </div>
 
