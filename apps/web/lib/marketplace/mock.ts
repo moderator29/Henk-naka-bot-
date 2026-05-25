@@ -47,6 +47,10 @@ export const COLLECTIONS = [
 const C = CATEGORIES;
 const COL = COLLECTIONS;
 
+// Declared before DEMO_LISTINGS so the l() calls below don't hit the temporal
+// dead zone (function l is hoisted, but this counter is not).
+let order = 0;
+
 export const DEMO_LISTINGS: Listing[] = [
   l("Spectral Bloom", "spiral", "Spiral", 1850, C[0], COL[1], "auction", 11, 98),
   l("Midnight Frequency", "nova", "Nova", 420, C[2], COL[2], "buy-now", 23, 71),
@@ -64,7 +68,6 @@ export const DEMO_LISTINGS: Listing[] = [
   l("Mirror Form", "spiral", "Spiral", 1240, C[4], COL[1], "auction", 21, 76),
 ];
 
-let order = 0;
 function l(
   title: string,
   creatorHandle: string,
