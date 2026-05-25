@@ -177,7 +177,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
+  /* The ambient aurora is a slow, non-vestibular gradient and stays alive on
+     purpose; everything else honors the setting. */
+  *:not(.aurora-blob),
   *::before,
   *::after {
     animation-duration: 0.01ms !important;

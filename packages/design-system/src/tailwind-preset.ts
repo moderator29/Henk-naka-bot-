@@ -62,10 +62,10 @@ export const auroraPreset = {
         shell: "16px",
       },
       animation: {
-        "aurora-drift-1": "aurora-drift-1 34s ease-in-out infinite",
-        "aurora-drift-2": "aurora-drift-2 28s ease-in-out infinite",
-        "aurora-drift-3": "aurora-drift-3 40s ease-in-out infinite",
-        "aurora-drift-4": "aurora-drift-4 24s ease-in-out infinite",
+        "aurora-drift-1": "aurora-drift-1 26s ease-in-out infinite",
+        "aurora-drift-2": "aurora-drift-2 22s ease-in-out infinite",
+        "aurora-drift-3": "aurora-drift-3 30s ease-in-out infinite",
+        "aurora-drift-4": "aurora-drift-4 19s ease-in-out infinite",
         "float-3d": "float-3d 8s ease-in-out infinite",
         "float-particle": "float-particle 16s ease-in-out infinite",
         "pulse-glow": "pulse-glow 3s ease-in-out infinite",
@@ -74,23 +74,28 @@ export const auroraPreset = {
         shimmer: "shimmer 2s linear infinite",
       },
       keyframes: {
-        // Translate-only, small range (breathing not sliding), each a
-        // different duration so the blobs never sync. Part 5 doctrine.
+        // Translate-only drift, each a different duration so the blobs never
+        // sync. Ranges are wide enough to clearly read as living motion while
+        // staying slow and calm. A mid keyframe keeps the path non-linear.
         "aurora-drift-1": {
           "0%, 100%": { transform: "translate3d(0, 0, 0)" },
-          "50%": { transform: "translate3d(7%, 5%, 0)" },
+          "33%": { transform: "translate3d(12%, 8%, 0)" },
+          "66%": { transform: "translate3d(6%, 14%, 0)" },
         },
         "aurora-drift-2": {
           "0%, 100%": { transform: "translate3d(0, 0, 0)" },
-          "50%": { transform: "translate3d(-6%, 7%, 0)" },
+          "33%": { transform: "translate3d(-13%, 10%, 0)" },
+          "66%": { transform: "translate3d(-7%, -8%, 0)" },
         },
         "aurora-drift-3": {
           "0%, 100%": { transform: "translate3d(0, 0, 0)" },
-          "50%": { transform: "translate3d(5%, -8%, 0)" },
+          "33%": { transform: "translate3d(10%, -12%, 0)" },
+          "66%": { transform: "translate3d(-9%, -6%, 0)" },
         },
         "aurora-drift-4": {
           "0%, 100%": { transform: "translate3d(0, 0, 0)" },
-          "50%": { transform: "translate3d(-8%, -4%, 0)" },
+          "33%": { transform: "translate3d(-12%, -9%, 0)" },
+          "66%": { transform: "translate3d(11%, -5%, 0)" },
         },
         "float-3d": {
           "0%, 100%": { transform: "rotateY(-5deg) translateY(0px)" },

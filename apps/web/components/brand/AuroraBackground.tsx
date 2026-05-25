@@ -25,14 +25,14 @@ const palette: Record<Variant, readonly [string, string, string]> = {
   orchid: ["#B847FF", "#E9D5FF", "#FF1F8F"],
 };
 
-// Peak blob alpha. In-app stays in the 0.06 to 0.10 band so content leads;
-// the hero is allowed a touch more. Nothing here is loud.
+// Peak blob alpha. Perceptible but tasteful: you should clearly see the
+// background is alive without it fighting the content.
 const alphaFor: Record<Intensity, number> = {
-  app: 0.08,
-  subtle: 0.08,
-  normal: 0.11,
-  hero: 0.16,
-  strong: 0.16,
+  app: 0.12,
+  subtle: 0.11,
+  normal: 0.16,
+  hero: 0.2,
+  strong: 0.22,
 };
 
 /**
@@ -57,10 +57,7 @@ export function AuroraBackground({
     extra: React.CSSProperties
   ) => (
     <div
-      className={cn(
-        "absolute rounded-full will-change-transform motion-reduce:animate-none",
-        cls
-      )}
+      className={cn("aurora-blob absolute rounded-full will-change-transform", cls)}
       style={{
         background: `radial-gradient(circle, ${rgba(color, a)} 0%, transparent 70%)`,
         filter: "blur(100px)",

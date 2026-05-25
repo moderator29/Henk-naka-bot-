@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Wallet } from "lucide-react";
-import { AuroraBackground } from "@/components/brand/AuroraBackground";
 import { GradientText } from "@/components/brand/GradientText";
 import { BrandIcon } from "@/components/brand/BrandIcon";
 import { Button } from "@/components/ui/Button";
@@ -13,7 +12,6 @@ const headline = ["The", "creator", "platform", "of", "tomorrow."];
 export function Hero() {
   return (
     <section className="relative min-h-[100svh] flex items-center pt-16 overflow-hidden">
-      <AuroraBackground variant="magenta" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 grid lg:grid-cols-[1.2fr_1fr] gap-12 items-center w-full">
         <div>
           <motion.div
