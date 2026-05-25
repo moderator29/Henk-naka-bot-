@@ -1,20 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ImagePlus, Paperclip, X, Globe, Users, Lock } from "lucide-react";
+import { ImagePlus, Paperclip, X, Globe, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EmojiPicker } from "./EmojiPicker";
 import { createPost } from "@/lib/posts/actions";
+import type { MyTier } from "@/lib/subscriptions/actions";
 import { cn } from "@/lib/utils";
-
-type Visibility = "public" | "followers" | "tier";
-
-const VIS: { value: Visibility; label: string; icon: typeof Globe }[] = [
-  { value: "public", label: "Public", icon: Globe },
-  { value: "followers", label: "Followers", icon: Users },
-  { value: "tier", label: "Subscribers", icon: Lock },
-];
 
 interface Attachment {
   file: File;
@@ -24,18 +18,22 @@ interface Attachment {
 
 /**
  * Post composer. Caption + emojis + image/file attachments + visibility.
- * Submits to the createPost server action (real Supabase insert + storage
- * upload). Shows honest success / error and routes to the feed on success.
+ * Public posts go out to everyone; "Subscribers" gates the post (and its media)
+ * behind one of the creator's tiers. Submits to the createPost server action
+ * (real Supabase insert + storage upload). Honest success / error states.
  */
-export function Composer() {
+export function Composer({ tiers }: { tiers: MyTier[] }) {
   const router = useRouter();
   const captionRef = useRef<HTMLTextAreaElement>(null);
   const [caption, setCaption] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const [visibility, setVisibility] = useState<Visibility>("public");
+  const [gated, setGated] = useState(false);
+  const [tierId, setTierId] = useState<string>(tiers[0]?.id ?? "");
   const [category, setCategory] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const hasTiers = tiers.length > 0;
 
   const addFiles = (files: FileList | null, asImage: boolean) => {
     if (!files) return;
@@ -82,7 +80,7 @@ export function Composer() {
       const fd = new FormData();
       fd.set("caption", caption);
       fd.set("category", category);
-      fd.set("visibility", visibility);
+      if (gated && tierId) fd.set("tierRequired", tierId);
       attachments.forEach((a) => fd.append("media", a.file));
       const res = await createPost(fd);
       if (!res.ok) {
@@ -144,23 +142,61 @@ export function Composer() {
       )}
 
       {/* Visibility */}
-      <div className="mt-4 flex items-center gap-2">
-        {VIS.map(({ value, label, icon: Icon }) => (
-          <button
-            key={value}
-            type="button"
-            onClick={() => setVisibility(value)}
-            className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
-              visibility === value
-                ? "bg-gradient-primary text-white"
-                : "glass text-lilac/70 hover:text-white"
-            )}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setGated(false)}
+          className={cn(
+            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+            !gated
+              ? "bg-gradient-primary text-white"
+              : "glass text-lilac/70 hover:text-white"
+          )}
+        >
+          <Globe size={13} />
+          Public
+        </button>
+        <button
+          type="button"
+          onClick={() => hasTiers && setGated(true)}
+          disabled={!hasTiers}
+          title={hasTiers ? undefined : "Create a subscription tier first"}
+          className={cn(
+            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+            gated
+              ? "bg-gradient-primary text-white"
+              : "glass text-lilac/70 hover:text-white",
+            !hasTiers && "opacity-40 cursor-not-allowed"
+          )}
+        >
+          <Lock size={13} />
+          Subscribers
+        </button>
+
+        {gated && hasTiers && (
+          <select
+            aria-label="Subscription tier"
+            value={tierId}
+            onChange={(e) => setTierId(e.target.value)}
+            className="h-8 rounded-full bg-plum/60 border border-white/10 px-3 text-xs text-white focus:border-magenta/50 focus:outline-none"
           >
-            <Icon size={13} />
-            {label}
-          </button>
-        ))}
+            {tiers.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+                {t.priceUsd != null ? ` · $${t.priceUsd.toFixed(2)}/mo` : ""}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {!hasTiers && (
+          <Link
+            href="/dashboard"
+            className="text-xs text-lilac/50 hover:text-white underline underline-offset-2"
+          >
+            Set up tiers to post subscriber-only content
+          </Link>
+        )}
       </div>
 
       <div className="mt-4 flex items-center gap-2 border-t border-white/5 pt-4">

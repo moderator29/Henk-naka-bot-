@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Composer } from "@/components/feed/Composer";
+import { getMyTiers } from "@/lib/subscriptions/actions";
 
 export const metadata = { title: "Create a post" };
 
-export default function ComposePage() {
+export default async function ComposePage() {
+  const tiers = await getMyTiers();
   return (
     <div className="max-w-2xl mx-auto">
       <header className="mb-6 flex items-center gap-3">
@@ -19,7 +21,7 @@ export default function ComposePage() {
           Create a <span className="text-gradient">post</span>
         </h1>
       </header>
-      <Composer />
+      <Composer tiers={tiers} />
     </div>
   );
 }

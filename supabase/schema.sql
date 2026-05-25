@@ -398,13 +398,15 @@ create policy subs_creator_read on public.subscriptions for select using (
 create policy subs_fan_insert on public.subscriptions for insert with check (auth.uid() = fan_id);
 create policy subs_fan_update on public.subscriptions for update using (auth.uid() = fan_id) with check (auth.uid() = fan_id);
 
--- Posts (public posts open; gated posts need an active subscription; author controls)
+-- Posts: rows (incl. gated teasers) are readable by anyone signed in so locked
+-- previews show; gated MEDIA is protected separately via a private bucket +
+-- server-issued signed URLs. Future-scheduled posts stay hidden from non-authors.
 drop policy if exists posts_public_read on public.posts;
 drop policy if exists posts_owner_write on public.posts;
 create policy posts_public_read on public.posts for select using (
-  tier_required is null
-  or auth.uid() = creator_id
-  or public.has_active_subscription(auth.uid(), tier_required)
+  auth.uid() = creator_id
+  or scheduled_for is null
+  or scheduled_for <= now()
 );
 create policy posts_owner_write on public.posts for all using (auth.uid() = creator_id) with check (auth.uid() = creator_id);
 

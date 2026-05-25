@@ -211,6 +211,32 @@ export async function getMySubscriptions(): Promise<MySubscription[]> {
   });
 }
 
+export interface MyTier {
+  id: string;
+  name: string;
+  priceUsd: number | null;
+}
+
+/** The caller's own active subscription tiers (for gating a post to one). */
+export async function getMyTiers(): Promise<MyTier[]> {
+  const user = await me();
+  if (!user) return [];
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("subscription_tiers")
+    .select("id, name, price_usd")
+    .eq("creator_id", user.id)
+    .eq("is_active", true)
+    .order("created_at", { ascending: true });
+  return ((data ?? []) as { id: string; name: string; price_usd: string | number | null }[]).map(
+    (t) => ({
+      id: t.id,
+      name: t.name,
+      priceUsd: t.price_usd != null ? Number(t.price_usd) : null,
+    })
+  );
+}
+
 /**
  * Turn auto-renew on or off. Industry-standard "cancel" keeps access until the
  * period ends, then simply doesn't renew, so cancelling is auto_renew = false.

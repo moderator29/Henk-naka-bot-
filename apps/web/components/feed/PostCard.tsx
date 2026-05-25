@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { BadgeCheck, Heart, MessageCircle, Bookmark, Coins, Lock } from "lucide-react";
 import { toggleLike, toggleSave } from "@/lib/engagement/actions";
+import { getGatedMedia } from "@/lib/posts/actions";
 import { useToast } from "@/components/ui/Toast";
 import { Comments } from "./Comments";
 import { TipModal } from "./TipModal";
@@ -43,6 +44,35 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
   const [, startTransition] = useTransition();
   // Demo posts aren't in the database; keep their interactions local-only.
   const isReal = !post.id.startsWith("demo");
+
+  // Gated media: resolve the viewer's entitlement and fetch signed URLs.
+  const [gatedStatus, setGatedStatus] = useState<"loading" | "locked" | "unlocked">(
+    post.gated ? "loading" : "unlocked"
+  );
+  const [gatedMedia, setGatedMedia] = useState<PostMedia[]>([]);
+
+  useEffect(() => {
+    if (!post.gated) return;
+    if (!isReal) {
+      setGatedStatus("locked"); // demo gated posts keep the teaser
+      return;
+    }
+    let active = true;
+    getGatedMedia(post.id)
+      .then((res) => {
+        if (!active) return;
+        if (res.entitled) {
+          setGatedMedia(res.media);
+          setGatedStatus("unlocked");
+        } else {
+          setGatedStatus("locked");
+        }
+      })
+      .catch(() => active && setGatedStatus("locked"));
+    return () => {
+      active = false;
+    };
+  }, [post.gated, post.id, isReal]);
 
   const { push } = useToast();
 
@@ -118,41 +148,29 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
           {post.caption}
         </p>
         {!post.gated && post.media && post.media.length > 0 && (
-          <div
-            className={cn(
-              "mt-3 grid gap-2 overflow-hidden rounded-xl",
-              post.media.length > 1 ? "grid-cols-2" : "grid-cols-1"
-            )}
-          >
-            {post.media.slice(0, 4).map((m, i) =>
-              m.type.startsWith("video/") ? (
-                <video
-                  key={i}
-                  src={m.url}
-                  controls
-                  playsInline
-                  className="w-full max-h-[28rem] rounded-lg bg-black/40 object-cover"
-                />
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element -- user media from Supabase storage; next/image needs a configured remote loader
-                <img
-                  key={i}
-                  src={m.url}
-                  alt=""
-                  loading="lazy"
-                  className="w-full max-h-[28rem] rounded-lg object-cover bg-plum/40"
-                />
-              )
-            )}
-          </div>
+          <MediaGrid media={post.media} />
         )}
-        {post.gated && (
-          <div className="mt-3 relative overflow-hidden rounded-xl border border-magenta/20 bg-plum/60 h-40 grid place-items-center">
+        {post.gated && gatedStatus === "unlocked" && gatedMedia.length > 0 && (
+          <MediaGrid media={gatedMedia} />
+        )}
+        {post.gated && gatedStatus === "loading" && (
+          <div className="mt-3 h-40 rounded-xl bg-plum/50 animate-pulse" aria-hidden="true" />
+        )}
+        {post.gated && gatedStatus === "locked" && (
+          <div className="mt-3 relative overflow-hidden rounded-xl border border-magenta/20 bg-plum/60 h-44 grid place-items-center">
             <div className="absolute inset-0 bg-gradient-to-br from-magenta/10 to-orchid/10" />
-            <div className="relative text-center">
+            <div className="relative text-center px-4">
               <Lock size={22} className="mx-auto text-magenta mb-2" />
               <p className="text-sm font-medium text-white">Subscriber-only</p>
-              <p className="text-xs text-lilac/60">Subscribe to unlock this post</p>
+              <p className="text-xs text-lilac/60 mb-3">
+                Subscribe to {post.creatorName} to unlock this post
+              </p>
+              <Link
+                href={`/creators/${post.creatorUsername}`}
+                className="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-gradient-primary text-white text-xs font-semibold hover:opacity-90 transition-opacity"
+              >
+                View subscription tiers
+              </Link>
             </div>
           </div>
         )}
@@ -220,5 +238,37 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
         />
       )}
     </motion.article>
+  );
+}
+
+function MediaGrid({ media }: { media: PostMedia[] }) {
+  return (
+    <div
+      className={cn(
+        "mt-3 grid gap-2 overflow-hidden rounded-xl",
+        media.length > 1 ? "grid-cols-2" : "grid-cols-1"
+      )}
+    >
+      {media.slice(0, 4).map((m, i) =>
+        m.type.startsWith("video/") ? (
+          <video
+            key={i}
+            src={m.url}
+            controls
+            playsInline
+            className="w-full max-h-[28rem] rounded-lg bg-black/40 object-cover"
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element -- user media from Supabase storage; next/image needs a configured remote loader
+          <img
+            key={i}
+            src={m.url}
+            alt=""
+            loading="lazy"
+            className="w-full max-h-[28rem] rounded-lg object-cover bg-plum/40"
+          />
+        )
+      )}
+    </div>
   );
 }

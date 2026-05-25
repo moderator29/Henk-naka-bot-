@@ -16,7 +16,8 @@ function configured() {
 }
 
 interface PostMedia {
-  url: string;
+  url?: string;
+  path?: string;
   type: string;
 }
 
@@ -38,6 +39,15 @@ interface PostRow {
 }
 
 function mapRow(r: PostRow): FeedPost {
+  const gated = r.tier_required != null;
+  // Gated posts expose no media here — the private storage path stays server-
+  // side and entitled viewers fetch a signed URL via getGatedMedia. Public
+  // posts carry their public URLs.
+  const media = gated
+    ? []
+    : (Array.isArray(r.media) ? r.media : [])
+        .filter((m): m is { url: string; type: string } => !!m.url)
+        .map((m) => ({ url: m.url, type: m.type }));
   return {
     id: r.id,
     creatorUsername: r.users?.username ?? "creator",
@@ -45,8 +55,8 @@ function mapRow(r: PostRow): FeedPost {
     verified: r.users?.is_verified ?? false,
     caption: r.caption ?? "",
     category: r.category ?? "",
-    gated: r.tier_required != null,
-    media: Array.isArray(r.media) ? r.media : [],
+    gated,
+    media,
     likes: r.likes?.[0]?.count ?? 0,
     comments: r.comments?.[0]?.count ?? 0,
     createdAt: r.created_at,
