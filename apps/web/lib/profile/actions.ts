@@ -6,6 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth/session";
 import { passwordSchema } from "@/lib/auth/schemas";
+import {
+  sendPasswordChangedEmail,
+  sendAccountDeletionEmail,
+} from "@/lib/email/resend";
 
 /**
  * Profile + account actions for the signed-in user. Profile writes run under
@@ -148,6 +152,7 @@ export async function changePassword(formData: FormData): Promise<{
 
   const { error } = await supabase.auth.updateUser({ password: next });
   if (error) return { ok: false, error: "Could not update password. Try again." };
+  await sendPasswordChangedEmail(me.email);
   return { ok: true };
 }
 
@@ -169,6 +174,9 @@ export async function deleteAccount(formData: FormData): Promise<{ ok: false; er
   if (confirm !== "delete my account") {
     return { ok: false, error: 'Type "delete my account" to confirm.' };
   }
+
+  // Notify before we remove the account (we lose the email afterward).
+  if (me.email) await sendAccountDeletionEmail(me.email);
 
   const admin = createAdminClient();
   // Remove the profile row first (cascades to posts, follows, tips, etc.).
