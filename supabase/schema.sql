@@ -688,5 +688,108 @@ create policy "exports owner delete" on storage.objects
   for delete to authenticated using (bucket_id = 'exports' and owner = auth.uid());
 
 -- =============================================================================
+-- ROLES, MODERATION, ADMIN (migration 0013 mirror)
+-- =============================================================================
+create table if not exists public.user_roles (
+  user_id uuid primary key references public.users(id) on delete cascade,
+  role text not null default 'user'
+    check (role in ('user', 'creator', 'moderator', 'admin', 'superadmin')),
+  granted_by uuid references public.users(id) on delete set null,
+  granted_at timestamptz not null default now()
+);
+
+create or replace function public.user_role(_uid uuid)
+returns text language sql stable security definer set search_path = public as $$
+  select coalesce((select role from public.user_roles where user_id = _uid), 'user');
+$$;
+create or replace function public.is_admin(_uid uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select public.user_role(_uid) in ('admin', 'superadmin');
+$$;
+create or replace function public.is_moderator(_uid uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select public.user_role(_uid) in ('moderator', 'admin', 'superadmin');
+$$;
+
+create table if not exists public.reports (
+  id uuid primary key default gen_random_uuid(),
+  reporter_id uuid not null references public.users(id) on delete cascade,
+  target_type text not null check (target_type in ('post', 'pveel', 'comment', 'message', 'user')),
+  target_id uuid not null,
+  reason text not null,
+  details text,
+  status text not null default 'open' check (status in ('open', 'reviewing', 'resolved', 'dismissed')),
+  resolved_by uuid references public.users(id) on delete set null,
+  resolved_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index if not exists reports_status_idx on public.reports (status, created_at desc);
+create index if not exists reports_target_idx on public.reports (target_type, target_id);
+
+create table if not exists public.admin_audit_log (
+  id uuid primary key default gen_random_uuid(),
+  actor_id uuid references public.users(id) on delete set null,
+  action text not null,
+  target_type text,
+  target_id text,
+  detail jsonb,
+  created_at timestamptz not null default now()
+);
+create index if not exists audit_created_idx on public.admin_audit_log (created_at desc);
+
+create table if not exists public.announcements (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  body text not null,
+  audience text not null default 'all' check (audience in ('all', 'creators', 'fans')),
+  created_by uuid references public.users(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.platform_settings (
+  key text primary key,
+  value jsonb,
+  updated_by uuid references public.users(id) on delete set null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.posts  add column if not exists is_removed boolean not null default false;
+alter table public.pveels add column if not exists is_removed boolean not null default false;
+alter table public.users  add column if not exists is_suspended boolean not null default false;
+
+alter table public.user_roles      enable row level security;
+alter table public.reports         enable row level security;
+alter table public.admin_audit_log enable row level security;
+alter table public.announcements   enable row level security;
+alter table public.platform_settings enable row level security;
+
+drop policy if exists user_roles_read  on public.user_roles;
+drop policy if exists user_roles_admin on public.user_roles;
+create policy user_roles_read  on public.user_roles for select using (user_id = auth.uid() or public.is_admin(auth.uid()));
+create policy user_roles_admin on public.user_roles for all using (public.is_admin(auth.uid())) with check (public.is_admin(auth.uid()));
+
+drop policy if exists reports_insert on public.reports;
+drop policy if exists reports_read   on public.reports;
+drop policy if exists reports_mod    on public.reports;
+create policy reports_insert on public.reports for insert with check (auth.uid() = reporter_id);
+create policy reports_read   on public.reports for select using (auth.uid() = reporter_id or public.is_moderator(auth.uid()));
+create policy reports_mod    on public.reports for update using (public.is_moderator(auth.uid())) with check (public.is_moderator(auth.uid()));
+
+drop policy if exists audit_admin_read   on public.admin_audit_log;
+drop policy if exists audit_admin_insert on public.admin_audit_log;
+create policy audit_admin_read   on public.admin_audit_log for select using (public.is_admin(auth.uid()));
+create policy audit_admin_insert on public.admin_audit_log for insert with check (public.is_admin(auth.uid()));
+
+drop policy if exists announcements_read  on public.announcements;
+drop policy if exists announcements_admin on public.announcements;
+create policy announcements_read  on public.announcements for select using (true);
+create policy announcements_admin on public.announcements for all using (public.is_admin(auth.uid())) with check (public.is_admin(auth.uid()));
+
+drop policy if exists platform_settings_read  on public.platform_settings;
+drop policy if exists platform_settings_admin on public.platform_settings;
+create policy platform_settings_read  on public.platform_settings for select using (true);
+create policy platform_settings_admin on public.platform_settings for all using (public.is_admin(auth.uid())) with check (public.is_admin(auth.uid()));
+
+-- =============================================================================
 -- DONE. To go fully real now, optionally run:  select public.purge_demo_content();
 -- =============================================================================

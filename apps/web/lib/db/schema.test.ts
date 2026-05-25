@@ -32,6 +32,11 @@ const expectedTables = [
   "pveelViews",
   "blocks",
   "mutes",
+  "userRoles",
+  "reports",
+  "adminAuditLog",
+  "announcements",
+  "platformSettings",
 ] as const;
 
 describe("db/schema", () => {

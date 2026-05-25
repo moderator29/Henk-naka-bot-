@@ -533,8 +533,69 @@ export const mutes = pgTable(
   })
 );
 
+/** Roles, reports, audit log, announcements, platform settings (migration 0013). */
+export const userRoles = pgTable("user_roles", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  role: text("role").default("user").notNull(),
+  grantedBy: uuid("granted_by").references(() => users.id, { onDelete: "set null" }),
+  grantedAt: timestamp("granted_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const reports = pgTable(
+  "reports",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    reporterId: uuid("reporter_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    targetType: text("target_type").notNull(),
+    targetId: uuid("target_id").notNull(),
+    reason: text("reason").notNull(),
+    details: text("details"),
+    status: text("status").default("open").notNull(),
+    resolvedBy: uuid("resolved_by").references(() => users.id, { onDelete: "set null" }),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({ statusIdx: index("reports_status_idx").on(t.status, t.createdAt) })
+);
+
+export const adminAuditLog = pgTable(
+  "admin_audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    actorId: uuid("actor_id").references(() => users.id, { onDelete: "set null" }),
+    action: text("action").notNull(),
+    targetType: text("target_type"),
+    targetId: text("target_id"),
+    detail: jsonb("detail"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({ createdIdx: index("audit_created_idx").on(t.createdAt) })
+);
+
+export const announcements = pgTable("announcements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  audience: text("audience").default("all").notNull(),
+  createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const platformSettings = pgTable("platform_settings", {
+  key: text("key").primaryKey(),
+  value: jsonb("value"),
+  updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type Report = typeof reports.$inferSelect;
+export type UserRole = typeof userRoles.$inferSelect;
 export type Post = typeof posts.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type Conversation = typeof conversations.$inferSelect;
