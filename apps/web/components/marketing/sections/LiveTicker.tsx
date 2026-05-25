@@ -14,7 +14,7 @@ export async function LiveTicker() {
   return (
     <section className="relative -mt-8 z-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="glass-strong rounded-2xl px-6 py-5 grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="glass-strong edge-light rounded-2xl px-6 py-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
           <Stat label="$NSFW">
             {stats.price != null ? (
               <StatTicker value={stats.price} formatPreset="price6" duration={1.4} />
@@ -41,6 +41,9 @@ export async function LiveTicker() {
           </Stat>
           <Stat label="Holders">
             {stats.holders != null ? <StatTicker value={stats.holders} /> : <Dash />}
+          </Stat>
+          <Stat label="Total Supply">
+            <StatTicker value={69_000_000_000} formatPreset="compact" />
           </Stat>
         </div>
       </div>

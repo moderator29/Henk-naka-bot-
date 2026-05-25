@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Hero } from "@/components/marketing/sections/Hero";
 import { LiveTicker } from "@/components/marketing/sections/LiveTicker";
+import { Mission } from "@/components/marketing/sections/Mission";
 import { Ecosystem } from "@/components/marketing/sections/Ecosystem";
 import { AIShowcase } from "@/components/marketing/sections/AIShowcase";
 import { CreatorsCarousel } from "@/components/marketing/sections/CreatorsCarousel";
@@ -16,6 +17,7 @@ export default function LandingPage() {
       <Suspense fallback={<div className="h-24" />}>
         <LiveTicker />
       </Suspense>
+      <Mission />
       <Ecosystem />
       <AIShowcase />
       <CreatorsCarousel />
