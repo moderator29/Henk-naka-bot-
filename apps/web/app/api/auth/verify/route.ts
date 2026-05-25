@@ -125,7 +125,16 @@ export async function POST(req: NextRequest) {
       .update({ wallet_address: address })
       .eq("id", sess.user.id);
 
-    return NextResponse.json({ verified: true, address, session: true });
+    // First-time wallet accounts have no username yet, so route them into
+    // profile setup; returning wallets (username set) go straight to the app.
+    const { data: profile } = await admin
+      .from("users")
+      .select("username")
+      .eq("id", sess.user.id)
+      .maybeSingle<{ username: string | null }>();
+    const needsOnboarding = !profile?.username;
+
+    return NextResponse.json({ verified: true, address, session: true, needsOnboarding });
   } catch {
     return NextResponse.json(
       {

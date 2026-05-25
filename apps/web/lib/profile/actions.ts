@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth/session";
+import { isAdult, parseDateOfBirth } from "@/lib/auth/age";
 import { passwordSchema } from "@/lib/auth/schemas";
 import {
   sendPasswordChangedEmail,
@@ -112,6 +113,112 @@ export async function updateProfile(
     }
     return { ok: false, error: "Could not save. Try again." };
   }
+  return { ok: true };
+}
+
+const setupSchema = z.object({
+  displayName: z.string().trim().min(1, "Add a display name").max(60),
+  username: z
+    .string()
+    .trim()
+    .min(3, "At least 3 characters")
+    .max(30)
+    .regex(/^[a-z0-9_]+$/i, "Letters, numbers, and underscores only"),
+  bio: z.string().trim().max(300).optional(),
+  dateOfBirth: z.string().min(1, "Enter your date of birth"),
+});
+
+/**
+ * First-time profile setup for wallet-first accounts: captures username, names,
+ * bio, and DOB. Writes the profile to the users row AND mirrors the identity
+ * fields (incl. date_of_birth) into auth metadata, which is where the 18+ gate
+ * (requireAdult / getSessionUser) reads age from.
+ */
+export async function setupProfile(
+  formData: FormData
+): Promise<UpdateProfileResult> {
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me) return { ok: false, error: "Sign in to set up your profile." };
+
+  const parsed = setupSchema.safeParse({
+    displayName: String(formData.get("displayName") ?? ""),
+    username: String(formData.get("username") ?? ""),
+    bio: (formData.get("bio") as string) || undefined,
+    dateOfBirth: String(formData.get("dateOfBirth") ?? ""),
+  });
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const key = issue.path[0];
+      if (typeof key === "string" && !fieldErrors[key]) {
+        fieldErrors[key] = issue.message;
+      }
+    }
+    return { ok: false, fieldErrors };
+  }
+
+  const dob = parseDateOfBirth(parsed.data.dateOfBirth);
+  if (!dob) return { ok: false, fieldErrors: { dateOfBirth: "Enter a valid date" } };
+  if (!isAdult(dob)) {
+    return { ok: false, fieldErrors: { dateOfBirth: "You must be 18 or older" } };
+  }
+
+  const supabase = createClient();
+  const username = parsed.data.username.toLowerCase();
+
+  // Username uniqueness pre-check (the DB unique constraint is the backstop).
+  const { data: taken } = await supabase
+    .from("users")
+    .select("id")
+    .eq("username", username)
+    .neq("id", me.id)
+    .maybeSingle();
+  if (taken) return { ok: false, fieldErrors: { username: "That username is taken" } };
+
+  const avatar = formData.get("avatar");
+  const cover = formData.get("cover");
+  const avatarUrl =
+    avatar instanceof File && avatar.size > 0
+      ? await uploadImage(supabase, me.id, avatar, "avatar")
+      : undefined;
+  const coverUrl =
+    cover instanceof File && cover.size > 0
+      ? await uploadImage(supabase, me.id, cover, "cover")
+      : undefined;
+
+  const { error } = await supabase
+    .from("users")
+    .update({
+      display_name: parsed.data.displayName,
+      username,
+      bio: parsed.data.bio ?? null,
+      date_of_birth: parsed.data.dateOfBirth,
+      ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
+      ...(coverUrl ? { cover_url: coverUrl } : {}),
+    })
+    .eq("id", me.id);
+
+  if (error) {
+    if (error.code === "23505") {
+      return { ok: false, fieldErrors: { username: "That username is taken" } };
+    }
+    return { ok: false, error: "Could not save. Try again." };
+  }
+
+  // Mirror identity into auth metadata so the 18+ gate sees the DOB.
+  await supabase.auth.updateUser({
+    data: {
+      username,
+      display_name: parsed.data.displayName,
+      date_of_birth: parsed.data.dateOfBirth,
+    },
+  });
+
   return { ok: true };
 }
 

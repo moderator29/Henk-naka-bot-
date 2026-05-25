@@ -2,27 +2,28 @@
 
 import { useState } from "react";
 import { Wallet } from "lucide-react";
-import { useAccount, useSignMessage, useChainId } from "wagmi";
+import { useAccount, useSignMessage, useChainId, useSwitchChain } from "wagmi";
+import { polygon } from "wagmi/chains";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { Button } from "@/components/ui/Button";
 import { buildSiweMessage } from "@/lib/auth/siwe";
 
 /**
- * Wallet (SIWE) sign-in, full client flow (RPD §5.4 / §9.3):
- *   1. Ensure a wallet is connected (RainbowKit connect modal if not).
+ * Wallet (SIWE) sign up + sign in, full client flow (RPD §5.4 / §9.3):
+ *   1. Connect a wallet (RainbowKit modal) if needed.
  *   2. GET /api/auth/nonce for a single-use server nonce.
- *   3. Build a SIWE message and have the wallet sign it.
- *   4. POST /api/auth/verify with { message, signature }.
+ *   3. Build a SIWE message and sign it.
+ *   4. POST /api/auth/verify { message, signature }.
  *
- * The server verifies the signature and nonce. Session minting completes once
- * the Supabase service role is configured server-side (the verify route
- * returns verified:true until then), the client flow itself is fully real,
- * no fake signing.
+ * On success the server mints a real Supabase session. First-time wallets are
+ * routed into profile setup; returning wallets go straight into the app. The
+ * signature is verified server-side and the nonce is single-use.
  */
 export function WalletAuthButton() {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const { signMessageAsync } = useSignMessage();
+  const { switchChainAsync } = useSwitchChain();
   const { openConnectModal } = useConnectModal();
   const [status, setStatus] = useState<
     "idle" | "signing" | "verifying" | "done" | "error"
@@ -37,6 +38,15 @@ export function WalletAuthButton() {
     }
 
     try {
+      // Prefer Polygon mainnet; nudge a switch but don't hard-block signing.
+      if (chainId !== polygon.id && switchChainAsync) {
+        try {
+          await switchChainAsync({ chainId: polygon.id });
+        } catch {
+          /* user can stay on their chain; SIWE still proves ownership */
+        }
+      }
+
       setStatus("signing");
       const nonceRes = await fetch("/api/auth/nonce");
       if (!nonceRes.ok) throw new Error("Could not start sign-in.");
@@ -68,12 +78,16 @@ export function WalletAuthButton() {
 
       const result = (await verifyRes.json()) as {
         session: unknown;
+        needsOnboarding?: boolean;
         note?: string;
       };
 
       setStatus("done");
       if (result.session) {
-        window.location.href = "/feed";
+        // New wallet → set up the profile; returning → into the app.
+        window.location.href = result.needsOnboarding
+          ? "/onboarding/profile"
+          : "/explore";
       } else {
         setMessage(
           result.note ??
@@ -82,9 +96,7 @@ export function WalletAuthButton() {
       }
     } catch (err) {
       setStatus("error");
-      setMessage(
-        err instanceof Error ? err.message : "Wallet sign-in failed."
-      );
+      setMessage(friendlyError(err));
     }
   };
 
@@ -121,4 +133,12 @@ export function WalletAuthButton() {
       )}
     </div>
   );
+}
+
+function friendlyError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : "";
+  if (/user rejected|denied|rejected the request/i.test(msg)) {
+    return "Signature cancelled. Approve the signature to sign in.";
+  }
+  return msg || "Wallet sign-in failed.";
 }
