@@ -56,19 +56,21 @@ export interface AdminUser {
   email: string | null;
   role: string;
   isCreator: boolean;
+  verified: boolean;
   isSuspended: boolean;
   isDemo: boolean;
   createdAt: string;
 }
 
-export async function getUsers(query?: string): Promise<AdminUser[]> {
+export async function getUsers(query?: string, creatorsOnly = false): Promise<AdminUser[]> {
   if (!adminConfigured() || !atLeast(await getMyRole(), "moderator")) return [];
   const admin = createAdminClient();
   let q = admin
     .from("users")
-    .select("id, username, display_name, email, is_creator, is_suspended, is_demo, created_at, user_roles(role)")
+    .select("id, username, display_name, email, is_creator, is_verified, is_suspended, is_demo, created_at, user_roles(role)")
     .order("created_at", { ascending: false })
     .limit(100);
+  if (creatorsOnly) q = q.eq("is_creator", true);
   const term = query?.replace(/[%,()*]/g, "").trim();
   if (term) q = q.or(`username.ilike.%${term}%,display_name.ilike.%${term}%,email.ilike.%${term}%`);
   const { data } = await q;
@@ -81,6 +83,7 @@ export async function getUsers(query?: string): Promise<AdminUser[]> {
       email: (u.email as string) ?? null,
       role: ((roleRow as { role?: string })?.role as string) ?? "user",
       isCreator: !!u.is_creator,
+      verified: !!u.is_verified,
       isSuspended: !!u.is_suspended,
       isDemo: !!u.is_demo,
       createdAt: u.created_at as string,

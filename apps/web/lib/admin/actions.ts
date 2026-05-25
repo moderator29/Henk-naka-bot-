@@ -120,6 +120,36 @@ export async function setUserRole(userId: string, role: Role): Promise<AdminResu
   return { ok: true };
 }
 
+// ---------- Creator verification (admin only) ----------
+export async function setUserVerified(userId: string, verified: boolean): Promise<AdminResult> {
+  const actor = await gate("admin");
+  if (!actor) return { ok: false, error: "Not authorized." };
+  const admin = createAdminClient();
+  const { error } = await admin.from("users").update({ is_verified: verified }).eq("id", userId);
+  if (error) return { ok: false, error: "Could not update." };
+  await logAdminAction(actor, verified ? "creator.verify" : "creator.unverify", { targetType: "user", targetId: userId });
+  revalidatePath("/admin/creators");
+  return { ok: true };
+}
+
+// ---------- Platform settings / feature flags (admin only) ----------
+export async function setPlatformSetting(
+  key: string,
+  value: Record<string, unknown>
+): Promise<AdminResult> {
+  const actor = await gate("admin");
+  if (!actor) return { ok: false, error: "Not authorized." };
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("platform_settings")
+    .upsert({ key, value, updated_by: actor, updated_at: new Date().toISOString() }, { onConflict: "key" });
+  if (error) return { ok: false, error: "Could not save setting." };
+  await logAdminAction(actor, "platform.setting", { targetId: key, detail: value });
+  revalidatePath("/admin/settings");
+  revalidatePath("/feed");
+  return { ok: true };
+}
+
 // ---------- Announcements (admin only) ----------
 export async function createAnnouncement(input: {
   title: string;

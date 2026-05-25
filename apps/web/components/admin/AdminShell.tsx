@@ -14,6 +14,8 @@ import {
   Wallet,
   FlaskConical,
   Activity,
+  BadgeCheck,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
@@ -27,8 +29,10 @@ const NAV = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/reports", label: "Reports & moderation", icon: Flag },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/creators", label: "Creators", icon: BadgeCheck },
   { href: "/admin/finance", label: "Transactions", icon: Wallet },
   { href: "/admin/announcements", label: "Announcements", icon: Megaphone },
+  { href: "/admin/settings", label: "Platform settings", icon: SlidersHorizontal },
   { href: "/admin/demo", label: "Demo data", icon: FlaskConical },
   { href: "/admin/system", label: "System health", icon: Activity },
   { href: "/admin/audit", label: "Audit log", icon: ScrollText },
