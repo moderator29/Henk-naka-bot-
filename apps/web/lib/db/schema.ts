@@ -494,6 +494,45 @@ export const pveelViews = pgTable(
   (t) => ({ pk: primaryKey({ columns: [t.pveelId, t.userId] }) })
 );
 
+/** Privacy: a user's block + mute lists (Settings > Privacy; DMs respect blocks). */
+export const blocks = pgTable(
+  "blocks",
+  {
+    blockerId: uuid("blocker_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    blockedId: uuid("blocked_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.blockerId, t.blockedId] }),
+    blockedIdx: index("blocks_blocked_idx").on(t.blockedId),
+  })
+);
+
+export const mutes = pgTable(
+  "mutes",
+  {
+    muterId: uuid("muter_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    mutedId: uuid("muted_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.muterId, t.mutedId] }),
+    mutedIdx: index("mutes_muted_idx").on(t.mutedId),
+  })
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Post = typeof posts.$inferSelect;

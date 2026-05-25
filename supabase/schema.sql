@@ -247,6 +247,23 @@ create table if not exists public.pveel_views (
   primary key (pveel_id, user_id)
 );
 
+-- ---------- PRIVACY: blocks + mutes ----------
+create table if not exists public.blocks (
+  blocker_id uuid not null references public.users(id) on delete cascade,
+  blocked_id uuid not null references public.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (blocker_id, blocked_id),
+  constraint blocks_distinct check (blocker_id <> blocked_id)
+);
+
+create table if not exists public.mutes (
+  muter_id uuid not null references public.users(id) on delete cascade,
+  muted_id uuid not null references public.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (muter_id, muted_id),
+  constraint mutes_distinct check (muter_id <> muted_id)
+);
+
 -- =============================================================================
 -- INDEXES
 -- =============================================================================
@@ -287,6 +304,10 @@ create index if not exists pveels_caption_trgm_idx   on public.pveels using gin 
 create index if not exists pveels_hashtags_idx       on public.pveels using gin (hashtags);
 create index if not exists pveels_demo_idx           on public.pveels (is_demo) where is_demo;
 create index if not exists pveel_comments_pveel_idx  on public.pveel_comments (pveel_id);
+
+create index if not exists users_username_trgm_idx   on public.users using gin (username gin_trgm_ops);
+create index if not exists blocks_blocked_idx        on public.blocks (blocked_id);
+create index if not exists mutes_muted_idx           on public.mutes (muted_id);
 
 -- =============================================================================
 -- HELPER FUNCTIONS
@@ -435,8 +456,20 @@ create trigger on_auth_user_updated
 create or replace function public.purge_demo_content()
 returns void language sql security definer set search_path = public as $$
   delete from public.marketplace_listings where is_demo;
+  delete from public.pveels where is_demo;
   delete from public.posts where is_demo;
   delete from public.users where is_demo;
+$$;
+
+-- Is there a block between two users (either direction)? SECURITY DEFINER so
+-- RLS policies can check it without exposing block rows to the other party.
+create or replace function public.is_blocked(_a uuid, _b uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists(
+    select 1 from public.blocks
+    where (blocker_id = _a and blocked_id = _b)
+       or (blocker_id = _b and blocked_id = _a)
+  );
 $$;
 
 -- =============================================================================
@@ -464,6 +497,8 @@ alter table public.pveel_likes           enable row level security;
 alter table public.pveel_saves           enable row level security;
 alter table public.pveel_comments        enable row level security;
 alter table public.pveel_views           enable row level security;
+alter table public.blocks                enable row level security;
+alter table public.mutes                 enable row level security;
 
 -- Users
 drop policy if exists users_self_read   on public.users;
@@ -606,6 +641,12 @@ create policy pveel_comments_write on public.pveel_comments for all using (auth.
 drop policy if exists pveel_views_self on public.pveel_views;
 create policy pveel_views_self on public.pveel_views for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+-- Blocks + mutes: a user only ever sees/manages their own lists.
+drop policy if exists blocks_self on public.blocks;
+create policy blocks_self on public.blocks for all using (auth.uid() = blocker_id) with check (auth.uid() = blocker_id);
+drop policy if exists mutes_self on public.mutes;
+create policy mutes_self on public.mutes for all using (auth.uid() = muter_id) with check (auth.uid() = muter_id);
+
 -- =============================================================================
 -- STORAGE BUCKETS (public read; uploads by authenticated users; owner edits/deletes)
 -- =============================================================================
@@ -631,6 +672,16 @@ create policy "media owner update" on storage.objects
   for update to authenticated using (owner = auth.uid()) with check (owner = auth.uid());
 create policy "media owner delete" on storage.objects
   for delete to authenticated using (owner = auth.uid());
+
+-- GDPR export files: private bucket, signed-URL reads only (owner write/delete).
+insert into storage.buckets (id, name, public) values ('exports', 'exports', false)
+on conflict (id) do nothing;
+drop policy if exists "exports owner write"  on storage.objects;
+drop policy if exists "exports owner delete" on storage.objects;
+create policy "exports owner write" on storage.objects
+  for insert to authenticated with check (bucket_id = 'exports');
+create policy "exports owner delete" on storage.objects
+  for delete to authenticated using (bucket_id = 'exports' and owner = auth.uid());
 
 -- =============================================================================
 -- DONE. To go fully real now, optionally run:  select public.purge_demo_content();

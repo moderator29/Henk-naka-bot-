@@ -30,6 +30,8 @@ const expectedTables = [
   "pveelSaves",
   "pveelComments",
   "pveelViews",
+  "blocks",
+  "mutes",
 ] as const;
 
 describe("db/schema", () => {
