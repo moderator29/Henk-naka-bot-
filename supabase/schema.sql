@@ -592,7 +592,10 @@ create policy listings_seller_write on public.marketplace_listings for all using
 drop policy if exists conv_participant_read   on public.conversations;
 drop policy if exists conv_participant_insert on public.conversations;
 create policy conv_participant_read   on public.conversations for select using (auth.uid() in (participant_a, participant_b));
-create policy conv_participant_insert on public.conversations for insert with check (auth.uid() in (participant_a, participant_b));
+create policy conv_participant_insert on public.conversations for insert with check (
+  auth.uid() in (participant_a, participant_b)
+  and not public.is_blocked(participant_a, participant_b)
+);
 
 -- Messages (read if participant; send as self; recipient may mark read)
 drop policy if exists messages_participant_read    on public.messages;
@@ -605,7 +608,9 @@ create policy messages_participant_read on public.messages for select using (
 create policy messages_participant_insert on public.messages for insert with check (
   auth.uid() = sender_id
   and exists (select 1 from public.conversations c
-              where c.id = messages.conversation_id and auth.uid() in (c.participant_a, c.participant_b))
+              where c.id = messages.conversation_id
+                and auth.uid() in (c.participant_a, c.participant_b)
+                and not public.is_blocked(c.participant_a, c.participant_b))
 );
 create policy messages_recipient_mark_read on public.messages for update
   using (

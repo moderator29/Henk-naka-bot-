@@ -1,6 +1,12 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MessagesShell, type ConversationPreview } from "./MessagesShell";
+
+// The inbox header's NewMessageButton pulls in router/toast/server actions;
+// stub it so this test stays focused on the shell layout.
+vi.mock("./NewMessageButton", () => ({
+  NewMessageButton: () => null,
+}));
 
 describe("MessagesShell", () => {
   it("renders the empty state when there are no conversations", () => {

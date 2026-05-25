@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Send, Sparkles } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Check, CheckCheck } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { cn, relativeTime } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -20,6 +20,8 @@ export interface ThreadMessage {
   senderId: string;
   body: string;
   createdAt: string | Date;
+  /** Set once the recipient has read it; drives the sent-bubble read tick. */
+  readAt?: string | null;
 }
 
 interface ThreadViewProps {
@@ -231,19 +233,27 @@ function Bubble({ message, mine }: { message: ThreadMessage; mine: boolean }) {
         )}
       >
         <p className="whitespace-pre-wrap break-words">{message.body}</p>
-        <time
-          className={cn(
-            "block text-[0.6rem] mt-1",
-            mine ? "text-white/70" : "text-lilac/50"
-          )}
-          dateTime={
-            message.createdAt instanceof Date
-              ? message.createdAt.toISOString()
-              : message.createdAt
-          }
-        >
-          {relativeTime(message.createdAt)}
-        </time>
+        <span className="flex items-center justify-end gap-1 mt-1">
+          <time
+            className={cn(
+              "text-[0.6rem]",
+              mine ? "text-white/70" : "text-lilac/50"
+            )}
+            dateTime={
+              message.createdAt instanceof Date
+                ? message.createdAt.toISOString()
+                : message.createdAt
+            }
+          >
+            {relativeTime(message.createdAt)}
+          </time>
+          {mine &&
+            (message.readAt ? (
+              <CheckCheck size={13} className="text-cyan" aria-label="Read" />
+            ) : (
+              <Check size={13} className="text-white/60" aria-label="Sent" />
+            ))}
+        </span>
       </div>
     </li>
   );

@@ -118,6 +118,7 @@ interface MessageRow {
   sender_id: string;
   body: string | null;
   created_at: string;
+  read_at: string | null;
 }
 
 export async function getThreadMessages(
@@ -130,7 +131,7 @@ export async function getThreadMessages(
   const supabase = createClient();
   const { data, error } = await supabase
     .from("messages")
-    .select("id, sender_id, body, created_at")
+    .select("id, sender_id, body, created_at, read_at")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true })
     .limit(200);
@@ -142,5 +143,6 @@ export async function getThreadMessages(
     senderId: m.sender_id,
     body: m.body ?? "",
     createdAt: m.created_at,
+    readAt: m.read_at,
   }));
 }

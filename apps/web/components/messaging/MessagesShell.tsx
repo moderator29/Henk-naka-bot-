@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { cn, relativeTime } from "@/lib/utils";
 import { Card } from "@/components/ui/Card";
 import { BrandIcon } from "@/components/brand/BrandIcon";
+import { NewMessageButton } from "./NewMessageButton";
 
 /**
  * Messages two-pane shell.
@@ -58,13 +59,16 @@ export function MessagesShell({
         )}
         aria-label="Conversations"
       >
-        <div className="px-5 py-4 border-b border-white/5">
-          <h1 className="font-display text-2xl font-bold text-white">
-            Messages
-          </h1>
-          <p className="text-xs text-lilac/60 mt-0.5">
-            Direct messages with creators and fans.
-          </p>
+        <div className="px-5 py-4 border-b border-white/5 flex items-start justify-between gap-3">
+          <div>
+            <h1 className="font-display text-2xl font-bold text-white">
+              Messages
+            </h1>
+            <p className="text-xs text-lilac/60 mt-0.5">
+              Direct messages with creators and fans.
+            </p>
+          </div>
+          <NewMessageButton />
         </div>
         <div className="flex-1 overflow-y-auto">
           {hasConversations ? (

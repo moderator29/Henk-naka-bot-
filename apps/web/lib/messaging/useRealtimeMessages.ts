@@ -24,6 +24,7 @@ interface MessageRow {
   sender_id: string;
   body: string | null;
   created_at: string;
+  read_at: string | null;
 }
 
 export function useRealtimeMessages(
@@ -32,10 +33,35 @@ export function useRealtimeMessages(
 ) {
   const [messages, setMessages] = useState<ThreadMessage[]>(initial);
 
+  // Local optimistic append (dedupes by id).
   const append = useCallback((m: ThreadMessage) => {
     setMessages((prev) =>
       prev.some((p) => p.id === m.id) ? prev : [...prev, m]
     );
+  }, []);
+
+  // A real row from Realtime: replace a matching optimistic message (same
+  // sender + body) so the sent bubble doesn't duplicate, else append.
+  const ingest = useCallback((m: ThreadMessage) => {
+    setMessages((prev) => {
+      if (prev.some((p) => p.id === m.id)) return prev;
+      const idx = prev.findIndex(
+        (p) =>
+          p.id.startsWith("optimistic-") &&
+          p.senderId === m.senderId &&
+          p.body === m.body
+      );
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = m;
+        return copy;
+      }
+      return [...prev, m];
+    });
+  }, []);
+
+  const patchRead = useCallback((id: string, readAt: string | null) => {
+    setMessages((prev) => prev.map((p) => (p.id === id ? { ...p, readAt } : p)));
   }, []);
 
   useEffect(() => {
@@ -74,12 +100,26 @@ export function useRealtimeMessages(
           },
           (payload) => {
             const row = payload.new as MessageRow;
-            append({
+            ingest({
               id: row.id,
               senderId: row.sender_id,
               body: row.body ?? "",
               createdAt: row.created_at,
+              readAt: row.read_at,
             });
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "messages",
+            filter: `conversation_id=eq.${conversationId}`,
+          },
+          (payload) => {
+            const row = payload.new as MessageRow;
+            patchRead(row.id, row.read_at);
           }
         )
         .subscribe();
@@ -89,7 +129,7 @@ export function useRealtimeMessages(
       cancelled = true;
       if (channel) supabase.removeChannel(channel);
     };
-  }, [conversationId, append]);
+  }, [conversationId, ingest, patchRead]);
 
   return { messages, append };
 }
