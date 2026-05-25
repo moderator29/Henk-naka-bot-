@@ -71,6 +71,35 @@ export function sendPasswordChangedEmail(to: string) {
   );
 }
 
+export function sendRenewalReminderEmail(
+  to: string,
+  creatorName: string,
+  daysLeft: number
+) {
+  const when = daysLeft <= 1 ? "tomorrow" : `in ${daysLeft} days`;
+  return send(
+    to,
+    `Your ${creatorName} subscription renews ${when}`,
+    shell(
+      "Renewal coming up",
+      `Your subscription to ${creatorName} renews ${when}. Manage it any time from your subscriptions, turn off auto-renew, or just keep enjoying the access.`,
+      "You can change this in Settings."
+    )
+  );
+}
+
+export function sendCreatorPostEmail(to: string, creatorName: string) {
+  return send(
+    to,
+    `${creatorName} just posted`,
+    shell(
+      `${creatorName} posted something new`,
+      "There's fresh content waiting in your feed. Open the app to catch up.",
+      "Manage post notifications in Settings."
+    )
+  );
+}
+
 export function sendAccountDeletionEmail(to: string) {
   return send(
     to,
