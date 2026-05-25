@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { StatTicker } from "@/components/ui/StatTicker";
 import { getTokenStats } from "@/lib/market/token-stats";
 
@@ -14,7 +16,7 @@ export async function LiveTicker() {
   return (
     <section className="relative -mt-8 z-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="glass-strong edge-light rounded-2xl px-6 py-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+        <div className="glass-strong edge-light rounded-2xl px-6 py-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 items-center">
           <Stat label="$NSFW">
             {stats.price != null ? (
               <StatTicker value={stats.price} formatPreset="price6" duration={1.4} />
@@ -45,6 +47,15 @@ export async function LiveTicker() {
           <Stat label="Total Supply">
             <StatTicker value={69_000_000_000} formatPreset="compact" />
           </Stat>
+          <div className="col-span-2 sm:col-span-3 lg:col-span-1 flex items-center lg:justify-end">
+            <Link
+              href="/trade"
+              className="inline-flex items-center gap-1.5 h-11 px-5 rounded-pill btn-primary text-white text-sm font-semibold w-full lg:w-auto justify-center"
+            >
+              Trade $NSFW
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+          </div>
         </div>
       </div>
     </section>

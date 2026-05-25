@@ -1,4 +1,5 @@
 import { NSFW_TOKEN_ADDRESS } from "@/lib/web3/addresses";
+import { getHolderCount } from "./holders";
 
 /**
  * Live $NSFW market data. CoinGecko is primary; CoinMarketCap is the fallback.
@@ -26,6 +27,11 @@ const EMPTY: TokenStats = {
 };
 
 export async function getTokenStats(): Promise<TokenStats> {
+  const [base, holders] = await Promise.all([resolveBase(), getHolderCount()]);
+  return { ...base, holders };
+}
+
+async function resolveBase(): Promise<TokenStats> {
   const cg = await fromCoinGecko();
   if (cg && cg.price != null) return cg;
 
