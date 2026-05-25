@@ -134,6 +134,79 @@ export async function getFeedPosts(userId: string | null): Promise<FeedPost[]> {
   return applyViewerState(supabase, posts, userId);
 }
 
+export interface PveelItem {
+  id: string;
+  creatorUsername: string;
+  creatorName: string;
+  verified: boolean;
+  caption: string;
+  videoUrl: string;
+  likes: number;
+  comments: number;
+  tips: number;
+  likedByMe: boolean;
+}
+
+interface PveelRow {
+  id: string;
+  caption: string | null;
+  media: PostMedia[] | null;
+  users: { username: string | null; display_name: string | null; is_verified: boolean } | null;
+  likes: { count: number }[] | null;
+  comments: { count: number }[] | null;
+  tips: { count: number }[] | null;
+}
+
+/**
+ * Pveels: real public posts that contain a video, newest first. The vertical
+ * reel plays the actual uploaded video. Empty when no one has posted a video.
+ */
+export async function getPveels(userId: string | null): Promise<PveelItem[]> {
+  if (!configured()) return [];
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("posts")
+    .select(
+      "id, caption, media, users!inner(username, display_name, is_verified), likes(count), comments(count), tips(count)"
+    )
+    .is("tier_required", null)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  const rows = (data as unknown as PveelRow[]) ?? [];
+  const items: PveelItem[] = [];
+  for (const r of rows) {
+    const video = (Array.isArray(r.media) ? r.media : []).find(
+      (m) => m.url && m.type.startsWith("video/")
+    );
+    if (!video?.url) continue;
+    items.push({
+      id: r.id,
+      creatorUsername: r.users?.username ?? "creator",
+      creatorName: r.users?.display_name ?? r.users?.username ?? "Creator",
+      verified: r.users?.is_verified ?? false,
+      caption: r.caption ?? "",
+      videoUrl: video.url,
+      likes: r.likes?.[0]?.count ?? 0,
+      comments: r.comments?.[0]?.count ?? 0,
+      tips: r.tips?.[0]?.count ?? 0,
+      likedByMe: false,
+    });
+  }
+
+  if (userId && items.length > 0) {
+    const ids = items.map((i) => i.id);
+    const { data: likes } = await supabase
+      .from("likes")
+      .select("post_id")
+      .eq("user_id", userId)
+      .in("post_id", ids);
+    const liked = new Set((likes ?? []).map((l) => l.post_id as string));
+    for (const it of items) it.likedByMe = liked.has(it.id);
+  }
+  return items;
+}
+
 /** A specific user's own posts (for their profile). */
 export async function getUserPosts(userId: string): Promise<FeedPost[]> {
   if (!configured()) return [];

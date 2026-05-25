@@ -5,15 +5,16 @@ import { motion } from "framer-motion";
 import { BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { formatNumber } from "@/lib/utils";
-import { DEMO_CREATORS } from "@/lib/demo/data";
+import type { TrendingCreator } from "@/lib/explore/queries";
 
 /**
  * Featured creators, shown as a continuous marquee on the public landing.
- * Uses the labeled demo roster until real verified creators are onboarded
- * and surfaced here. The marquee pauses on hover.
+ * Real verified/trending creators from Supabase (passed in by the server page).
+ * When none have onboarded yet, an honest invitation shows instead of a roster.
+ * The marquee pauses on hover.
  */
-export function CreatorsCarousel() {
-  const row = [...DEMO_CREATORS, ...DEMO_CREATORS]; // doubled for seamless loop
+export function CreatorsCarousel({ creators }: { creators: TrendingCreator[] }) {
+  const row = creators.length > 0 ? [...creators, ...creators] : []; // doubled for seamless loop
 
   return (
     <section className="relative py-24 sm:py-32 overflow-hidden">
@@ -40,6 +41,21 @@ export function CreatorsCarousel() {
         </motion.div>
       </div>
 
+      {row.length === 0 ? (
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="glass rounded-2xl p-10 text-center">
+            <p className="text-white font-medium">
+              The first creators are on their way.
+            </p>
+            <p className="mt-1 text-sm text-lilac/60">
+              Verified creators appear here as they join. Want to be one of them?
+            </p>
+            <Button asChild className="mt-4">
+              <Link href="/signup">Become a creator</Link>
+            </Button>
+          </div>
+        </div>
+      ) : (
       <div className="relative">
         {/* edge fades */}
         <div className="pointer-events-none absolute inset-y-0 left-0 w-24 z-10 bg-gradient-to-r from-plum to-transparent" />
@@ -79,6 +95,7 @@ export function CreatorsCarousel() {
           ))}
         </div>
       </div>
+      )}
     </section>
   );
 }

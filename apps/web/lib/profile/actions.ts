@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth/session";
 import { isAdult, parseDateOfBirth } from "@/lib/auth/age";
+import { maybePurgeDemoContent } from "@/lib/admin/demo";
 import { passwordSchema } from "@/lib/auth/schemas";
 import {
   sendPasswordChangedEmail,
@@ -219,6 +220,7 @@ export async function setupProfile(
     },
   });
 
+  await maybePurgeDemoContent();
   return { ok: true };
 }
 

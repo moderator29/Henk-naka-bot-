@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
-import { Info } from "lucide-react";
+import Link from "next/link";
+import { UserX } from "lucide-react";
 import { CreatorHeader } from "@/components/creator/CreatorHeader";
 import { TierSelector } from "@/components/creator/TierSelector";
 import { ContentTabs } from "@/components/creator/ContentTabs";
 import { CatchMeUpButton } from "@/components/creator/CatchMeUpButton";
-import { getCreatorByUsername, getViewerRelation, type ViewerRelation } from "@/lib/creators/queries";
-import { SAMPLE_PREVIEW_DATA } from "@/lib/creators/sample";
-import { demoCreatorProfile, demoEnabled } from "@/lib/demo/data";
+import { Button } from "@/components/ui/Button";
+import {
+  getCreatorByUsername,
+  getViewerRelation,
+  type ViewerRelation,
+} from "@/lib/creators/queries";
 
 interface CreatorPageProps {
   params: { username: string };
@@ -23,28 +27,36 @@ export async function generateMetadata({
   };
 }
 
-export default async function CreatorProfilePage({
-  params,
-}: CreatorPageProps) {
-  const real = await getCreatorByUsername(params.username);
-  const demo = demoEnabled() ? demoCreatorProfile(params.username) : null;
-  const creator = real ?? demo ?? SAMPLE_PREVIEW_DATA;
-  const relation: ViewerRelation = real?.id
-    ? await getViewerRelation(real.id)
+export default async function CreatorProfilePage({ params }: CreatorPageProps) {
+  const creator = await getCreatorByUsername(params.username);
+
+  if (!creator) {
+    return (
+      <div className="max-w-md mx-auto py-20 text-center flex flex-col items-center gap-4">
+        <span className="h-14 w-14 rounded-2xl glass edge-light grid place-items-center text-lilac/60">
+          <UserX size={26} />
+        </span>
+        <div>
+          <h1 className="font-display text-2xl font-bold text-white">
+            Creator not found
+          </h1>
+          <p className="mt-1 text-sm text-lilac/60">
+            @{params.username} isn&apos;t a creator yet, or the handle is wrong.
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/explore">Discover creators</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const relation: ViewerRelation = creator.id
+    ? await getViewerRelation(creator.id)
     : { following: false, subscribedTierIds: [] };
 
   return (
     <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-6">
-      {creator.isPreview && (
-        <div className="mx-4 sm:mx-8 mb-2 mt-2 flex items-center gap-2 rounded-xl glass px-4 py-2.5 text-xs text-lilac/70">
-          <Info size={14} className="text-cyan flex-shrink-0" />
-          <span>
-            Preview, a sample profile showing the creator surface. Real
-            profiles render here once creators are onboarded.
-          </span>
-        </div>
-      )}
-
       <CreatorHeader creator={creator} relation={relation} />
 
       <div className="mx-4 sm:mx-8 mt-8 grid lg:grid-cols-[1fr_340px] gap-8 pb-12">

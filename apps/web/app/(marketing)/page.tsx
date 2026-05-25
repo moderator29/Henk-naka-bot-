@@ -9,8 +9,10 @@ import { StakingCTA } from "@/components/marketing/sections/StakingCTA";
 import { Journey } from "@/components/marketing/sections/Journey";
 import { FAQ } from "@/components/marketing/sections/FAQ";
 import { FinalCTA } from "@/components/marketing/sections/FinalCTA";
+import { getTrendingCreators } from "@/lib/explore/queries";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const creators = await getTrendingCreators(8);
   return (
     <>
       <Hero />
@@ -20,7 +22,7 @@ export default function LandingPage() {
       <Mission />
       <Ecosystem />
       <AIShowcase />
-      <CreatorsCarousel />
+      <CreatorsCarousel creators={creators} />
       <StakingCTA />
       <Journey />
       <FAQ />

@@ -10,6 +10,7 @@ import {
 } from "./schemas";
 import { parseDateOfBirth } from "./age";
 import { verifyTurnstile } from "./turnstile";
+import { maybePurgeDemoContent } from "@/lib/admin/demo";
 import { hasHumanVerified } from "./human-check";
 
 export interface AuthActionState {
@@ -128,6 +129,9 @@ export async function signUpAction(
       },
     };
   }
+
+  // First real signup clears any seeded demo content (best-effort, runs once).
+  await maybePurgeDemoContent();
 
   redirect(`/check-email?email=${encodeURIComponent(parsed.data.email)}`);
 }

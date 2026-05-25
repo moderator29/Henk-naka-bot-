@@ -10,14 +10,13 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/components/ui/Toast";
 import { cn, formatNumber } from "@/lib/utils";
 import {
-  DEMO_LISTINGS,
   CATEGORIES,
   COLLECTIONS,
-  MARKETPLACE_IS_MOCK,
   artGradient,
   type Listing,
   type ListingStatus,
 } from "@/lib/marketplace/mock";
+import { isMarketplaceWired } from "@/lib/web3/addresses";
 
 type Sort = "popular" | "newest" | "price-asc" | "price-desc";
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -41,7 +40,7 @@ function NftArt({ seed, title, className }: { seed: number; title: string; class
 
 export function MarketplaceBrowser() {
   const { push } = useToast();
-  const [listings, setListings] = useState<Listing[]>(DEMO_LISTINGS);
+  const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<Sort>("popular");
@@ -92,13 +91,13 @@ export function MarketplaceBrowser() {
 
   return (
     <div className="flex flex-col gap-6">
-      {MARKETPLACE_IS_MOCK && (
+      {!isMarketplaceWired && (
         <div className="flex items-center gap-2 text-xs text-cyan border border-cyan/30 rounded-xl px-3 py-2">
-          <span className="uppercase tracking-wider font-medium">Demo</span>
+          <span className="uppercase tracking-wider font-medium">Pending</span>
           <span className="text-lilac/60">
-            Sample listings with generated art until NFT contracts are wired
-            (<span className="font-mono">PENDING_CONTRACT_ADDRESS</span>). They
-            clear on first real signup.
+            The NFT marketplace goes live when the contracts are wired
+            (<span className="font-mono">PENDING_CONTRACT_ADDRESS</span>). Buying
+            and listing are on-chain actions that activate then.
           </span>
         </div>
       )}
