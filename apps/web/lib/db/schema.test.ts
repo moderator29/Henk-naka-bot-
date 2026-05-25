@@ -25,6 +25,11 @@ const expectedTables = [
   "marketplaceListings",
   "conversations",
   "messages",
+  "pveels",
+  "pveelLikes",
+  "pveelSaves",
+  "pveelComments",
+  "pveelViews",
 ] as const;
 
 describe("db/schema", () => {
@@ -39,6 +44,22 @@ describe("db/schema", () => {
 
   it("posts table carries the gating column tier_required", () => {
     expect(schema.posts.tierRequired).toBeDefined();
+  });
+
+  it("posts table carries the composer audience + toggle columns", () => {
+    expect(schema.posts.visibility).toBeDefined();
+    expect(schema.posts.allowComments).toBeDefined();
+    expect(schema.posts.allowTips).toBeDefined();
+    expect(schema.posts.hashtags).toBeDefined();
+  });
+
+  it("pveels table carries video, poster, gating, and cached counts", () => {
+    expect(schema.pveels.videoUrl).toBeDefined();
+    expect(schema.pveels.posterUrl).toBeDefined();
+    expect(schema.pveels.visibility).toBeDefined();
+    expect(schema.pveels.tierRequired).toBeDefined();
+    expect(schema.pveels.likeCount).toBeDefined();
+    expect(schema.pveels.viewCount).toBeDefined();
   });
 
   it("staking positions carry a 12-week unlock_at column", () => {

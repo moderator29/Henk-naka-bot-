@@ -71,6 +71,11 @@ create table if not exists public.posts (
   media jsonb,
   tier_required uuid references public.subscription_tiers(id) on delete set null,
   category text,
+  visibility text not null default 'public',         -- 'public'|'followers'|'subscribers'|'tier'
+  allow_comments boolean not null default true,
+  allow_tips boolean not null default true,
+  hashtags text[],
+  mentions uuid[],
   is_demo boolean not null default false,
   created_at timestamptz not null default now(),
   scheduled_for timestamptz
@@ -187,6 +192,61 @@ create table if not exists public.messages (
   constraint messages_body_or_media check (body is not null or media is not null)
 );
 
+-- ---------- PVEELS (short vertical video) ----------
+create table if not exists public.pveels (
+  id uuid primary key default gen_random_uuid(),
+  creator_id uuid not null references public.users(id) on delete cascade,
+  video_url text not null,
+  poster_url text,
+  caption text,
+  hashtags text[],
+  mentions uuid[],
+  category text,
+  visibility text not null default 'public',         -- 'public'|'followers'|'subscribers'|'tier'
+  tier_required uuid references public.subscription_tiers(id) on delete set null,
+  duration_seconds numeric,
+  width integer,
+  height integer,
+  allow_comments boolean not null default true,
+  allow_tips boolean not null default true,
+  view_count bigint not null default 0,
+  like_count bigint not null default 0,
+  comment_count bigint not null default 0,
+  save_count bigint not null default 0,
+  is_demo boolean not null default false,
+  created_at timestamptz not null default now(),
+  scheduled_for timestamptz
+);
+
+create table if not exists public.pveel_likes (
+  pveel_id uuid not null references public.pveels(id) on delete cascade,
+  user_id uuid not null references public.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (pveel_id, user_id)
+);
+
+create table if not exists public.pveel_saves (
+  pveel_id uuid not null references public.pveels(id) on delete cascade,
+  user_id uuid not null references public.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (pveel_id, user_id)
+);
+
+create table if not exists public.pveel_comments (
+  id uuid primary key default gen_random_uuid(),
+  pveel_id uuid not null references public.pveels(id) on delete cascade,
+  user_id uuid not null references public.users(id) on delete cascade,
+  body text not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.pveel_views (
+  pveel_id uuid not null references public.pveels(id) on delete cascade,
+  user_id uuid not null references public.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (pveel_id, user_id)
+);
+
 -- =============================================================================
 -- INDEXES
 -- =============================================================================
@@ -219,6 +279,14 @@ create index if not exists conv_b_idx                on public.conversations (pa
 create index if not exists conv_last_msg_idx         on public.conversations (last_message_at desc nulls last);
 create index if not exists messages_conv_idx         on public.messages (conversation_id);
 create index if not exists messages_created_idx      on public.messages (created_at desc);
+
+create index if not exists posts_hashtags_idx        on public.posts using gin (hashtags);
+create index if not exists pveels_creator_idx        on public.pveels (creator_id);
+create index if not exists pveels_created_idx        on public.pveels (created_at desc);
+create index if not exists pveels_caption_trgm_idx   on public.pveels using gin (caption gin_trgm_ops);
+create index if not exists pveels_hashtags_idx       on public.pveels using gin (hashtags);
+create index if not exists pveels_demo_idx           on public.pveels (is_demo) where is_demo;
+create index if not exists pveel_comments_pveel_idx  on public.pveel_comments (pveel_id);
 
 -- =============================================================================
 -- HELPER FUNCTIONS
@@ -258,6 +326,33 @@ drop trigger if exists messages_bump_conversation on public.messages;
 create trigger messages_bump_conversation
   after insert on public.messages
   for each row execute function public.bump_conversation_last_message();
+
+-- Keep the cached engagement counters on a pveel fresh.
+create or replace function public.bump_pveel_counter()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  col text := tg_argv[0];
+  delta int := case when tg_op = 'INSERT' then 1 else -1 end;
+  pid uuid := case when tg_op = 'INSERT' then new.pveel_id else old.pveel_id end;
+begin
+  execute format('update public.pveels set %I = greatest(0, %I + $1) where id = $2', col, col)
+    using delta, pid;
+  return null;
+end;
+$$;
+
+drop trigger if exists pveel_likes_count    on public.pveel_likes;
+drop trigger if exists pveel_saves_count    on public.pveel_saves;
+drop trigger if exists pveel_comments_count on public.pveel_comments;
+drop trigger if exists pveel_views_count    on public.pveel_views;
+create trigger pveel_likes_count    after insert or delete on public.pveel_likes
+  for each row execute function public.bump_pveel_counter('like_count');
+create trigger pveel_saves_count    after insert or delete on public.pveel_saves
+  for each row execute function public.bump_pveel_counter('save_count');
+create trigger pveel_comments_count after insert or delete on public.pveel_comments
+  for each row execute function public.bump_pveel_counter('comment_count');
+create trigger pveel_views_count    after insert or delete on public.pveel_views
+  for each row execute function public.bump_pveel_counter('view_count');
 
 -- Mirror a new auth.users row into public.users + seed user_preferences,
 -- copying date_of_birth from signup metadata for the 18+ gate.
@@ -364,6 +459,11 @@ alter table public.nft_holdings          enable row level security;
 alter table public.marketplace_listings  enable row level security;
 alter table public.conversations         enable row level security;
 alter table public.messages              enable row level security;
+alter table public.pveels                enable row level security;
+alter table public.pveel_likes           enable row level security;
+alter table public.pveel_saves           enable row level security;
+alter table public.pveel_comments        enable row level security;
+alter table public.pveel_views           enable row level security;
 
 -- Users
 drop policy if exists users_self_read   on public.users;
@@ -481,11 +581,38 @@ create policy messages_recipient_mark_read on public.messages for update
   )
   with check (sender_id <> auth.uid());
 
+-- Pveels (rows world-readable for the locked preview; gated FILE is protected
+-- by the private `gated-media` bucket + signed URLs). Author writes own.
+drop policy if exists pveels_public_read on public.pveels;
+drop policy if exists pveels_owner_write on public.pveels;
+create policy pveels_public_read on public.pveels for select using (true);
+create policy pveels_owner_write on public.pveels for all using (auth.uid() = creator_id) with check (auth.uid() = creator_id);
+
+drop policy if exists pveel_likes_read  on public.pveel_likes;
+drop policy if exists pveel_likes_write on public.pveel_likes;
+create policy pveel_likes_read  on public.pveel_likes for select using (true);
+create policy pveel_likes_write on public.pveel_likes for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists pveel_saves_read  on public.pveel_saves;
+drop policy if exists pveel_saves_write on public.pveel_saves;
+create policy pveel_saves_read  on public.pveel_saves for select using (auth.uid() = user_id);
+create policy pveel_saves_write on public.pveel_saves for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists pveel_comments_read  on public.pveel_comments;
+drop policy if exists pveel_comments_write on public.pveel_comments;
+create policy pveel_comments_read  on public.pveel_comments for select using (true);
+create policy pveel_comments_write on public.pveel_comments for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists pveel_views_self on public.pveel_views;
+create policy pveel_views_self on public.pveel_views for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
 -- =============================================================================
 -- STORAGE BUCKETS (public read; uploads by authenticated users; owner edits/deletes)
 -- =============================================================================
 insert into storage.buckets (id, name, public)
-values ('post-media', 'post-media', true), ('avatars', 'avatars', true)
+values ('post-media', 'post-media', true), ('avatars', 'avatars', true),
+       ('covers', 'covers', true), ('pveels', 'pveels', true),
+       ('gated-media', 'gated-media', false)
 on conflict (id) do nothing;
 
 drop policy if exists "media public read" on storage.objects;
@@ -493,10 +620,13 @@ drop policy if exists "media auth upload"  on storage.objects;
 drop policy if exists "media owner update" on storage.objects;
 drop policy if exists "media owner delete" on storage.objects;
 
+-- Public read covers free media + posters/covers/avatars. `gated-media` is NOT
+-- listed here on purpose: it is private and reached only via server-issued
+-- signed URLs after a subscription/entitlement check.
 create policy "media public read" on storage.objects
-  for select using (bucket_id in ('post-media', 'avatars'));
+  for select using (bucket_id in ('post-media', 'avatars', 'covers', 'pveels'));
 create policy "media auth upload" on storage.objects
-  for insert to authenticated with check (bucket_id in ('post-media', 'avatars'));
+  for insert to authenticated with check (bucket_id in ('post-media', 'avatars', 'covers', 'pveels', 'gated-media'));
 create policy "media owner update" on storage.objects
   for update to authenticated using (owner = auth.uid()) with check (owner = auth.uid());
 create policy "media owner delete" on storage.objects

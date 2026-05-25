@@ -18,6 +18,7 @@ import {
   timestamp,
   numeric,
   integer,
+  bigint,
   jsonb,
   date,
   primaryKey,
@@ -127,6 +128,11 @@ export const posts = pgTable(
       onDelete: "set null",
     }),
     category: text("category"),
+    visibility: text("visibility").default("public").notNull(),
+    allowComments: boolean("allow_comments").default(true).notNull(),
+    allowTips: boolean("allow_tips").default(true).notNull(),
+    hashtags: text("hashtags").array(),
+    mentions: uuid("mentions").array(),
     isDemo: boolean("is_demo").default(false).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
@@ -376,9 +382,123 @@ export const messages = pgTable(
   })
 );
 
+/**
+ * Pveels: short vertical video. Rows are world-readable so a non-subscriber
+ * sees a locked preview; gated video files live in the private `gated-media`
+ * bucket and are reached only via server-issued signed URLs after an
+ * entitlement check. Cached counts are kept fresh by triggers (migration 0009).
+ */
+export const pveels = pgTable(
+  "pveels",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    creatorId: uuid("creator_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    videoUrl: text("video_url").notNull(),
+    posterUrl: text("poster_url"),
+    caption: text("caption"),
+    hashtags: text("hashtags").array(),
+    mentions: uuid("mentions").array(),
+    category: text("category"),
+    visibility: text("visibility").default("public").notNull(),
+    tierRequired: uuid("tier_required").references(() => subscriptionTiers.id, {
+      onDelete: "set null",
+    }),
+    durationSeconds: numeric("duration_seconds"),
+    width: integer("width"),
+    height: integer("height"),
+    allowComments: boolean("allow_comments").default(true).notNull(),
+    allowTips: boolean("allow_tips").default(true).notNull(),
+    viewCount: bigint("view_count", { mode: "number" }).default(0).notNull(),
+    likeCount: bigint("like_count", { mode: "number" }).default(0).notNull(),
+    commentCount: bigint("comment_count", { mode: "number" })
+      .default(0)
+      .notNull(),
+    saveCount: bigint("save_count", { mode: "number" }).default(0).notNull(),
+    isDemo: boolean("is_demo").default(false).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    scheduledFor: timestamp("scheduled_for", { withTimezone: true }),
+  },
+  (t) => ({
+    creatorIdx: index("pveels_creator_idx").on(t.creatorId),
+    createdIdx: index("pveels_created_idx").on(t.createdAt),
+  })
+);
+
+export const pveelLikes = pgTable(
+  "pveel_likes",
+  {
+    pveelId: uuid("pveel_id")
+      .references(() => pveels.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.pveelId, t.userId] }) })
+);
+
+export const pveelSaves = pgTable(
+  "pveel_saves",
+  {
+    pveelId: uuid("pveel_id")
+      .references(() => pveels.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.pveelId, t.userId] }) })
+);
+
+export const pveelComments = pgTable(
+  "pveel_comments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    pveelId: uuid("pveel_id")
+      .references(() => pveels.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => ({ pveelIdx: index("pveel_comments_pveel_idx").on(t.pveelId) })
+);
+
+export const pveelViews = pgTable(
+  "pveel_views",
+  {
+    pveelId: uuid("pveel_id")
+      .references(() => pveels.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.pveelId, t.userId] }) })
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Post = typeof posts.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type Conversation = typeof conversations.$inferSelect;
 export type Message = typeof messages.$inferSelect;
+export type Pveel = typeof pveels.$inferSelect;
+export type NewPveel = typeof pveels.$inferInsert;
