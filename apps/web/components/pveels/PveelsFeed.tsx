@@ -18,6 +18,7 @@ import {
   Music2,
   X,
   Send,
+  Plus,
 } from "lucide-react";
 import { cn, formatNumber, relativeTime } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
@@ -70,6 +71,15 @@ export function PveelsFeed({
 
   return (
     <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-6 relative">
+      {/* Box-shape create button: opens the Pveels creation studio */}
+      <Link
+        href="/pveels/create"
+        aria-label="Create a Pveel"
+        className="absolute top-3 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary text-white shadow-glow transition-transform hover:scale-105 active:scale-95"
+      >
+        <Plus size={20} />
+      </Link>
+
       {/* Tabs */}
       <div className="absolute top-3 inset-x-0 z-20 flex justify-center pointer-events-none">
         <div role="tablist" aria-label="Pveels feeds" className="pointer-events-auto flex items-center gap-1 glass-chrome rounded-full p-1">

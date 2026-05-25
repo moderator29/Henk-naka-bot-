@@ -1,8 +1,10 @@
 "use server";
 
+import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getSessionUser } from "@/lib/auth/session";
+import { getSessionUser, requireAdult } from "@/lib/auth/session";
 import type { CommentItem } from "@/lib/engagement/types";
 
 /**
@@ -15,6 +17,81 @@ import type { CommentItem } from "@/lib/engagement/types";
 export interface PveelEngagementResult {
   ok: boolean;
   needsAuth?: boolean;
+}
+
+const createSchema = z.object({
+  videoUrl: z.string().min(1),
+  posterUrl: z.string().nullable().optional(),
+  caption: z.string().trim().max(2000).optional(),
+  category: z.string().trim().max(40).optional(),
+  hashtags: z.array(z.string().trim().max(40)).max(20).optional(),
+  visibility: z.enum(["public", "followers", "subscribers", "tier"]).default("public"),
+  tierRequired: z.string().uuid().nullable().optional(),
+  durationSeconds: z.number().positive().max(45).optional(),
+  width: z.number().int().positive().optional(),
+  height: z.number().int().positive().optional(),
+  allowComments: z.boolean().default(true),
+  allowTips: z.boolean().default(true),
+  scheduledFor: z.string().datetime().nullable().optional(),
+});
+
+export interface CreatePveelResult {
+  ok: boolean;
+  error?: string;
+  pveelId?: string;
+}
+
+/**
+ * Publish a Pveel. The client uploads the (compressed) video + poster to
+ * Storage first (the public `pveels` bucket for free clips, the private
+ * `gated-media` bucket for subscriber-only clips), then calls this with the
+ * resulting URLs/paths + metadata. Requires a verified-adult creator.
+ */
+export async function createPveel(
+  input: z.input<typeof createSchema>
+): Promise<CreatePveelResult> {
+  let user;
+  try {
+    user = await requireAdult();
+  } catch {
+    return { ok: false, error: "Sign in as a verified adult to post." };
+  }
+
+  const parsed = createSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Check your Pveel and try again." };
+  const d = parsed.data;
+
+  const tier_required = d.visibility === "tier" ? d.tierRequired ?? null : null;
+  if (d.visibility === "tier" && !tier_required) {
+    return { ok: false, error: "Pick a tier for this Pveel." };
+  }
+
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("pveels")
+    .insert({
+      creator_id: user.id,
+      video_url: d.videoUrl,
+      poster_url: d.posterUrl ?? null,
+      caption: d.caption || null,
+      category: d.category ?? null,
+      hashtags: d.hashtags && d.hashtags.length ? d.hashtags : null,
+      visibility: d.visibility,
+      tier_required,
+      duration_seconds: d.durationSeconds ?? null,
+      width: d.width ?? null,
+      height: d.height ?? null,
+      allow_comments: d.allowComments,
+      allow_tips: d.allowTips,
+      scheduled_for: d.scheduledFor ?? null,
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) return { ok: false, error: "Could not publish. Try again." };
+  revalidatePath("/pveels");
+  revalidatePath("/profile");
+  return { ok: true, pveelId: data.id as string };
 }
 
 function isDemo(id: string) {
