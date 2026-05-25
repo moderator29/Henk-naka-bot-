@@ -18,6 +18,7 @@ import {
   type AppNotification,
   type NotificationType,
 } from "@/lib/notifications/types";
+import { useRealtimeNotifications } from "@/lib/notifications/useRealtimeNotifications";
 
 const ICONS: Record<NotificationType, LucideIcon> = {
   follow: UserPlus,
@@ -66,6 +67,14 @@ export function NotificationsBell() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Live updates: a new notification bumps the badge, and refreshes the list
+  // if the dropdown is open.
+  const onRealtime = useCallback(() => {
+    setUnread((u) => u + 1);
+    if (open) load();
+  }, [open, load]);
+  useRealtimeNotifications(onRealtime);
 
   // Close on outside click / Escape.
   useEffect(() => {
