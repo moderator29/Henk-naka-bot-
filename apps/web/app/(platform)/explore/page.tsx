@@ -9,7 +9,7 @@ import {
   getRecentPublicPosts,
   type TrendingCreator,
 } from "@/lib/explore/queries";
-import { relativeTime } from "@/lib/utils";
+import { cn, relativeTime } from "@/lib/utils";
 import {
   DEMO_CREATORS,
   DEMO_POSTS,
@@ -30,21 +30,62 @@ function groupByCategory(creators: DemoCreator[]): [string, DemoCreator[]][] {
 }
 
 /**
+ * Curation slugs are ordering views (show everyone); content slugs filter by
+ * the creator's own category tags. Keeps the chips honest: a content chip with
+ * no matching creators shows an empty state rather than an unrelated list.
+ */
+const CURATION_SLUGS = new Set(["trending", "new", "top"]);
+const CONTENT_KEYWORDS: Record<string, string[]> = {
+  nfts: ["nft"],
+  metaverse: ["meta", "verse", "world", "land"],
+  premium: ["premium", "vip", "exclusive", "insider"],
+};
+
+function matchesCategory(creator: { categories: string[] }, slug: string) {
+  if (CURATION_SLUGS.has(slug)) return true;
+  const keywords = CONTENT_KEYWORDS[slug] ?? [];
+  return creator.categories.some((c) =>
+    keywords.some((k) => c.toLowerCase().includes(k))
+  );
+}
+
+/**
  * Discovery, the front door (RPD §6.2, Part 5 signature moment 3). A calm
  * Concierge prompt, then horizontally scrolling rows of creators that reveal in
  * a downward stagger. Live data from Supabase; clearly-labeled demo creators
  * fill in until real creators onboard.
  */
-export default async function ExplorePage() {
+export default async function ExplorePage({
+  searchParams,
+}: {
+  searchParams?: { cat?: string };
+}) {
   const [liveCreators, posts] = await Promise.all([
     getTrendingCreators(12),
     getRecentPublicPosts(10),
   ]);
 
   const usingDemo = liveCreators.length === 0 && demoEnabled();
-  const trending: TrendingCreator[] = usingDemo ? DEMO_CREATORS : liveCreators;
-  const categoryRows = usingDemo ? groupByCategory(DEMO_CREATORS) : [];
+  const allTrending: TrendingCreator[] = usingDemo ? DEMO_CREATORS : liveCreators;
   const usingDemoPosts = posts.length === 0 && demoEnabled();
+
+  // Active category filter from the chips. Unknown slugs fall back to "no filter".
+  const activeCat =
+    searchParams?.cat && CATEGORIES.some((c) => c.slug === searchParams.cat)
+      ? searchParams.cat
+      : null;
+  const activeLabel = activeCat
+    ? CATEGORIES.find((c) => c.slug === activeCat)?.label ?? null
+    : null;
+
+  const trending = activeCat
+    ? allTrending.filter((c) => matchesCategory(c, activeCat))
+    : allTrending;
+
+  // Per-category demo rows only make sense in the unfiltered (or curation) view.
+  const showCategoryRows =
+    usingDemo && (!activeCat || CURATION_SLUGS.has(activeCat));
+  const categoryRows = showCategoryRows ? groupByCategory(DEMO_CREATORS) : [];
 
   let row = 0;
   const delay = () => 0.06 * row++;
@@ -68,20 +109,48 @@ export default async function ExplorePage() {
       {/* Category quick filters */}
       <ScrollReveal delay={delay()}>
         <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-1 px-1 pb-1">
-          {CATEGORIES.map((c) => (
-            <Link
-              key={c.slug}
-              href={`/explore/${c.slug}`}
-              className="shrink-0 rounded-pill border border-white/10 px-4 h-9 inline-flex items-center text-sm text-lilac/80 hover:text-white hover:border-white/30 transition-colors"
-            >
-              {c.label}
-            </Link>
-          ))}
+          {CATEGORIES.map((c) => {
+            const active = activeCat === c.slug;
+            return (
+              <Link
+                key={c.slug}
+                href={active ? "/explore" : `/explore?cat=${c.slug}`}
+                aria-pressed={active}
+                className={cn(
+                  "shrink-0 rounded-pill border px-4 h-9 inline-flex items-center text-sm transition-colors",
+                  active
+                    ? "border-magenta/50 bg-magenta/15 text-white"
+                    : "border-white/10 text-lilac/80 hover:text-white hover:border-white/30"
+                )}
+              >
+                {c.label}
+              </Link>
+            );
+          })}
         </div>
       </ScrollReveal>
 
       <ScrollReveal delay={delay()}>
-        <CreatorRow title="Trending now" creators={trending} demo={usingDemo} />
+        {trending.length > 0 ? (
+          <CreatorRow
+            title={activeLabel ? `${activeLabel} creators` : "Trending now"}
+            creators={trending}
+            demo={usingDemo}
+          />
+        ) : activeCat ? (
+          <Card className="text-center py-12 border-dashed border-2 border-white/10 bg-transparent">
+            <p className="text-sm text-lilac/60">
+              No {activeLabel} creators yet.
+            </p>
+            <p className="text-xs text-lilac/40 mt-1">
+              Try another category or{" "}
+              <Link href="/explore" className="text-magenta hover:underline">
+                clear the filter
+              </Link>
+              .
+            </p>
+          </Card>
+        ) : null}
       </ScrollReveal>
 
       {categoryRows.map(([cat, list]) => (

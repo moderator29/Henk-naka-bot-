@@ -21,12 +21,14 @@ export interface TrendingCreator {
   avatarUrl: string | null;
   verified: boolean;
   subscriberCount: number;
+  categories: string[];
 }
 
 interface CreatorJoinRow {
   user_id: string;
   tagline: string | null;
   subscriber_count: number;
+  categories: string[] | null;
   users: {
     username: string | null;
     display_name: string | null;
@@ -43,7 +45,7 @@ export async function getTrendingCreators(
   const { data, error } = await supabase
     .from("creator_profiles")
     .select(
-      "user_id, tagline, subscriber_count, users!inner(username, display_name, avatar_url, is_verified)"
+      "user_id, tagline, subscriber_count, categories, users!inner(username, display_name, avatar_url, is_verified)"
     )
     .order("subscriber_count", { ascending: false })
     .limit(limit);
@@ -59,6 +61,7 @@ export async function getTrendingCreators(
       avatarUrl: row.users!.avatar_url,
       verified: row.users!.is_verified,
       subscriberCount: row.subscriber_count,
+      categories: row.categories ?? [],
     }));
 }
 

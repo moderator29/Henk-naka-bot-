@@ -50,7 +50,9 @@ export function CandlestickChart({
       lo = Math.min(lo, c.l);
       hi = Math.max(hi, c.h);
     }
-    const pad = (hi - lo) * 0.08 || hi * 0.05;
+    // Fall back through magnitude-relative then absolute padding so flat data
+    // (and an all-zero feed) can never collapse min===max and divide by zero.
+    const pad = (hi - lo) * 0.08 || Math.abs(hi) * 0.05 || 1;
     return { min: lo - pad, max: hi + pad };
   }, [candles]);
 

@@ -163,7 +163,11 @@ export function ProfileView({
 
       {editing && (
         <EditProfileForm
-          initial={{ displayName, username, bio }}
+          initial={{
+            displayName: profile?.displayName ?? "",
+            username: profile?.username ?? "",
+            bio: profile?.bio ?? "",
+          }}
           onClose={() => setEditing(false)}
         />
       )}

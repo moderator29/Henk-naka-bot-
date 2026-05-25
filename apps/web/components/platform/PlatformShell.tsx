@@ -62,7 +62,7 @@ export function PlatformShell({
         <NavRail items={nav} unreadMessageCount={unreadMessageCount} />
 
         <div className="flex flex-col flex-1 min-w-0 max-w-full p-2 sm:p-3">
-          <header className="glass-chrome edge-light rounded-2xl px-3 sm:px-4 h-14 flex items-center gap-3 sticky top-2 sm:top-3 z-30">
+          <header className="glass-chrome edge-light rounded-2xl px-3 sm:px-4 h-14 flex items-center gap-3 sticky top-2 sm:top-3 z-50">
             <div className="lg:hidden">
               <Logo size="sm" showWordmark={false} />
             </div>
@@ -93,7 +93,7 @@ export function PlatformShell({
 
           <main
             id="main-content"
-            className="content-panel edge-light flex-1 min-w-0 max-w-full mt-2 sm:mt-3 p-4 sm:p-6 lg:p-8 pb-28 lg:pb-8"
+            className="content-panel edge-light flex-1 min-w-0 max-w-full mt-2 sm:mt-3 p-4 sm:p-6 lg:p-8 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] lg:pb-8"
           >
             {children}
           </main>

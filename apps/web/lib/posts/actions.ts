@@ -53,6 +53,18 @@ export async function createPost(formData: FormData): Promise<CreatePostResult> 
     return { ok: false, error: "Add a caption or some media." };
   }
 
+  // Validate uploads at the boundary: images/videos only, 25MB ceiling each.
+  const MAX_BYTES = 25 * 1024 * 1024;
+  const ALLOWED_MEDIA = /^(image|video)\//;
+  const tooBig = files.find((f) => f.size > MAX_BYTES);
+  if (tooBig) {
+    return { ok: false, error: "Each file must be under 25MB." };
+  }
+  const wrongType = files.find((f) => !ALLOWED_MEDIA.test(f.type));
+  if (wrongType) {
+    return { ok: false, error: "Only images and videos can be uploaded." };
+  }
+
   const supabase = createClient();
 
   // Upload media to storage (best-effort; a failed upload doesn't lose the post).

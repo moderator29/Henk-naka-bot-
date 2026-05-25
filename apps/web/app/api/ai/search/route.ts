@@ -87,15 +87,22 @@ async function runSearch(
   const supabase = createClient();
   const kind = filters?.kind ?? "creators";
 
+  // The text to match on: AI keywords when we have them, else the raw query.
+  // Sanitized to the characters PostgREST `ilike`/`or` filters accept so a
+  // stray comma or paren can't break the query.
+  const searchText = (filters?.keywords?.join(" ") ?? query)
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .trim();
+
   if (kind === "posts") {
     let q = supabase
       .from("posts")
       .select("id, caption, category")
       .is("tier_required", null)
+      .order("created_at", { ascending: false })
       .limit(20);
-    // pg_trgm fallback when no structured terms.
-    const terms = filters?.keywords?.join(" ") ?? query;
-    q = q.textSearch("caption", terms, { type: "websearch", config: "english" });
+    // ilike keeps the fallback working without depending on a full-text index.
+    if (searchText) q = q.ilike("caption", `%${searchText}%`);
     const { data } = await q;
     return (data ?? []).map((p) => ({
       kind: "post" as const,
@@ -109,12 +116,21 @@ async function runSearch(
   let q = supabase
     .from("creator_profiles")
     .select("user_id, subscriber_count, users!inner(username, display_name, bio)")
+    .order("subscriber_count", { ascending: false })
     .limit(20);
   if (filters?.maxFollowers != null) {
     q = q.lte("subscriber_count", filters.maxFollowers);
   }
   if (filters?.minFollowers != null) {
     q = q.gte("subscriber_count", filters.minFollowers);
+  }
+  // Match the query text against the creator's name/handle/bio. Without this
+  // the no-AI fallback ignored the query entirely and returned a generic list.
+  if (searchText) {
+    q = q.or(
+      `username.ilike.%${searchText}%,display_name.ilike.%${searchText}%,bio.ilike.%${searchText}%`,
+      { referencedTable: "users" }
+    );
   }
   const { data } = await q;
   type Row = {

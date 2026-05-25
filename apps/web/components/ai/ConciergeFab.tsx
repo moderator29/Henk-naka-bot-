@@ -138,7 +138,7 @@ export function ConciergeFab() {
         aria-label="Open Aura, your discovery concierge"
         onClick={() => setOpen(true)}
         className={cn(
-          "fixed bottom-20 lg:bottom-6 right-4 lg:right-6 z-40 h-14 w-14 rounded-full",
+          "fixed bottom-24 lg:bottom-6 right-4 lg:right-6 z-40 h-14 w-14 rounded-full",
           "bg-gradient-primary text-white shadow-glow-lg flex items-center justify-center",
           "transition-transform hover:scale-105 active:scale-95",
           open && "hidden"
@@ -156,7 +156,7 @@ export function ConciergeFab() {
             transition={{ duration: 0.2 }}
             role="dialog"
             aria-label="Aura, Discovery Concierge"
-            className="fixed bottom-20 lg:bottom-6 right-4 lg:right-6 z-50 w-[calc(100vw-2rem)] sm:w-96 h-[28rem] glass-strong rounded-2xl shadow-glow flex flex-col overflow-hidden"
+            className="fixed bottom-24 lg:bottom-6 right-4 lg:right-6 z-50 w-[calc(100vw-2rem)] sm:w-96 h-[28rem] glass-strong rounded-2xl shadow-glow flex flex-col overflow-hidden"
           >
             <header className="flex items-center justify-between px-4 py-3 border-b border-white/5">
               <div className="flex items-center gap-2">

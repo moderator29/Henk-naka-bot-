@@ -15,11 +15,17 @@ function configured() {
   );
 }
 
+interface PostMedia {
+  url: string;
+  type: string;
+}
+
 interface PostRow {
   id: string;
   caption: string | null;
   category: string | null;
   tier_required: string | null;
+  media: PostMedia[] | null;
   created_at: string;
   creator_id: string;
   users: {
@@ -27,6 +33,8 @@ interface PostRow {
     display_name: string | null;
     is_verified: boolean;
   } | null;
+  likes: { count: number }[] | null;
+  comments: { count: number }[] | null;
 }
 
 function mapRow(r: PostRow): FeedPost {
@@ -38,14 +46,15 @@ function mapRow(r: PostRow): FeedPost {
     caption: r.caption ?? "",
     category: r.category ?? "",
     gated: r.tier_required != null,
-    likes: 0,
-    comments: 0,
+    media: Array.isArray(r.media) ? r.media : [],
+    likes: r.likes?.[0]?.count ?? 0,
+    comments: r.comments?.[0]?.count ?? 0,
     createdAt: r.created_at,
   };
 }
 
 const SELECT =
-  "id, caption, category, tier_required, created_at, creator_id, users!inner(username, display_name, is_verified)";
+  "id, caption, category, tier_required, media, created_at, creator_id, users!inner(username, display_name, is_verified), likes(count), comments(count)";
 
 /**
  * Home feed: posts from creators the signed-in user follows, newest first.

@@ -49,7 +49,7 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
       <Dialog.Portal>
         <Dialog.Overlay
           className={cn(
-            "fixed inset-0 z-50 backdrop-blur-xl bg-magenta/10",
+            "fixed inset-0 z-[90] backdrop-blur-xl bg-magenta/10",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0"
           )}
@@ -57,7 +57,7 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
         <Dialog.Content
           ref={ref}
           className={cn(
-            "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
+            "fixed left-1/2 top-1/2 z-[90] -translate-x-1/2 -translate-y-1/2",
             "w-full max-w-lg p-6 rounded-2xl",
             "glass-strong shadow-glow",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
