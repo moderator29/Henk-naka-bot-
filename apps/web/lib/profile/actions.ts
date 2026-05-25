@@ -13,7 +13,7 @@ import {
   sendPasswordChangedEmail,
   sendAccountDeletionEmail,
 } from "@/lib/email/resend";
-import type { UserSettings } from "./settings";
+import { DEFAULT_SETTINGS, type UserSettings } from "./settings";
 
 /**
  * Profile + account actions for the signed-in user. Profile writes run under
@@ -118,7 +118,8 @@ export async function updateProfile(
   return { ok: true };
 }
 
-/** Persist notification / AI / language preferences to user_preferences. */
+/** Persist notification / AI / language preferences. Privacy is preserved
+ * (it's managed by its own panel), so saving here never wipes it. */
 export async function updatePreferences(
   formData: FormData
 ): Promise<{ ok: boolean; error?: string }> {
@@ -129,6 +130,13 @@ export async function updatePreferences(
     me = null;
   }
   if (!me) return { ok: false, error: "Sign in first." };
+
+  const supabase = createClient();
+  const { data: existing } = await supabase
+    .from("user_preferences")
+    .select("settings")
+    .eq("user_id", me.id)
+    .maybeSingle<{ settings: Partial<UserSettings> | null }>();
 
   const on = (k: string) => formData.get(k) === "on";
   const settings: UserSettings = {
@@ -143,14 +151,64 @@ export async function updatePreferences(
       search: on("ai_search"),
       copilot: on("ai_copilot"),
     },
+    privacy: { ...DEFAULT_SETTINGS.privacy, ...existing?.settings?.privacy },
     language: String(formData.get("language") ?? "en"),
   };
 
-  const supabase = createClient();
   const { error } = await supabase
     .from("user_preferences")
     .upsert({ user_id: me.id, settings }, { onConflict: "user_id" });
   if (error) return { ok: false, error: "Could not save preferences." };
+  return { ok: true };
+}
+
+/** Persist privacy settings, preserving the rest of the settings object. */
+export async function updatePrivacy(
+  privacy: UserSettings["privacy"]
+): Promise<{ ok: boolean; error?: string }> {
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me) return { ok: false, error: "Sign in first." };
+
+  const supabase = createClient();
+  const { data: existing } = await supabase
+    .from("user_preferences")
+    .select("settings")
+    .eq("user_id", me.id)
+    .maybeSingle<{ settings: Partial<UserSettings> | null }>();
+
+  const merged: UserSettings = {
+    ...DEFAULT_SETTINGS,
+    ...existing?.settings,
+    privacy: { ...DEFAULT_SETTINGS.privacy, ...privacy },
+  } as UserSettings;
+
+  const { error } = await supabase
+    .from("user_preferences")
+    .upsert({ user_id: me.id, settings: merged }, { onConflict: "user_id" });
+  if (error) return { ok: false, error: "Could not save privacy settings." };
+  return { ok: true };
+}
+
+/** Clear the AI personalization memory the Concierge has built up. */
+export async function resetAiMemory(): Promise<{ ok: boolean; error?: string }> {
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me) return { ok: false, error: "Sign in first." };
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("user_preferences")
+    .update({ ai_persona_memory: null })
+    .eq("user_id", me.id);
+  if (error) return { ok: false, error: "Could not reset." };
   return { ok: true };
 }
 

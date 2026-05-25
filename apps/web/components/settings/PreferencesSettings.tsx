@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
-import { updatePreferences } from "@/lib/profile/actions";
+import { updatePreferences, resetAiMemory } from "@/lib/profile/actions";
 import type { UserSettings } from "@/lib/profile/settings";
 import { Section } from "./AccountSettings";
 import { cn } from "@/lib/utils";
@@ -65,6 +65,18 @@ export function PreferencesSettings({ initial }: { initial: UserSettings }) {
   const { push } = useToast();
   const [s, setS] = useState<UserSettings>(initial);
   const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
+
+  async function resetMemory() {
+    setResetting(true);
+    const res = await resetAiMemory();
+    setResetting(false);
+    push(
+      res.ok
+        ? { tone: "success", title: "Personalization reset" }
+        : { tone: "error", title: res.error ?? "Could not reset" }
+    );
+  }
 
   const setNotif = (k: keyof UserSettings["notifications"], v: boolean) =>
     setS((p) => ({ ...p, notifications: { ...p.notifications, [k]: v } }));
@@ -104,9 +116,17 @@ export function PreferencesSettings({ initial }: { initial: UserSettings }) {
       </Section>
 
       <Section title="AI features" desc="Aura and the AI tools across the platform.">
-        <Row label="Discovery Concierge" desc="Aura builds and refines your feed." checked={s.ai.concierge} onChange={(v) => setAi("concierge", v)} />
+        <Row label="Discovery Concierge" desc="Aura builds and refines your feed from your interests and follows." checked={s.ai.concierge} onChange={(v) => setAi("concierge", v)} />
         <Row label="Smart Search" desc="Natural-language search across the platform." checked={s.ai.search} onChange={(v) => setAi("search", v)} />
         <Row label="Creator Co-Pilot" desc="Reply suggestions and creator tools." checked={s.ai.copilot} onChange={(v) => setAi("copilot", v)} />
+        <div className="border-t border-white/5 pt-3 flex items-center justify-between gap-4">
+          <p className="text-xs text-lilac/55">
+            Aura remembers your tastes to personalize recommendations. You can clear that anytime.
+          </p>
+          <Button variant="glass" size="sm" loading={resetting} onClick={resetMemory}>
+            Reset personalization
+          </Button>
+        </div>
       </Section>
 
       <Section title="Language" desc="Display language for the interface.">

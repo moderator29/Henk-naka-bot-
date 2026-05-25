@@ -41,12 +41,27 @@ export async function searchUsers(query: string): Promise<PersonResult[]> {
   }
 
   const supabase = createClient();
+
+  // Exclude anyone in a block relationship with the viewer (either direction).
+  const blocked = new Set<string>();
+  if (meId) {
+    const [{ data: b1 }, { data: b2 }] = await Promise.all([
+      supabase.from("blocks").select("blocked_id").eq("blocker_id", meId),
+      supabase.from("blocks").select("blocker_id").eq("blocked_id", meId),
+    ]);
+    for (const r of (b1 ?? []) as { blocked_id: string }[]) blocked.add(r.blocked_id);
+    for (const r of (b2 ?? []) as { blocker_id: string }[]) blocked.add(r.blocker_id);
+  }
+
   const { data } = await supabase
     .from("users")
-    .select("id, username, display_name, avatar_url, is_verified, is_demo")
+    .select(
+      "id, username, display_name, avatar_url, is_verified, is_demo, user_preferences(settings)"
+    )
     .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
-    .limit(12);
+    .limit(20);
 
+  type PrefEmbed = { settings: { privacy?: { searchable?: boolean } } | null };
   return ((data ?? []) as {
     id: string;
     username: string | null;
@@ -54,8 +69,14 @@ export async function searchUsers(query: string): Promise<PersonResult[]> {
     avatar_url: string | null;
     is_verified: boolean;
     is_demo: boolean;
+    user_preferences: PrefEmbed | PrefEmbed[] | null;
   }[])
-    .filter((u) => u.id !== meId && !u.is_demo && u.username)
+    .filter((u) => {
+      if (u.id === meId || u.is_demo || !u.username || blocked.has(u.id)) return false;
+      const pref = Array.isArray(u.user_preferences) ? u.user_preferences[0] : u.user_preferences;
+      return pref?.settings?.privacy?.searchable !== false; // default searchable
+    })
+    .slice(0, 12)
     .map((u) => ({
       id: u.id,
       username: u.username as string,

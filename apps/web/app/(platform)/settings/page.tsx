@@ -8,10 +8,12 @@ import { PasswordSettings } from "@/components/settings/PasswordSettings";
 import { PreferencesSettings } from "@/components/settings/PreferencesSettings";
 import { ConnectedWallets } from "@/components/settings/ConnectedWallets";
 import { SubscriptionsSettings } from "@/components/settings/SubscriptionsSettings";
+import { PrivacySettings } from "@/components/settings/PrivacySettings";
 import { DataExport } from "@/components/settings/DataExport";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { DEFAULT_SETTINGS, type UserSettings } from "@/lib/profile/settings";
 import { getMySubscriptions } from "@/lib/subscriptions/actions";
+import { getBlockedUsers } from "@/lib/privacy/actions";
 import { getSessionUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -31,6 +33,7 @@ export default async function SettingsPage() {
   let prefs: UserSettings = DEFAULT_SETTINGS;
   let linkedWallet: string | null = null;
   const subscriptions = me ? await getMySubscriptions() : [];
+  const blocked = me ? await getBlockedUsers() : [];
   if (me && configured()) {
     const supabase = createClient();
     const [{ data }, { data: pref }] = await Promise.all([
@@ -64,6 +67,7 @@ export default async function SettingsPage() {
       prefs = {
         notifications: { ...DEFAULT_SETTINGS.notifications, ...pref.settings.notifications },
         ai: { ...DEFAULT_SETTINGS.ai, ...pref.settings.ai },
+        privacy: { ...DEFAULT_SETTINGS.privacy, ...pref.settings.privacy },
         language: pref.settings.language ?? DEFAULT_SETTINGS.language,
       };
     }
@@ -81,6 +85,7 @@ export default async function SettingsPage() {
       </header>
 
       <AccountSettings initial={initial} />
+      <PrivacySettings initial={prefs.privacy} blocked={blocked} />
       <ConnectedWallets linkedAddress={linkedWallet} />
       <SubscriptionsSettings subscriptions={subscriptions} />
       <PreferencesSettings initial={prefs} />

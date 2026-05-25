@@ -7,6 +7,8 @@ import { CatchMeUpButton } from "@/components/creator/CatchMeUpButton";
 import { getCreatorByUsername } from "@/lib/creators/queries";
 import { SAMPLE_PREVIEW_DATA } from "@/lib/creators/sample";
 import { demoCreatorProfile, demoEnabled } from "@/lib/demo/data";
+import { getSessionUser } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
 
 interface CreatorPageProps {
   params: { username: string };
@@ -30,6 +32,20 @@ export default async function CreatorProfilePage({
   const demo = demoEnabled() ? demoCreatorProfile(params.username) : null;
   const creator = real ?? demo ?? SAMPLE_PREVIEW_DATA;
 
+  let initiallyBlocked = false;
+  if (creator.id) {
+    const me = await getSessionUser();
+    if (me) {
+      const { data } = await createClient()
+        .from("blocks")
+        .select("blocked_id")
+        .eq("blocker_id", me.id)
+        .eq("blocked_id", creator.id)
+        .maybeSingle();
+      initiallyBlocked = !!data;
+    }
+  }
+
   return (
     <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-6">
       {creator.isPreview && (
@@ -42,7 +58,7 @@ export default async function CreatorProfilePage({
         </div>
       )}
 
-      <CreatorHeader creator={creator} />
+      <CreatorHeader creator={creator} initiallyBlocked={initiallyBlocked} />
 
       <div className="mx-4 sm:mx-8 mt-8 grid lg:grid-cols-[1fr_340px] gap-8 pb-12">
         <div className="order-2 lg:order-1">

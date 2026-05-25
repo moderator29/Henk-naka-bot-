@@ -3,12 +3,13 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { BadgeCheck, Heart, Plus, Coins, MessageCircle } from "lucide-react";
+import { BadgeCheck, Heart, Plus, Coins, MessageCircle, MoreHorizontal, Ban, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { StatTicker } from "@/components/ui/StatTicker";
 import { useToast } from "@/components/ui/Toast";
 import { toggleFollow } from "@/lib/engagement/actions";
 import { startConversation } from "@/lib/messaging/actions";
+import { blockUser, unblockUser } from "@/lib/privacy/actions";
 import { formatNumber } from "@/lib/utils";
 import type { CreatorProfileData } from "@/lib/creators/types";
 
@@ -17,7 +18,13 @@ import type { CreatorProfileData } from "@/lib/creators/types";
  * through to Supabase (toggleFollow); Subscribe / Tip persist once those flows
  * are wired. Optimistic, reverts only if the user isn't signed in.
  */
-export function CreatorHeader({ creator }: { creator: CreatorProfileData }) {
+export function CreatorHeader({
+  creator,
+  initiallyBlocked = false,
+}: {
+  creator: CreatorProfileData;
+  initiallyBlocked?: boolean;
+}) {
   const router = useRouter();
   const { push } = useToast();
   const { scrollY } = useScroll();
@@ -26,6 +33,38 @@ export function CreatorHeader({ creator }: { creator: CreatorProfileData }) {
   const [following, setFollowing] = useState(false);
   const [, startFollow] = useTransition();
   const [messaging, startMessage] = useTransition();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [blocked, setBlocked] = useState(initiallyBlocked);
+  const [blocking, setBlocking] = useState(false);
+
+  const copyLink = async () => {
+    setMenuOpen(false);
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/creators/${creator.username}`);
+      push({ tone: "success", title: "Profile link copied" });
+    } catch {
+      push({ tone: "info", title: "Couldn't copy link" });
+    }
+  };
+
+  const onBlock = async () => {
+    if (!creator.id) return;
+    setMenuOpen(false);
+    setBlocking(true);
+    const res = blocked ? await unblockUser(creator.id) : await blockUser(creator.id);
+    setBlocking(false);
+    if (res.needsAuth) {
+      push({ tone: "error", title: "Sign in first" });
+      return;
+    }
+    if (!res.ok) {
+      push({ tone: "error", title: res.error ?? "Something went wrong" });
+      return;
+    }
+    setBlocked(!blocked);
+    push({ tone: "success", title: blocked ? `Unblocked ${creator.displayName}` : `Blocked ${creator.displayName}` });
+    router.refresh();
+  };
 
   const onFollow = () => {
     const next = !following;
@@ -134,6 +173,39 @@ export function CreatorHeader({ creator }: { creator: CreatorProfileData }) {
               <Button variant="glass" size="icon" aria-label="Tip">
                 <Coins size={16} />
               </Button>
+              {creator.id && (
+                <div className="relative">
+                  <Button
+                    variant="glass"
+                    size="icon"
+                    aria-label="More"
+                    aria-haspopup="menu"
+                    aria-expanded={menuOpen}
+                    onClick={() => setMenuOpen((v) => !v)}
+                  >
+                    <MoreHorizontal size={16} />
+                  </Button>
+                  {menuOpen && (
+                    <>
+                      <button
+                        type="button"
+                        aria-hidden="true"
+                        tabIndex={-1}
+                        onClick={() => setMenuOpen(false)}
+                        className="fixed inset-0 z-40 cursor-default"
+                      />
+                      <div role="menu" className="absolute right-0 top-11 z-50 w-44 glass-strong edge-light rounded-xl p-1 shadow-e3">
+                        <button type="button" role="menuitem" onClick={copyLink} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-lilac/85 hover:bg-white/5">
+                          <Link2 size={14} /> Copy link
+                        </button>
+                        <button type="button" role="menuitem" disabled={blocking} onClick={onBlock} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-red-300 hover:bg-red-500/10 disabled:opacity-50">
+                          <Ban size={14} /> {blocked ? "Unblock" : "Block"}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
