@@ -53,7 +53,7 @@ export function PveelsFeed({
 }) {
   const [tab, setTab] = useState<Tab>("foryou");
   const [muted, setMuted] = useState(true);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   // Persisted mute preference (browsers require muted autoplay, so default on).
   useEffect(() => {
@@ -88,7 +88,10 @@ export function PveelsFeed({
               key={t}
               role="tab"
               aria-selected={tab === t}
-              onClick={() => setTab(t)}
+              onClick={() => {
+                setTab(t);
+                setActiveIndex(0);
+              }}
               className={cn(
                 "relative px-4 py-1.5 text-sm font-medium rounded-full transition-colors",
                 tab === t ? "text-white" : "text-white/60 hover:text-white"
@@ -117,8 +120,9 @@ export function PveelsFeed({
               first={i === 0}
               muted={muted}
               onToggleMute={toggleMute}
-              active={activeId === p.id}
-              onVisible={() => setActiveId(p.id)}
+              active={activeIndex === i}
+              near={Math.abs(activeIndex - i) <= 1}
+              onVisible={() => setActiveIndex(i)}
             />
           ))}
         </div>
@@ -157,6 +161,7 @@ function PveelCard({
   muted,
   onToggleMute,
   active,
+  near,
   onVisible,
 }: {
   pveel: PveelView;
@@ -164,6 +169,8 @@ function PveelCard({
   muted: boolean;
   onToggleMute: () => void;
   active: boolean;
+  /** Active clip or an immediate neighbour, mount the video; else poster only. */
+  near: boolean;
   onVisible: () => void;
 }) {
   const { push } = useToast();
@@ -200,7 +207,8 @@ function PveelCard({
     return () => io.disconnect();
   }, [onVisible]);
 
-  // Play when active, pause otherwise.
+  // Play when active, pause otherwise. `near` is a dep so a freshly-mounted
+  // video (a card scrolled into the window) starts playing if it's active.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -210,7 +218,7 @@ function PveelCard({
     } else {
       v.pause();
     }
-  }, [active, paused, muted]);
+  }, [active, paused, muted, near]);
 
   const onLike = () => {
     const next = !liked;
@@ -272,21 +280,30 @@ function PveelCard({
       className="relative h-[calc(100svh-4rem)] snap-start snap-always grid place-items-center overflow-hidden"
     >
       <div className="absolute inset-2 sm:inset-4 rounded-3xl overflow-hidden bg-plum">
-        {/* Media layer */}
+        {/* Media layer. Only the active clip + its neighbours mount a <video>;
+            far cards show the poster so we never keep dozens of players alive. */}
         {pveel.gated ? (
           <LockedMedia pveel={pveel} />
-        ) : hasVideo ? (
+        ) : hasVideo && near ? (
           <video
             ref={videoRef}
             src={pveel.playbackUrl ?? undefined}
             poster={pveel.posterUrl ?? undefined}
             loop
             playsInline
+            preload="metadata"
             muted={muted}
             onClick={onTapMedia}
             onTimeUpdate={onTime}
             className="absolute inset-0 h-full w-full object-cover"
           />
+        ) : hasVideo ? (
+          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${pveel.accent[0]}, ${pveel.accent[1]})` }}>
+            {pveel.posterUrl && (
+              // eslint-disable-next-line @next/next/no-img-element -- poster from storage
+              <img src={pveel.posterUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            )}
+          </div>
         ) : (
           <DemoCanvas accent={pveel.accent} onClick={onTapMedia} paused={paused} reduce={!!reduce} />
         )}
