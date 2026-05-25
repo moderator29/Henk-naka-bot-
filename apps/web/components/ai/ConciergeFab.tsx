@@ -2,14 +2,26 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, X, Send, SquarePen } from "lucide-react";
+import { Sparkles, X, Send, SquarePen, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+
+type MediaType = "image/jpeg" | "image/png" | "image/gif" | "image/webp";
+
+interface AttachedImage {
+  dataUrl: string;
+  base64: string;
+  mediaType: MediaType;
+}
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+  image?: string; // dataUrl, for display only
+  imageData?: AttachedImage; // sent to the API as an image block
 }
+
+const ALLOWED_IMAGE: MediaType[] = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
 const GREETING =
   "Hey, I'm Aura. What are you in the mood to discover tonight? Tell me a vibe, a type, a feeling, and I'll build your feed.";
@@ -26,14 +38,44 @@ export function ConciergeFab() {
     { role: "assistant", content: GREETING },
   ]);
   const [draft, setDraft] = useState("");
+  const [image, setImage] = useState<AttachedImage | null>(null);
   const [streaming, setStreaming] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const newChat = () => {
     if (streaming) return;
     setMessages([{ role: "assistant", content: GREETING }]);
     setDraft("");
+    setImage(null);
   };
+
+  const pickImage = (file: File | undefined) => {
+    if (!file) return;
+    if (!ALLOWED_IMAGE.includes(file.type as MediaType)) return;
+    if (file.size > 5 * 1024 * 1024) return; // 5MB ceiling
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result);
+      const base64 = dataUrl.split(",")[1] ?? "";
+      setImage({ dataUrl, base64, mediaType: file.type as MediaType });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Build the API message content, injecting an image block when present.
+  function toApiContent(m: ChatMessage): unknown {
+    if (m.imageData) {
+      return [
+        ...(m.content ? [{ type: "text", text: m.content }] : []),
+        {
+          type: "image",
+          source: { type: "base64", media_type: m.imageData.mediaType, data: m.imageData.base64 },
+        },
+      ];
+    }
+    return m.content;
+  }
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -53,11 +95,17 @@ export function ConciergeFab() {
   const send = async (e: FormEvent) => {
     e.preventDefault();
     const text = draft.trim();
-    if (!text || streaming) return;
+    if ((!text && !image) || streaming) return;
 
-    const next: ChatMessage[] = [...messages, { role: "user", content: text }];
+    const userMsg: ChatMessage = {
+      role: "user",
+      content: text || (image ? "What do you make of this?" : ""),
+      ...(image ? { image: image.dataUrl, imageData: image } : {}),
+    };
+    const next: ChatMessage[] = [...messages, userMsg];
     setMessages(next);
     setDraft("");
+    setImage(null);
     setStreaming(true);
     // Reserve an assistant bubble we stream into.
     setMessages((m) => [...m, { role: "assistant", content: "" }]);
@@ -67,7 +115,10 @@ export function ConciergeFab() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: next.filter((_, i) => i > 0), // drop the static greeting
+          // drop the static greeting; convert to API content (text or blocks)
+          messages: next
+            .filter((_, i) => i > 0)
+            .map((m) => ({ role: m.role, content: toApiContent(m) })),
         }),
       });
 
@@ -207,6 +258,14 @@ export function ConciergeFab() {
                         : "glass text-lilac rounded-bl-sm"
                     )}
                   >
+                    {m.image && (
+                      // eslint-disable-next-line @next/next/no-img-element -- local data URL preview
+                      <img
+                        src={m.image}
+                        alt="Attached"
+                        className="mb-2 max-h-40 w-auto rounded-lg"
+                      />
+                    )}
                     {m.content}
                     {streaming &&
                       i === messages.length - 1 &&
@@ -218,20 +277,51 @@ export function ConciergeFab() {
               ))}
             </div>
 
-            <form onSubmit={send} className="p-3 border-t border-white/5 flex items-center gap-2">
-              <label htmlFor="concierge-input" className="sr-only">
-                Message Aura
-              </label>
-              <input
-                id="concierge-input"
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                placeholder="Tell me a vibe…"
-                className="flex-1 h-10 rounded-xl bg-plum/60 border border-white/10 px-3 text-sm text-white placeholder:text-lilac/40 focus:border-magenta/50 focus:outline-none focus:ring-2 focus:ring-magenta/20"
-              />
-              <Button type="submit" size="icon" loading={streaming} disabled={!draft.trim()} aria-label="Send">
-                <Send size={16} />
-              </Button>
+            <form onSubmit={send} className="p-3 border-t border-white/5 flex flex-col gap-2">
+              {image && (
+                <div className="relative w-fit">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- local data URL preview */}
+                  <img src={image.dataUrl} alt="Attached" className="h-16 w-16 rounded-lg object-cover" />
+                  <button
+                    type="button"
+                    aria-label="Remove image"
+                    onClick={() => setImage(null)}
+                    className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-plum/90 text-white grid place-items-center"
+                  >
+                    <X size={11} />
+                  </button>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <label htmlFor="concierge-input" className="sr-only">
+                  Message Aura
+                </label>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/gif,image/webp"
+                  className="hidden"
+                  onChange={(e) => pickImage(e.target.files?.[0])}
+                />
+                <button
+                  type="button"
+                  aria-label="Attach an image"
+                  onClick={() => fileRef.current?.click()}
+                  className="h-10 w-10 flex-shrink-0 rounded-xl flex items-center justify-center text-lilac/60 hover:text-magenta hover:bg-white/5 transition-colors"
+                >
+                  <ImagePlus size={18} />
+                </button>
+                <input
+                  id="concierge-input"
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder="Tell me a vibe…"
+                  className="flex-1 h-10 rounded-xl bg-plum/60 border border-white/10 px-3 text-sm text-white placeholder:text-lilac/40 focus:border-magenta/50 focus:outline-none focus:ring-2 focus:ring-magenta/20"
+                />
+                <Button type="submit" size="icon" loading={streaming} disabled={!draft.trim() && !image} aria-label="Send">
+                  <Send size={16} />
+                </Button>
+              </div>
             </form>
           </motion.div>
         )}
