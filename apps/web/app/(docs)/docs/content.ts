@@ -488,6 +488,123 @@ export const DOC_SECTIONS: DocSection[] = [
     ],
   },
   {
+    slug: "creator-payouts",
+    title: "Creator Payouts & Earnings",
+    description: "How money reaches your wallet, step by step.",
+    blocks: [
+      {
+        type: "p",
+        text: "Earnings on Pleasure Coin are non-custodial. When a fan subscribes or tips, the $NSFW transfers on-chain directly from their wallet to your payout wallet. The platform never holds your money, so there is no balance to withdraw and no payout delay.",
+      },
+      { type: "h2", text: "Set your payout wallet" },
+      {
+        type: "p",
+        text: "When you apply to become a creator you provide a payout wallet, and you can change it anytime in Settings → Creator. Tips and subscription payments route to that address. If you ever leave it blank, fans see that payouts aren't set up yet and can't subscribe until you add one.",
+      },
+      { type: "h2", text: "How a subscription pays out" },
+      {
+        type: "ul",
+        items: [
+          "A fan picks your tier and confirms the payment in their wallet.",
+          "The $NSFW (converted from the tier's USD price at the live rate) transfers to your payout wallet on Polygon.",
+          "The subscription is recorded with the transaction hash and a 30-day expiry, and your subscriber count updates.",
+          "When it renews, the same on-chain transfer happens again unless the fan cancelled auto-renew.",
+        ],
+      },
+      { type: "h2", text: "Tips" },
+      {
+        type: "p",
+        text: "Tips are an instant on-chain transfer to your wallet, with an optional note tied to a post. They show in your earnings and the fan gets a confirmation once the transaction settles.",
+      },
+      {
+        type: "callout",
+        tone: "info",
+        text: "Because payouts are on-chain, every payment is verifiable on PolygonScan. Keep a small amount of MATIC in your wallet for gas if you plan to move funds.",
+      },
+      { type: "h2", text: "Reading your earnings" },
+      {
+        type: "p",
+        text: "The creator dashboard shows total earnings, active subscribers, and a 30-day tip total, plus the Earnings Forecaster for a transparent projection you can adjust with scenario sliders.",
+      },
+    ],
+  },
+  {
+    slug: "pricing-playbook",
+    title: "Subscription Pricing Playbook",
+    description: "How to price your tiers, including the $20 starting tier.",
+    blocks: [
+      {
+        type: "p",
+        text: "You set tier prices in USD and fans pay the equivalent in $NSFW at the live token price at checkout. Pricing in dollars keeps your pricing stable and familiar even as the token moves.",
+      },
+      { type: "h2", text: "Start with one clear tier" },
+      {
+        type: "p",
+        text: "A single, well-named tier converts better than a confusing ladder. A $20/month tier is a strong default: high enough to value your work, low enough for an easy yes. Add a second, higher tier later for superfans once you know what they want more of.",
+      },
+      { type: "h2", text: "Write benefits as outcomes" },
+      {
+        type: "ul",
+        items: [
+          "List concrete things a subscriber gets, not vague promises.",
+          "Lead with the benefit fans ask for most.",
+          "Keep it to three to five bullets so the value is scannable.",
+        ],
+      },
+      { type: "h2", text: "Use the tools" },
+      {
+        type: "p",
+        text: "The Co-Pilot suggests prices grounded in benchmarks from similar-profile creators, and the Forecaster shows how a price or growth change affects next month. Manage tiers (create, edit, show/hide) from the dashboard Tiers tab; hiding a tier never removes existing subscribers' access.",
+      },
+      {
+        type: "callout",
+        tone: "tip",
+        text: "Raising a price? Keep current subscribers on their old price and apply the new one to new sign-ups. Goodwill compounds.",
+      },
+    ],
+  },
+  {
+    slug: "safety-and-compliance",
+    title: "Safety, Privacy & 18+ Compliance",
+    description: "The rules that keep this platform safe, and your controls.",
+    blocks: [
+      {
+        type: "p",
+        text: "Pleasure Coin is strictly 18+. Age is verified by date of birth at signup and checked server-side every time you load gated content. Accounts that misrepresent age are removed.",
+      },
+      { type: "h2", text: "What is never allowed" },
+      {
+        type: "ul",
+        items: [
+          "Anything involving minors, or anyone whose age is unclear. Zero tolerance, reported to authorities where required.",
+          "Non-consensual, leaked, or revenge content of any kind.",
+          "Impersonation, doxxing, harassment, or sharing someone's private information.",
+          "Illegal content or activity.",
+        ],
+      },
+      { type: "h2", text: "Reporting and moderation" },
+      {
+        type: "p",
+        text: "Every post, profile, and message has a Report button with clear reasons; the most serious (involving a minor, non-consensual content) are prioritized. Our moderation team can remove or age-restrict content and suspend or ban accounts. You can also block or mute any user from their profile.",
+      },
+      { type: "h2", text: "Your privacy controls" },
+      {
+        type: "p",
+        text: "From Settings → Privacy you control who can message you (everyone, or mutuals only), your blocked and muted lists, and what's visible on your profile. Gated media is stored privately and only ever served to you or an active subscriber through a short-lived signed link, never a public URL.",
+      },
+      {
+        type: "callout",
+        tone: "warning",
+        text: "If you see content involving a minor, report it immediately and do not share it. We act on these reports first and cooperate with law enforcement.",
+      },
+      { type: "h2", text: "Your data" },
+      {
+        type: "p",
+        text: "Sensitive fields are protected by row-level security so only you (and, where required, moderators) can read them. You can export or delete your account at any time from Settings → Account. The AI assistants operate under hard safety limits and never generate explicit imagery or reveal your private data.",
+      },
+    ],
+  },
+  {
     slug: "faq",
     title: "FAQ",
     description: "Quick answers to the questions we hear the most.",
