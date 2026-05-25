@@ -73,7 +73,7 @@ export function WalletAuthButton() {
 
       setStatus("done");
       if (result.session) {
-        window.location.href = "/explore";
+        window.location.href = "/feed";
       } else {
         setMessage(
           result.note ??

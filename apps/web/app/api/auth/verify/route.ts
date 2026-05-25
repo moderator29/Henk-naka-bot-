@@ -5,6 +5,8 @@ import { createPublicClient, http } from "viem";
 import { parseSiweMessage, verifySiweMessage } from "viem/siwe";
 import { polygon } from "viem/chains";
 import { SIWE_NONCE_COOKIE } from "@/lib/auth/siwe";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Verifies a SIWE signature, enforces single-use nonce + replay protection,
@@ -74,10 +76,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No address in message" }, { status: 400 });
   }
 
-  // PENDING_SUPABASE_AUTH, with the service role configured, this is where we
-  // upsert a users row keyed by wallet_address and mint a Supabase session
-  // (admin.generateLink / setSession). Until the project is connected we do
-  // not fake a session.
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return NextResponse.json(
       {
@@ -90,6 +88,53 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // When configured, mint here. Returning verified payload for now.
-  return NextResponse.json({ verified: true, address, session: null });
+  // Mint a real Supabase session for this wallet: ensure an auth user keyed by
+  // a deterministic wallet email exists, generate a one-time link, then
+  // exchange it for a session (which writes the auth cookies). Fail-safe: any
+  // error falls back to verified-without-session rather than crashing.
+  try {
+    const email = `${address.toLowerCase()}@wallet.pleasurecoin.app`;
+    const admin = createAdminClient();
+
+    await admin.auth.admin
+      .createUser({
+        email,
+        email_confirm: true,
+        user_metadata: { wallet_address: address },
+      })
+      .catch(() => {
+        /* already exists */
+      });
+
+    const { data: link, error: linkErr } = await admin.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+    });
+    const tokenHash = link?.properties?.hashed_token;
+    if (linkErr || !tokenHash) throw new Error("link");
+
+    const supabase = createClient();
+    const { data: sess, error: otpErr } = await supabase.auth.verifyOtp({
+      type: "magiclink",
+      token_hash: tokenHash,
+    });
+    if (otpErr || !sess.session || !sess.user) throw new Error("otp");
+
+    await admin
+      .from("users")
+      .update({ wallet_address: address })
+      .eq("id", sess.user.id);
+
+    return NextResponse.json({ verified: true, address, session: true });
+  } catch {
+    return NextResponse.json(
+      {
+        verified: true,
+        address,
+        session: null,
+        note: "Signature verified. Completing wallet sign-in didn't finish, you can also sign in with email.",
+      },
+      { status: 200 }
+    );
+  }
 }
