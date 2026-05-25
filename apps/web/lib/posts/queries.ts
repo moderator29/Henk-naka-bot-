@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { FeedPost } from "@/components/feed/PostCard";
+import type { FeedPost, PostMedia } from "@/components/feed/PostCard";
 
 /**
  * Real post reads from Supabase. All run under the caller's session so RLS
@@ -22,6 +22,7 @@ interface PostRow {
   tier_required: string | null;
   created_at: string;
   creator_id: string;
+  media: PostMedia[] | null;
   users: {
     username: string | null;
     display_name: string | null;
@@ -41,11 +42,12 @@ function mapRow(r: PostRow): FeedPost {
     likes: 0,
     comments: 0,
     createdAt: r.created_at,
+    media: r.media ?? undefined,
   };
 }
 
 const SELECT =
-  "id, caption, category, tier_required, created_at, creator_id, users!inner(username, display_name, is_verified)";
+  "id, caption, category, tier_required, created_at, creator_id, media, users!inner(username, display_name, is_verified)";
 
 /**
  * Home feed: posts from creators the signed-in user follows, newest first.
@@ -96,4 +98,42 @@ export async function getUserPosts(userId: string): Promise<FeedPost[]> {
     .order("created_at", { ascending: false })
     .limit(40);
   return ((data as unknown as PostRow[]) ?? []).map(mapRow);
+}
+
+/** A user's own posts that carry media, for the profile Media tab. */
+export async function getUserMediaPosts(userId: string): Promise<FeedPost[]> {
+  if (!configured()) return [];
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("posts")
+    .select(SELECT)
+    .eq("creator_id", userId)
+    .not("media", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(40);
+  return ((data as unknown as PostRow[]) ?? []).map(mapRow);
+}
+
+interface LikeRow {
+  posts: PostRow | null;
+}
+
+/**
+ * Posts the user has liked, newest like first, for the profile Likes tab.
+ * Reads through the `likes` join; gated posts the user can no longer see are
+ * dropped by RLS on the embedded `posts` row.
+ */
+export async function getUserLikedPosts(userId: string): Promise<FeedPost[]> {
+  if (!configured()) return [];
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("likes")
+    .select(`created_at, posts!inner(${SELECT})`)
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(40);
+  return ((data as unknown as LikeRow[]) ?? [])
+    .map((r) => r.posts)
+    .filter((p): p is PostRow => p != null)
+    .map(mapRow);
 }

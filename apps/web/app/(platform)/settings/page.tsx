@@ -6,6 +6,8 @@ import { ReplayOnboardingAction } from "@/components/onboarding/ReplayOnboarding
 import { AccountSettings } from "@/components/settings/AccountSettings";
 import { PasswordSettings } from "@/components/settings/PasswordSettings";
 import { PreferencesSettings } from "@/components/settings/PreferencesSettings";
+import { ConnectedWallets } from "@/components/settings/ConnectedWallets";
+import { DataExport } from "@/components/settings/DataExport";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { DEFAULT_SETTINGS, type UserSettings } from "@/lib/profile/settings";
 import { getSessionUser } from "@/lib/auth/session";
@@ -25,18 +27,20 @@ export default async function SettingsPage() {
 
   let initial = { displayName: "", username: "", bio: "", country: "" };
   let prefs: UserSettings = DEFAULT_SETTINGS;
+  let linkedWallet: string | null = null;
   if (me && configured()) {
     const supabase = createClient();
     const [{ data }, { data: pref }] = await Promise.all([
       supabase
         .from("users")
-        .select("display_name, username, bio, country")
+        .select("display_name, username, bio, country, wallet_address")
         .eq("id", me.id)
         .maybeSingle<{
           display_name: string | null;
           username: string | null;
           bio: string | null;
           country: string | null;
+          wallet_address: string | null;
         }>(),
       supabase
         .from("user_preferences")
@@ -51,6 +55,7 @@ export default async function SettingsPage() {
         bio: data.bio ?? "",
         country: data.country ?? "",
       };
+      linkedWallet = data.wallet_address;
     }
     if (pref?.settings) {
       prefs = {
@@ -73,8 +78,10 @@ export default async function SettingsPage() {
       </header>
 
       <AccountSettings initial={initial} />
+      <ConnectedWallets linkedAddress={linkedWallet} />
       <PreferencesSettings initial={prefs} />
       <PasswordSettings />
+      <DataExport />
 
       <Card className="edge-light flex items-center justify-between gap-4">
         <div>

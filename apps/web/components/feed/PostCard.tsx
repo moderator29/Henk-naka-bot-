@@ -9,6 +9,11 @@ import { Comments } from "./Comments";
 import { TipModal } from "./TipModal";
 import { cn, formatNumber, relativeTime } from "@/lib/utils";
 
+export interface PostMedia {
+  url: string;
+  type: string;
+}
+
 export interface FeedPost {
   id: string;
   creatorUsername: string;
@@ -20,6 +25,7 @@ export interface FeedPost {
   likes: number;
   comments: number;
   createdAt: string | Date;
+  media?: PostMedia[];
 }
 
 /**

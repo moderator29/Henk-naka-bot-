@@ -1,11 +1,14 @@
 "use server";
 
 import { z } from "zod";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth/session";
 import { passwordSchema } from "@/lib/auth/schemas";
+import { SIWE_NONCE_COOKIE } from "@/lib/auth/siwe";
+import { verifyWalletSignature } from "@/lib/web3/verify";
 import {
   sendPasswordChangedEmail,
   sendAccountDeletionEmail,
@@ -190,6 +193,83 @@ export async function changePassword(formData: FormData): Promise<{
   const { error } = await supabase.auth.updateUser({ password: next });
   if (error) return { ok: false, error: "Could not update password. Try again." };
   await sendPasswordChangedEmail(me.email);
+  return { ok: true };
+}
+
+export interface LinkWalletResult {
+  ok: boolean;
+  error?: string;
+  address?: string;
+}
+
+/**
+ * Link a wallet to the signed-in account by proving ownership with a SIWE
+ * signature (same nonce + signature flow as wallet sign-in). The address is
+ * only saved after the signature verifies, so a user can't claim a wallet they
+ * don't control. Refuses an address already linked to a different account.
+ */
+export async function linkWallet(formData: FormData): Promise<LinkWalletResult> {
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me) return { ok: false, error: "Sign in to link a wallet." };
+
+  const message = String(formData.get("message") ?? "");
+  const signature = String(formData.get("signature") ?? "");
+  if (!message || !signature) {
+    return { ok: false, error: "Missing signature. Try again." };
+  }
+
+  const nonce = cookies().get(SIWE_NONCE_COOKIE)?.value;
+  if (!nonce) {
+    return { ok: false, error: "Link request expired. Try again." };
+  }
+
+  const address = await verifyWalletSignature({ message, signature, nonce });
+  // Single-use: clear the nonce so the signature can't be replayed.
+  cookies().delete(SIWE_NONCE_COOKIE);
+  if (!address) {
+    return { ok: false, error: "Could not verify that signature." };
+  }
+
+  const supabase = createClient();
+  // Case-insensitive: wallet sign-in stores a checksummed address, linking stores lowercase.
+  const { data: existing } = await supabase
+    .from("users")
+    .select("id")
+    .ilike("wallet_address", address)
+    .maybeSingle<{ id: string }>();
+  if (existing && existing.id !== me.id) {
+    return { ok: false, error: "That wallet is already linked to another account." };
+  }
+
+  const { error } = await supabase
+    .from("users")
+    .update({ wallet_address: address })
+    .eq("id", me.id);
+  if (error) return { ok: false, error: "Could not link wallet. Try again." };
+  return { ok: true, address };
+}
+
+/** Remove the wallet linked to the signed-in account. */
+export async function unlinkWallet(): Promise<{ ok: boolean; error?: string }> {
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me) return { ok: false, error: "Sign in first." };
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("users")
+    .update({ wallet_address: null })
+    .eq("id", me.id);
+  if (error) return { ok: false, error: "Could not unlink wallet. Try again." };
   return { ok: true };
 }
 

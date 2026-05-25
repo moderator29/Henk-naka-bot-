@@ -41,6 +41,8 @@ interface ProfileViewProps {
     bio: string | null;
   } | null;
   posts?: FeedPost[];
+  mediaPosts?: FeedPost[];
+  likedPosts?: FeedPost[];
   followerCount?: number;
   followingCount?: number;
 }
@@ -63,6 +65,8 @@ export function ProfileView({
   isCreator = false,
   profile,
   posts = [],
+  mediaPosts = [],
+  likedPosts = [],
   followerCount = 0,
   followingCount = 0,
 }: ProfileViewProps) {
@@ -210,21 +214,40 @@ export function ProfileView({
             />
           ))}
 
-        {tab === "media" && (
-          <EmptyTab
-            icon={<ImageIcon size={28} />}
-            title="No media yet"
-            body="Photo and video posts will appear here."
-          />
-        )}
+        {tab === "media" &&
+          (mediaPosts.length > 0 ? (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {mediaPosts.map((p) => (
+                <PostTile key={p.id} post={p} onOpen={() => setSelected(p)} />
+              ))}
+            </div>
+          ) : (
+            <EmptyTab
+              icon={<ImageIcon size={28} />}
+              title="No media yet"
+              body="Photo and video posts will appear here."
+              action={
+                <Button asChild leftIcon={<Plus size={16} />}>
+                  <Link href="/compose">Add media</Link>
+                </Button>
+              }
+            />
+          ))}
 
-        {tab === "likes" && (
-          <EmptyTab
-            icon={<Heart size={28} />}
-            title="Nothing liked yet"
-            body="Posts you like will appear here."
-          />
-        )}
+        {tab === "likes" &&
+          (likedPosts.length > 0 ? (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {likedPosts.map((p) => (
+                <PostTile key={p.id} post={p} onOpen={() => setSelected(p)} />
+              ))}
+            </div>
+          ) : (
+            <EmptyTab
+              icon={<Heart size={28} />}
+              title="Nothing liked yet"
+              body="Posts you like will appear here."
+            />
+          ))}
       </div>
 
       {/* Wallet shortcut */}
@@ -257,6 +280,7 @@ export function ProfileView({
 }
 
 function PostTile({ post, onOpen }: { post: FeedPost; onOpen: () => void }) {
+  const cover = post.media?.find((m) => m.type.startsWith("image/")) ?? null;
   return (
     <button
       type="button"
@@ -264,6 +288,15 @@ function PostTile({ post, onOpen }: { post: FeedPost; onOpen: () => void }) {
       className="group relative text-left rounded-2xl overflow-hidden glass edge-light transition-transform duration-200 hover:-translate-y-1 hover:shadow-[var(--glow-magenta)]"
     >
       <div className="relative h-28 sm:h-32" style={{ background: tileGradient(post.id) }}>
+        {cover && !post.gated && (
+          // eslint-disable-next-line @next/next/no-img-element -- user media from Supabase storage, not a local asset
+          <img
+            src={cover.url}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        )}
         {post.category && (
           <span className="absolute top-2 left-2 text-[0.6rem] uppercase tracking-wider px-2 py-0.5 rounded-full bg-plum/60 text-lilac/90">
             {post.category}

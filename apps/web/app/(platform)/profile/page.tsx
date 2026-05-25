@@ -1,5 +1,9 @@
 import { getSessionUser } from "@/lib/auth/session";
-import { getUserPosts } from "@/lib/posts/queries";
+import {
+  getUserPosts,
+  getUserMediaPosts,
+  getUserLikedPosts,
+} from "@/lib/posts/queries";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileView } from "@/components/profile/ProfileView";
 
@@ -22,12 +26,21 @@ export default async function ProfilePage() {
   } | null = null;
   let isCreator = false;
   let posts: Awaited<ReturnType<typeof getUserPosts>> = [];
+  let mediaPosts: Awaited<ReturnType<typeof getUserMediaPosts>> = [];
+  let likedPosts: Awaited<ReturnType<typeof getUserLikedPosts>> = [];
   let followerCount = 0;
   let followingCount = 0;
 
   if (me && configured()) {
     const supabase = createClient();
-    const [{ data: row }, userPosts, followers, following] = await Promise.all([
+    const [
+      { data: row },
+      userPosts,
+      userMedia,
+      userLikes,
+      followers,
+      following,
+    ] = await Promise.all([
       supabase
         .from("users")
         .select("display_name, username, bio, is_creator")
@@ -39,6 +52,8 @@ export default async function ProfilePage() {
           is_creator: boolean | null;
         }>(),
       getUserPosts(me.id),
+      getUserMediaPosts(me.id),
+      getUserLikedPosts(me.id),
       supabase
         .from("follows")
         .select("follower_id", { count: "exact", head: true })
@@ -57,6 +72,8 @@ export default async function ProfilePage() {
       isCreator = row.is_creator ?? false;
     }
     posts = userPosts;
+    mediaPosts = userMedia;
+    likedPosts = userLikes;
     followerCount = followers.count ?? 0;
     followingCount = following.count ?? 0;
   }
@@ -68,6 +85,8 @@ export default async function ProfilePage() {
       isCreator={isCreator}
       profile={profile}
       posts={posts}
+      mediaPosts={mediaPosts}
+      likedPosts={likedPosts}
       followerCount={followerCount}
       followingCount={followingCount}
     />
