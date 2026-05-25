@@ -225,3 +225,134 @@ export async function setAutoRenew(
 export async function cancelSubscription(subscriptionId: string): Promise<SubscribeResult> {
   return setAutoRenew(subscriptionId, false);
 }
+
+// ---------- Creator tier management ----------
+
+export interface CreatorTierRow {
+  id: string;
+  name: string;
+  priceNsfw: number;
+  benefits: string[];
+  isActive: boolean;
+}
+
+const tierSchema = z.object({
+  name: z.string().trim().min(1, "Name your tier").max(60),
+  priceNsfw: z.number().positive("Set a price").max(1_000_000_000),
+  benefits: z.array(z.string().trim().min(1).max(160)).max(12),
+});
+
+export async function getMyTiers(): Promise<CreatorTierRow[]> {
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me) return [];
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("subscription_tiers")
+    .select("id, name, price_nsfw, benefits, is_active")
+    .eq("creator_id", me.id)
+    .order("price_nsfw", { ascending: true });
+  return ((data ?? []) as {
+    id: string;
+    name: string;
+    price_nsfw: number | string;
+    benefits: unknown;
+    is_active: boolean;
+  }[]).map((t) => ({
+    id: t.id,
+    name: t.name,
+    priceNsfw: Number(t.price_nsfw),
+    benefits: Array.isArray(t.benefits) ? (t.benefits as string[]) : [],
+    isActive: t.is_active,
+  }));
+}
+
+/** Create a tier. The first tier also marks the user as a creator and ensures
+ * a creator_profiles row exists. */
+export async function createTier(
+  input: z.input<typeof tierSchema>
+): Promise<SubscribeResult> {
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me) return { ok: false, error: "Sign in first." };
+
+  const parsed = tierSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Check the tier." };
+  }
+
+  const supabase = createClient();
+  await supabase.from("users").update({ is_creator: true }).eq("id", me.id);
+  await supabase
+    .from("creator_profiles")
+    .upsert({ user_id: me.id }, { onConflict: "user_id" });
+
+  const { error } = await supabase.from("subscription_tiers").insert({
+    creator_id: me.id,
+    name: parsed.data.name,
+    price_nsfw: parsed.data.priceNsfw,
+    benefits: parsed.data.benefits,
+    is_active: true,
+  });
+  if (error) return { ok: false, error: "Could not create tier." };
+  revalidatePath("/settings");
+  return { ok: true };
+}
+
+export async function updateTier(
+  id: string,
+  input: z.input<typeof tierSchema>
+): Promise<SubscribeResult> {
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me) return { ok: false, error: "Sign in first." };
+  const parsed = tierSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Check the tier." };
+  }
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("subscription_tiers")
+    .update({
+      name: parsed.data.name,
+      price_nsfw: parsed.data.priceNsfw,
+      benefits: parsed.data.benefits,
+    })
+    .eq("id", id)
+    .eq("creator_id", me.id);
+  if (error) return { ok: false, error: "Could not save tier." };
+  revalidatePath("/settings");
+  return { ok: true };
+}
+
+/** Activate/deactivate a tier. Deactivated tiers stop accepting new subs. */
+export async function setTierActive(id: string, active: boolean): Promise<SubscribeResult> {
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me) return { ok: false, error: "Sign in first." };
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("subscription_tiers")
+    .update({ is_active: active })
+    .eq("id", id)
+    .eq("creator_id", me.id);
+  if (error) return { ok: false, error: "Could not update tier." };
+  revalidatePath("/settings");
+  return { ok: true };
+}

@@ -8,11 +8,12 @@ import { PasswordSettings } from "@/components/settings/PasswordSettings";
 import { PreferencesSettings } from "@/components/settings/PreferencesSettings";
 import { ConnectedWallets } from "@/components/settings/ConnectedWallets";
 import { SubscriptionsSettings } from "@/components/settings/SubscriptionsSettings";
+import { CreatorTiersSettings } from "@/components/settings/CreatorTiersSettings";
 import { PrivacySettings } from "@/components/settings/PrivacySettings";
 import { DataExport } from "@/components/settings/DataExport";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { DEFAULT_SETTINGS, type UserSettings } from "@/lib/profile/settings";
-import { getMySubscriptions } from "@/lib/subscriptions/actions";
+import { getMySubscriptions, getMyTiers } from "@/lib/subscriptions/actions";
 import { getBlockedUsers } from "@/lib/privacy/actions";
 import { getSessionUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
@@ -34,6 +35,7 @@ export default async function SettingsPage() {
   let linkedWallet: string | null = null;
   const subscriptions = me ? await getMySubscriptions() : [];
   const blocked = me ? await getBlockedUsers() : [];
+  const tiers = me ? await getMyTiers() : [];
   if (me && configured()) {
     const supabase = createClient();
     const [{ data }, { data: pref }] = await Promise.all([
@@ -87,6 +89,7 @@ export default async function SettingsPage() {
       <AccountSettings initial={initial} />
       <PrivacySettings initial={prefs.privacy} blocked={blocked} />
       <ConnectedWallets linkedAddress={linkedWallet} />
+      <CreatorTiersSettings tiers={tiers} />
       <SubscriptionsSettings subscriptions={subscriptions} />
       <PreferencesSettings initial={prefs} />
       <PasswordSettings />
