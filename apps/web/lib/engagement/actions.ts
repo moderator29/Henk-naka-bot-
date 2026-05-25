@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth/session";
+import type { CommentItem } from "./types";
 
 /**
  * Real engagement writes: follow, like, save. Each runs under the caller's
@@ -100,6 +101,64 @@ export async function toggleLike(
       .eq("user_id", user.id);
   }
   return { ok: true };
+}
+
+interface CommentRow {
+  id: string;
+  body: string;
+  created_at: string;
+  users: { display_name: string | null; username: string | null } | null;
+}
+
+function mapComment(r: CommentRow): CommentItem {
+  return {
+    id: r.id,
+    body: r.body,
+    createdAt: r.created_at,
+    authorName: r.users?.display_name ?? r.users?.username ?? "Someone",
+    authorUsername: r.users?.username ?? "user",
+  };
+}
+
+export async function loadComments(postId: string): Promise<CommentItem[]> {
+  if (postId.startsWith("demo")) return [];
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("comments")
+    .select("id, body, created_at, users!inner(display_name, username)")
+    .eq("post_id", postId)
+    .order("created_at", { ascending: true })
+    .limit(100);
+  return ((data as unknown as CommentRow[]) ?? []).map(mapComment);
+}
+
+export async function addComment(
+  postId: string,
+  body: string
+): Promise<{ ok: boolean; needsAuth?: boolean; comment?: CommentItem }> {
+  const user = await me();
+  if (!user) return { ok: false, needsAuth: true };
+  const text = body.trim();
+  if (!text || text.length > 1000 || postId.startsWith("demo")) {
+    return { ok: false };
+  }
+
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("comments")
+    .insert({ post_id: postId, user_id: user.id, body: text })
+    .select("id, body, created_at, users!inner(display_name, username)")
+    .maybeSingle();
+  if (error || !data) return { ok: false };
+
+  const { data: post } = await supabase
+    .from("posts")
+    .select("creator_id")
+    .eq("id", postId)
+    .maybeSingle<{ creator_id: string }>();
+  if (post) await notify(post.creator_id, user.id, "comment", { postId, actorId: user.id });
+
+  return { ok: true, comment: mapComment(data as unknown as CommentRow) };
 }
 
 export async function toggleSave(

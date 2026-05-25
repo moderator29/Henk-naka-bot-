@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { BadgeCheck, Heart, MessageCircle, Bookmark, Coins, Lock } from "lucide-react";
 import { toggleLike, toggleSave } from "@/lib/engagement/actions";
+import { Comments } from "./Comments";
 import { cn, formatNumber, relativeTime } from "@/lib/utils";
 
 export interface FeedPost {
@@ -28,6 +29,7 @@ export interface FeedPost {
 export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
   const reduce = useReducedMotion();
   const [, startTransition] = useTransition();
   // Demo posts aren't in the database; keep their interactions local-only.
@@ -118,10 +120,20 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
           </motion.span>
           {formatNumber(post.likes + (liked ? 1 : 0))}
         </button>
-        <span className="inline-flex items-center gap-1.5 text-lilac/60">
+        <button
+          type="button"
+          onClick={() => isReal && setCommentsOpen((v) => !v)}
+          className={cn(
+            "inline-flex items-center gap-1.5 transition-colors",
+            commentsOpen ? "text-white" : "text-lilac/60",
+            isReal && "hover:text-white"
+          )}
+          aria-expanded={commentsOpen}
+          aria-label="Comments"
+        >
           <MessageCircle size={18} />
           {formatNumber(post.comments)}
-        </span>
+        </button>
         <button
           type="button"
           onClick={onSave}
@@ -142,6 +154,8 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
           <Coins size={18} />
         </button>
       </footer>
+
+      {commentsOpen && isReal && <Comments postId={post.id} />}
     </motion.article>
   );
 }
