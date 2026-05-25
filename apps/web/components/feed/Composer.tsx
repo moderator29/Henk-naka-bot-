@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ImagePlus, Paperclip, X, Globe, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EmojiPicker } from "./EmojiPicker";
+import { CategoryPicker } from "./CategoryPicker";
 import { createPost } from "@/lib/posts/actions";
 import type { MyTier } from "@/lib/subscriptions/actions";
 import { cn } from "@/lib/utils";
@@ -203,12 +204,9 @@ export function Composer({ tiers }: { tiers: MyTier[] }) {
         <ImageButton onFiles={(f) => addFiles(f, true)} />
         <FileButton onFiles={(f) => addFiles(f, false)} />
         <EmojiPicker onPick={insertEmoji} />
-        <input
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          placeholder="Category (optional)"
-          className="ml-auto h-9 w-40 rounded-lg bg-plum/60 border border-white/10 px-3 text-xs text-white placeholder:text-lilac/40 focus:border-magenta/50 focus:outline-none"
-        />
+        <div className="ml-auto">
+          <CategoryPicker value={category} onChange={setCategory} />
+        </div>
         <Button onClick={submit} loading={submitting} disabled={submitting}>
           Post
         </Button>
