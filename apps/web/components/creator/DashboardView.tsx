@@ -14,6 +14,7 @@ import { Coins, Users, FileText, TrendingUp, Sparkles, Crown } from "lucide-reac
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { StatTicker } from "@/components/ui/StatTicker";
+import { TierManager, type ManagedTier } from "@/components/creator/TierManager";
 import { cn, formatNumber } from "@/lib/utils";
 
 export interface DashboardData {
@@ -24,7 +25,7 @@ export interface DashboardData {
   postCount: number;
   tips30d: number;
   baselineMonthly: number;
-  tiers: { id: string; name: string; price: number; active: boolean }[];
+  tiers: ManagedTier[];
 }
 
 type Tab = "overview" | "earnings" | "tiers" | "fans";
@@ -114,30 +115,7 @@ export function DashboardView({ data }: { data: DashboardData }) {
 
       {tab === "earnings" && <Forecaster baseline={data.baselineMonthly} />}
 
-      {tab === "tiers" && (
-        <Card className="edge-light">
-          <h2 className="font-display text-lg font-semibold text-white mb-4">
-            Subscription tiers
-          </h2>
-          {data.tiers.length > 0 ? (
-            <div className="flex flex-col gap-3">
-              {data.tiers.map((t) => (
-                <div key={t.id} className="flex items-center justify-between rounded-xl bg-white/[0.03] border border-white/5 px-4 py-3">
-                  <div>
-                    <p className="font-medium text-white">{t.name}</p>
-                    <p className="text-xs text-lilac/50">{t.active ? "Active" : "Hidden"}</p>
-                  </div>
-                  <span className="font-display font-semibold text-white">{fmt(t.price)} $NSFW</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-lilac/60">
-              You have no tiers yet. Set up tiers to let fans subscribe.
-            </p>
-          )}
-        </Card>
-      )}
+      {tab === "tiers" && <TierManager tiers={data.tiers} />}
 
       {tab === "fans" && (
         <Card className="edge-light">

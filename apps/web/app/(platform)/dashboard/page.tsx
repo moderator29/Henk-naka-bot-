@@ -15,8 +15,9 @@ interface TierRow {
   id: string;
   name: string;
   price_nsfw: string;
+  price_usd: string | null;
+  benefits: unknown;
   is_active: boolean;
-  subscriber_count?: number;
 }
 
 export default async function DashboardPage() {
@@ -40,7 +41,7 @@ export default async function DashboardPage() {
     const [userRow, profile, tiers, postCount, tips] = await Promise.all([
       supabase.from("users").select("display_name, is_creator").eq("id", me.id).maybeSingle<{ display_name: string | null; is_creator: boolean | null }>(),
       supabase.from("creator_profiles").select("total_earnings_nsfw, subscriber_count").eq("user_id", me.id).maybeSingle<{ total_earnings_nsfw: string; subscriber_count: number }>(),
-      supabase.from("subscription_tiers").select("id, name, price_nsfw, is_active").eq("creator_id", me.id),
+      supabase.from("subscription_tiers").select("id, name, price_nsfw, price_usd, benefits, is_active").eq("creator_id", me.id),
       supabase.from("posts").select("id", { count: "exact", head: true }).eq("creator_id", me.id),
       supabase.from("tips").select("amount_nsfw").eq("to_user", me.id).gte("created_at", since),
     ]);
@@ -65,7 +66,9 @@ export default async function DashboardPage() {
       tiers: tierRows.map((t) => ({
         id: t.id,
         name: t.name,
-        price: Number(t.price_nsfw),
+        priceUsd: t.price_usd != null ? Number(t.price_usd) : null,
+        priceNsfw: Number(t.price_nsfw),
+        benefits: Array.isArray(t.benefits) ? (t.benefits as string[]) : [],
         active: t.is_active,
       })),
     };
