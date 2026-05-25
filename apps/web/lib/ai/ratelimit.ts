@@ -49,3 +49,18 @@ export async function checkAILimit(
   const res = await rl.limit(`${feature}:${userId}`);
   return { success: res.success, remaining: res.remaining };
 }
+
+/** General-purpose per-user limiter for non-AI endpoints (e.g. data export). */
+const generalLimits = {
+  dataExport: limiter(3, "1 d"),
+} as const;
+
+export async function checkLimit(
+  feature: keyof typeof generalLimits,
+  userId: string
+): Promise<{ success: boolean; remaining: number }> {
+  const rl = generalLimits[feature];
+  if (!rl) return { success: true, remaining: Infinity };
+  const res = await rl.limit(`${feature}:${userId}`);
+  return { success: res.success, remaining: res.remaining };
+}
