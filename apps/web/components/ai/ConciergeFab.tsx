@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, X, Send } from "lucide-react";
+import { Sparkles, X, Send, SquarePen, Settings } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +14,8 @@ interface ChatMessage {
 
 const GREETING =
   "Hey, I'm Aura. What are you in the mood to discover tonight? Tell me a vibe, a type, a feeling, and I'll build your feed.";
+
+const THREAD_KEY = "aurora-aura-thread";
 
 /**
  * Discovery Concierge floating action button (RPD §3.1 / §6.2). Streams from
@@ -32,6 +35,39 @@ export function ConciergeFab() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [messages, open]);
+
+  // Restore the last conversation so closing/reopening doesn't lose it.
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(THREAD_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as ChatMessage[];
+        if (Array.isArray(parsed) && parsed.length > 0) setMessages(parsed);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (streaming) return;
+    try {
+      window.localStorage.setItem(THREAD_KEY, JSON.stringify(messages.slice(-40)));
+    } catch {
+      /* ignore */
+    }
+  }, [messages, streaming]);
+
+  function newChat() {
+    if (streaming) return;
+    setMessages([{ role: "assistant", content: GREETING }]);
+    setDraft("");
+    try {
+      window.localStorage.removeItem(THREAD_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
 
   // The Discovery prompt bar (and anywhere else) can open Aura with a draft.
   useEffect(() => {
@@ -165,14 +201,35 @@ export function ConciergeFab() {
                 </span>
                 <span className="font-display font-semibold text-white">Aura</span>
               </div>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={() => setOpen(false)}
-                className="h-8 w-8 rounded-lg flex items-center justify-center text-lilac/60 hover:text-white hover:bg-white/5"
-              >
-                <X size={16} />
-              </button>
+              <div className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  aria-label="New chat"
+                  title="New chat"
+                  onClick={newChat}
+                  disabled={streaming}
+                  className="h-8 w-8 rounded-lg flex items-center justify-center text-lilac/60 hover:text-white hover:bg-white/5 disabled:opacity-40"
+                >
+                  <SquarePen size={15} />
+                </button>
+                <Link
+                  href="/settings"
+                  aria-label="AI settings"
+                  title="AI settings"
+                  onClick={() => setOpen(false)}
+                  className="h-8 w-8 rounded-lg flex items-center justify-center text-lilac/60 hover:text-white hover:bg-white/5"
+                >
+                  <Settings size={15} />
+                </Link>
+                <button
+                  type="button"
+                  aria-label="Close"
+                  onClick={() => setOpen(false)}
+                  className="h-8 w-8 rounded-lg flex items-center justify-center text-lilac/60 hover:text-white hover:bg-white/5"
+                >
+                  <X size={16} />
+                </button>
+              </div>
             </header>
 
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
