@@ -100,6 +100,24 @@ async function resolve(rows: PostRow[], viewerId: string | null): Promise<FeedPo
   return Promise.all(rows.map((r) => mapRow(r, access)));
 }
 
+/** The viewer's hidden categories (Settings → Content & safety), lowercased. */
+async function hiddenCategories(viewerId: string | null): Promise<Set<string>> {
+  if (!viewerId) return new Set();
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("user_preferences")
+    .select("settings")
+    .eq("user_id", viewerId)
+    .maybeSingle<{ settings: { hiddenCategories?: string[] } | null }>();
+  const list = data?.settings?.hiddenCategories ?? [];
+  return new Set(list.map((c) => c.toLowerCase()));
+}
+
+function dropHidden(posts: FeedPost[], hidden: Set<string>): FeedPost[] {
+  if (hidden.size === 0) return posts;
+  return posts.filter((p) => !p.category || !hidden.has(p.category.toLowerCase()));
+}
+
 /**
  * Home feed: posts from creators the signed-in user follows, newest first.
  * Falls back to recent public posts when the follow graph is empty.
@@ -107,6 +125,7 @@ async function resolve(rows: PostRow[], viewerId: string | null): Promise<FeedPo
 export async function getFeedPosts(userId: string | null): Promise<FeedPost[]> {
   if (!configured()) return [];
   const supabase = createClient();
+  const hidden = await hiddenCategories(userId);
 
   if (userId) {
     const { data: follows } = await supabase
@@ -123,7 +142,7 @@ export async function getFeedPosts(userId: string | null): Promise<FeedPost[]> {
         .order("created_at", { ascending: false })
         .limit(40);
       const rows = (data as unknown as PostRow[]) ?? [];
-      if (rows.length > 0) return resolve(rows, userId);
+      if (rows.length > 0) return dropHidden(await resolve(rows, userId), hidden);
     }
   }
 
@@ -133,7 +152,7 @@ export async function getFeedPosts(userId: string | null): Promise<FeedPost[]> {
     .is("tier_required", null)
     .order("created_at", { ascending: false })
     .limit(40);
-  return resolve((data as unknown as PostRow[]) ?? [], userId);
+  return dropHidden(await resolve((data as unknown as PostRow[]) ?? [], userId), hidden);
 }
 
 /** A specific user's own posts (for their profile). */

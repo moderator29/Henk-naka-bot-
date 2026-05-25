@@ -17,6 +17,12 @@ export interface UserSettings {
     /** Show your online / recently-active status. */
     showOnlineStatus: boolean;
   };
+  appearance: {
+    /** Force-reduce motion regardless of the OS setting. */
+    reduceMotion: boolean;
+  };
+  /** Categories to hide from feed + discovery. */
+  hiddenCategories: string[];
   language: string;
 }
 
@@ -24,5 +30,11 @@ export const DEFAULT_SETTINGS: UserSettings = {
   notifications: { follows: true, posts: true, tips: true, renewals: true },
   ai: { concierge: true, search: true, copilot: true },
   privacy: { searchable: true, showLikes: true, showOnlineStatus: true },
+  appearance: { reduceMotion: false },
+  hiddenCategories: [],
   language: "en",
 };
+
+/** Cookie the root layout reads to apply the reduce-motion class without a
+ * flash; the appearance toggle keeps it in sync with the saved setting. */
+export const REDUCE_MOTION_COOKIE = "aurora-reduce-motion";

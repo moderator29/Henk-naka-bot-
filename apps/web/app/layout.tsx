@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import { display, inter, mono } from "@/lib/fonts";
 import { Providers } from "./providers";
+import { REDUCE_MOTION_COOKIE } from "@/lib/profile/settings";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -38,10 +40,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const reduceMotion = cookies().get(REDUCE_MOTION_COOKIE)?.value === "1";
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${mono.variable} ${display.variable}`}
+      className={`${inter.variable} ${mono.variable} ${display.variable}${reduceMotion ? " reduce-motion" : ""}`}
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-plum text-lilac">

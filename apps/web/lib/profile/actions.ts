@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth/session";
@@ -152,6 +153,8 @@ export async function updatePreferences(
       copilot: on("ai_copilot"),
     },
     privacy: { ...DEFAULT_SETTINGS.privacy, ...existing?.settings?.privacy },
+    appearance: { ...DEFAULT_SETTINGS.appearance, ...existing?.settings?.appearance },
+    hiddenCategories: existing?.settings?.hiddenCategories ?? DEFAULT_SETTINGS.hiddenCategories,
     language: String(formData.get("language") ?? "en"),
   };
 
@@ -192,6 +195,52 @@ export async function updatePrivacy(
     .upsert({ user_id: me.id, settings: merged }, { onConflict: "user_id" });
   if (error) return { ok: false, error: "Could not save privacy settings." };
   return { ok: true };
+}
+
+async function mergeSettings(
+  patch: Partial<UserSettings>
+): Promise<{ ok: boolean; error?: string }> {
+  let me;
+  try {
+    me = await getSessionUser();
+  } catch {
+    me = null;
+  }
+  if (!me) return { ok: false, error: "Sign in first." };
+
+  const supabase = createClient();
+  const { data: existing } = await supabase
+    .from("user_preferences")
+    .select("settings")
+    .eq("user_id", me.id)
+    .maybeSingle<{ settings: Partial<UserSettings> | null }>();
+
+  const merged: UserSettings = {
+    ...DEFAULT_SETTINGS,
+    ...existing?.settings,
+    ...patch,
+  } as UserSettings;
+
+  const { error } = await supabase
+    .from("user_preferences")
+    .upsert({ user_id: me.id, settings: merged }, { onConflict: "user_id" });
+  if (error) return { ok: false, error: "Could not save." };
+  revalidatePath("/settings");
+  return { ok: true };
+}
+
+/** Persist appearance (reduce-motion) preferences. */
+export async function updateAppearance(
+  appearance: UserSettings["appearance"]
+): Promise<{ ok: boolean; error?: string }> {
+  return mergeSettings({ appearance });
+}
+
+/** Persist the list of categories to hide from feed + discovery. */
+export async function updateHiddenCategories(
+  hiddenCategories: string[]
+): Promise<{ ok: boolean; error?: string }> {
+  return mergeSettings({ hiddenCategories: hiddenCategories.slice(0, 50) });
 }
 
 /** Clear the AI personalization memory the Concierge has built up. */

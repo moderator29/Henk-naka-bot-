@@ -187,3 +187,13 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Manual "Reduce motion" preference (Settings → Appearance). Mirrors the media
+   query so a user can force it on regardless of their OS setting. */
+.reduce-motion *:not(.aurora-blob),
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}

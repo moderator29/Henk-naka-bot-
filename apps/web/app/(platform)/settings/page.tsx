@@ -10,6 +10,8 @@ import { ConnectedWallets } from "@/components/settings/ConnectedWallets";
 import { SubscriptionsSettings } from "@/components/settings/SubscriptionsSettings";
 import { CreatorTiersSettings } from "@/components/settings/CreatorTiersSettings";
 import { PrivacySettings } from "@/components/settings/PrivacySettings";
+import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
+import { ContentFilters } from "@/components/settings/ContentFilters";
 import { DataExport } from "@/components/settings/DataExport";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { DEFAULT_SETTINGS, type UserSettings } from "@/lib/profile/settings";
@@ -70,6 +72,8 @@ export default async function SettingsPage() {
         notifications: { ...DEFAULT_SETTINGS.notifications, ...pref.settings.notifications },
         ai: { ...DEFAULT_SETTINGS.ai, ...pref.settings.ai },
         privacy: { ...DEFAULT_SETTINGS.privacy, ...pref.settings.privacy },
+        appearance: { ...DEFAULT_SETTINGS.appearance, ...pref.settings.appearance },
+        hiddenCategories: pref.settings.hiddenCategories ?? DEFAULT_SETTINGS.hiddenCategories,
         language: pref.settings.language ?? DEFAULT_SETTINGS.language,
       };
     }
@@ -88,10 +92,12 @@ export default async function SettingsPage() {
 
       <AccountSettings initial={initial} />
       <PrivacySettings initial={prefs.privacy} blocked={blocked} />
+      <ContentFilters initial={prefs.hiddenCategories} />
       <ConnectedWallets linkedAddress={linkedWallet} />
       <CreatorTiersSettings tiers={tiers} />
       <SubscriptionsSettings subscriptions={subscriptions} />
       <PreferencesSettings initial={prefs} />
+      <AppearanceSettings reduceMotion={prefs.appearance.reduceMotion} />
       <PasswordSettings />
       <DataExport />
 
