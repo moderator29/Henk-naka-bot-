@@ -152,6 +152,26 @@ export const DOC_SECTIONS: DocSection[] = [
         type: "p",
         text: "Subscriptions auto-renew at the end of each billing cycle. We'll always remind you a few days before the next charge, turn auto-renew off from your Subscriptions panel any time.",
       },
+      { type: "h2", text: "How to subscribe" },
+      {
+        type: "p",
+        text: "Open a creator's profile, pick the tier you want, and confirm the payment in $NSFW from your wallet. The unlock is instant: gated posts, the creator's DMs, and any tier perks open the moment the transaction confirms on Polygon. There's no platform middleman holding your money, payment settles on-chain.",
+      },
+      { type: "h3", text: "Tiers" },
+      {
+        type: "p",
+        text: "Creators can run multiple tiers, for example a Supporter tier for the full public catalogue and an Insider tier that adds tier-gated drops, priority replies, and early access. You can be on one tier per creator and upgrade or downgrade between cycles.",
+      },
+      { type: "h3", text: "Managing your subscriptions" },
+      {
+        type: "ul",
+        items: [
+          "See every active subscription, its tier, and its renewal date in one place",
+          "Turn auto-renew on or off per creator at any time",
+          "Get a reminder a few days before each renewal",
+          "Cancel and keep access until the end of the cycle you already paid for",
+        ],
+      },
       {
         type: "callout",
         tone: "info",
@@ -377,6 +397,93 @@ export const DOC_SECTIONS: DocSection[] = [
         type: "callout",
         tone: "warning",
         text: "We will never DM you for your seed phrase or send you a link asking you to \"reconnect.\" If anyone claiming to be Pleasure Coin support asks, it's a scam.",
+      },
+    ],
+  },
+  {
+    slug: "messages",
+    title: "Messages & DMs",
+    description: "Private, real-time conversations with creators and connections.",
+    blocks: [
+      {
+        type: "p",
+        text: "Messages is your private inbox. Threads with creators you subscribe to and the people you connect with, delivered in real time with read state and timestamps.",
+      },
+      { type: "h2", text: "How it works" },
+      {
+        type: "p",
+        text: "Open Messages from the nav, or the bell. Pick a conversation or start a new one, type, and send. Delivery is instant over a live connection, no refresh needed. Your conversation list orders by most recent so the active threads stay on top.",
+      },
+      { type: "h2", text: "Who can message you" },
+      {
+        type: "p",
+        text: "Subscribing to a creator opens a direct channel with them. You stay in control of your inbox, and every message a creator sends is written and sent by them.",
+      },
+      {
+        type: "callout",
+        tone: "tip",
+        text: "Creators: the Co-Pilot drafts on-brand reply suggestions in your voice. You always edit and send, nothing goes out automatically.",
+      },
+    ],
+  },
+  {
+    slug: "pveels",
+    title: "Pveels (Short Video)",
+    description: "Full-screen vertical video, the reels of Pleasure Coin.",
+    blocks: [
+      {
+        type: "p",
+        text: "Pveels is the full-screen vertical feed: short clips you swipe through one at a time, tuned to what you like. It's the fastest way to discover a creator's energy in seconds.",
+      },
+      { type: "h2", text: "Watching" },
+      {
+        type: "p",
+        text: "Open Pveels from the nav, swipe up for the next clip, tap to like, and follow creators you discover without leaving the feed. Gated clips show a clean unlock prompt instead of the video.",
+      },
+      { type: "h2", text: "For creators" },
+      {
+        type: "p",
+        text: "Short video is one of the fastest ways to grow. Post a clip and it surfaces in Pveels and on your profile, turning viewers into followers and subscribers. Keep it on-brand and let the Co-Pilot help you plan a posting cadence.",
+      },
+    ],
+  },
+  {
+    slug: "profile-and-settings",
+    title: "Profile & Settings",
+    description: "Your profile, your account, and everything you control.",
+    blocks: [
+      {
+        type: "p",
+        text: "Your profile is your home on the platform: cover image, avatar, bio, your post grid, and your follower and following counts. It's what people see when they tap your name anywhere on Pleasure Coin.",
+      },
+      { type: "h2", text: "Editing your profile" },
+      {
+        type: "ul",
+        items: [
+          "Display name and username, with a live availability check",
+          "Bio and country",
+          "Avatar and cover image uploads",
+          "Changes save to your account and reflect instantly",
+        ],
+      },
+      { type: "h2", text: "Account & security" },
+      {
+        type: "ul",
+        items: [
+          "Change your password, we confirm the current one first and email you when it changes",
+          "Manage connected wallets",
+          "Replay the welcome tour any time",
+        ],
+      },
+      { type: "h2", text: "Deleting your account" },
+      {
+        type: "p",
+        text: "From Settings you can permanently delete your account. You confirm by typing a phrase, we email you a confirmation, and your profile, posts, follows, and data are removed for good.",
+      },
+      {
+        type: "callout",
+        tone: "warning",
+        text: "Account deletion is permanent and immediate. Export anything you want to keep before you confirm.",
       },
     ],
   },
