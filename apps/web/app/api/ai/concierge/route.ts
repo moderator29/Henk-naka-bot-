@@ -5,6 +5,8 @@ import {
   AI_MODEL,
 } from "@/lib/ai/client";
 import { CONCIERGE_SYSTEM_PROMPT } from "@/lib/ai/prompts/concierge";
+import { composeSystem } from "@/lib/ai/knowledge";
+import { loadUserGrounding } from "@/lib/ai/grounding";
 import { chatMessagesSchema } from "@/lib/ai/schemas";
 import { checkAILimit } from "@/lib/ai/ratelimit";
 import { streamToSSE } from "@/lib/ai/sse";
@@ -39,11 +41,14 @@ export async function POST(req: NextRequest) {
     return new Response("Bad request", { status: 400 });
   }
 
+  const { context } = await loadUserGrounding(user.id);
+  const system = composeSystem(CONCIERGE_SYSTEM_PROMPT, context);
+
   const stream = anthropic.messages.stream({
     model: AI_MODEL,
     max_tokens: 1024,
     temperature: 0.8,
-    system: CONCIERGE_SYSTEM_PROMPT,
+    system,
     messages,
   });
 

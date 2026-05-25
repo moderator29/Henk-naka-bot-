@@ -5,6 +5,7 @@ import {
   AI_MODEL,
 } from "@/lib/ai/client";
 import { COPILOT_REPLY_PROMPT } from "@/lib/ai/prompts/copilot";
+import { composeSystem } from "@/lib/ai/knowledge";
 import { replySuggestionsSchema, chatMessagesSchema } from "@/lib/ai/schemas";
 import { checkAILimit } from "@/lib/ai/ratelimit";
 import { getSessionUser } from "@/lib/auth/session";
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
       model: AI_MODEL,
       max_tokens: 400,
       temperature: 0.7,
-      system: COPILOT_REPLY_PROMPT,
+      system: composeSystem(COPILOT_REPLY_PROMPT),
       messages: [{ role: "user", content: transcript }],
     });
 
