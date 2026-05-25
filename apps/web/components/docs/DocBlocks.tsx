@@ -81,7 +81,7 @@ function renderBlock(block: DocBlock, key: number) {
         <aside
           key={key}
           className={cn(
-            "glass rounded-2xl p-5 max-w-prose flex gap-3",
+            "glass edge-light rounded-2xl p-5 max-w-prose flex gap-3",
             toneClasses[tone]
           )}
         >

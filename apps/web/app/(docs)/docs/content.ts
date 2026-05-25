@@ -63,6 +63,44 @@ export const DOC_SECTIONS: DocSection[] = [
     ],
   },
   {
+    slug: "the-nsfw-token",
+    title: "The $NSFW Token",
+    description:
+      "The utility token that powers the entire ecosystem. ERC-20 on Polygon.",
+    blocks: [
+      {
+        type: "p",
+        text: "$NSFW is the utility token behind everything on the platform. It is an ERC-20 on Polygon, live since 2021, and it is what you use to subscribe to creators, tip, buy and sell NFTs, and stake for rewards. One token, used everywhere, buy once and use it across the whole ecosystem.",
+      },
+      { type: "h2", text: "Total supply" },
+      {
+        type: "p",
+        text: "The total supply is 69,000,000,000 $NSFW (69 billion). It is a fixed supply, the protocol does not mint new tokens.",
+      },
+      {
+        type: "callout",
+        tone: "info",
+        text: "Contract: 0x8f006d1e1d9dc6c98996f50a4c810f17a47fbf19 on Polygon. Always verify the address on the Token page or PolygonScan before you transact.",
+      },
+      { type: "h2", text: "What it is used for" },
+      {
+        type: "ul",
+        items: [
+          "Subscriptions to creators on Pleasurely",
+          "Tipping creators directly",
+          "Buying and selling NFTs on PleasureNifty",
+          "Staking for 10% APY over a 12-week lock",
+          "Settlement across the whole ecosystem",
+        ],
+      },
+      { type: "h2", text: "How to get $NSFW" },
+      {
+        type: "p",
+        text: "Connect a wallet on Polygon and swap for $NSFW on a DEX like SushiSwap, or use the in-app trade screen. You only need a little POL for gas. The live price, market cap, and holder count are on the Token page.",
+      },
+    ],
+  },
+  {
     slug: "feed-and-discovery",
     title: "How the Feed & Discovery Work",
     description:
@@ -222,12 +260,19 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "How staking works" },
       {
         type: "p",
-        text: "Connect your wallet on the Staking page, approve the staking contract for your $NSFW balance, then stake. Your position locks for 12 weeks. During the lock, you accrue rewards continuously and can claim them at any time.",
+        text: "Connect your wallet on the Staking page, approve the staking contract for your $NSFW balance, then stake. Your position locks for 12 weeks and earns 10% APY. Rewards accrue continuously while it's locked.",
       },
-      { type: "h2", text: "Unlocking" },
+      { type: "h2", text: "The rules" },
       {
-        type: "p",
-        text: "After the 12 weeks, request an unlock. There's a short unlock window during which you can withdraw your principal. Rewards stay claimable separately.",
+        type: "ul",
+        items: [
+          "Lock your $NSFW for 12 weeks to earn 10% APY.",
+          "Rewards accrue continuously and can be claimed weekly (every Monday).",
+          "To unstake: request unlock, wait out the lock, then withdraw your principal.",
+          "Adding more tokens to a position resets its 12-week lock.",
+          "Minimum stake is 1,000,000 $NSFW.",
+          "Keep a little POL in your wallet for transaction fees.",
+        ],
       },
       { type: "h2", text: "Why stake" },
       {
