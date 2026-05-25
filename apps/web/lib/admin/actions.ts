@@ -1,9 +1,11 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStaffContext, isAdminRole, type Role } from "@/lib/auth/roles";
 import { logAdminAction } from "./audit";
+import { purgeDemoContent } from "./demo";
 
 /**
  * Admin mutations. Every action re-checks the caller's role server-side (never
@@ -198,5 +200,84 @@ export async function reviewCreatorApplication(
     { userId: app.user_id, note: note ?? null }
   );
   revalidatePath("/admin/creators");
+  return { ok: true };
+}
+
+const announcementSchema = z.object({
+  title: z.string().trim().min(1).max(120),
+  body: z.string().trim().min(1).max(2000),
+  audience: z.enum(["all", "creators", "fans"]),
+});
+
+/** Post a platform announcement and fan it out as notifications (admin only). */
+export async function createAnnouncement(input: {
+  title: string;
+  body: string;
+  audience: "all" | "creators" | "fans";
+}): Promise<AdminResult> {
+  const ctx = await getStaffContext();
+  if (!ctx || !isAdminRole(ctx.role)) return { ok: false, error: "Not allowed." };
+  const parsed = announcementSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Check the announcement." };
+
+  const admin = createAdminClient();
+  const { error } = await admin.from("announcements").insert({
+    title: parsed.data.title,
+    body: parsed.data.body,
+    audience: parsed.data.audience,
+    created_by: ctx.user.id,
+  });
+  if (error) return { ok: false, error: "Could not post announcement." };
+
+  // Fan out as notifications to the matching audience (bounded).
+  let q = admin.from("users").select("id").limit(10000);
+  if (parsed.data.audience === "creators") q = q.eq("is_creator", true);
+  else if (parsed.data.audience === "fans") q = q.eq("is_creator", false);
+  const { data: targets } = await q;
+  const rows = (targets ?? []).map((u) => ({
+    user_id: u.id as string,
+    type: "system",
+    payload: { message: `${parsed.data.title}: ${parsed.data.body}` },
+  }));
+  if (rows.length) {
+    // Chunk inserts to stay within payload limits.
+    for (let i = 0; i < rows.length; i += 500) {
+      await admin.from("notifications").insert(rows.slice(i, i + 500));
+    }
+  }
+
+  await logAdminAction(ctx.user.id, "create_announcement", { type: "announcement" }, { audience: parsed.data.audience });
+  revalidatePath("/admin/announcements");
+  return { ok: true };
+}
+
+/** Upsert a platform setting value (admin only). */
+export async function updatePlatformSetting(
+  key: string,
+  value: unknown
+): Promise<AdminResult> {
+  const ctx = await getStaffContext();
+  if (!ctx || !isAdminRole(ctx.role)) return { ok: false, error: "Not allowed." };
+  if (!/^[a-z0-9_]{1,40}$/.test(key)) return { ok: false, error: "Invalid setting." };
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("platform_settings")
+    .upsert({ key, value, updated_by: ctx.user.id, updated_at: new Date().toISOString() }, { onConflict: "key" });
+  if (error) return { ok: false, error: "Could not save setting." };
+
+  await logAdminAction(ctx.user.id, "update_setting", { type: "platform_settings", id: key }, { value });
+  revalidatePath("/admin/settings");
+  return { ok: true };
+}
+
+/** Admin-triggered purge of all is_demo content. */
+export async function purgeDemoNow(): Promise<AdminResult> {
+  const ctx = await getStaffContext();
+  if (!ctx || !isAdminRole(ctx.role)) return { ok: false, error: "Not allowed." };
+  const res = await purgeDemoContent();
+  if (!res.ok) return { ok: false, error: "Purge failed." };
+  await logAdminAction(ctx.user.id, "purge_demo", { type: "platform" });
+  revalidatePath("/admin/demo");
   return { ok: true };
 }

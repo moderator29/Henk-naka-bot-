@@ -277,3 +277,143 @@ export async function listAuditLog(): Promise<AdminAuditRow[]> {
     createdAt: l.created_at,
   }));
 }
+
+export interface AdminTxRow {
+  id: string;
+  kind: "tip" | "subscription";
+  amount: string;
+  party: string;
+  txHash: string | null;
+  createdAt: string;
+}
+
+/** Recent finance events: tips + subscriptions, newest first. */
+export async function listTransactions(limit = 100): Promise<AdminTxRow[]> {
+  if (!configured()) return [];
+  const admin = createAdminClient();
+  const [{ data: tips }, { data: subs }] = await Promise.all([
+    admin
+      .from("tips")
+      .select("id, amount_nsfw, tx_hash, created_at, to:to_user(username, display_name)")
+      .order("created_at", { ascending: false })
+      .limit(limit),
+    admin
+      .from("subscriptions")
+      .select("id, tx_hash, started_at, subscription_tiers(name, users:creator_id(username))")
+      .order("started_at", { ascending: false })
+      .limit(limit),
+  ]);
+
+  const tipRows: AdminTxRow[] = (
+    (tips as unknown as Array<{
+      id: string; amount_nsfw: string; tx_hash: string | null; created_at: string;
+      to: { username: string | null; display_name: string | null } | null;
+    }>) ?? []
+  ).map((t) => ({
+    id: t.id,
+    kind: "tip",
+    amount: `${Math.round(Number(t.amount_nsfw))} $NSFW`,
+    party: `to ${t.to?.display_name ?? t.to?.username ?? "creator"}`,
+    txHash: t.tx_hash,
+    createdAt: t.created_at,
+  }));
+
+  const subRows: AdminTxRow[] = (
+    (subs as unknown as Array<{
+      id: string; tx_hash: string | null; started_at: string;
+      subscription_tiers: { name: string; users: { username: string | null } | null } | null;
+    }>) ?? []
+  ).map((s) => ({
+    id: s.id,
+    kind: "subscription",
+    amount: s.subscription_tiers?.name ?? "Tier",
+    party: `to ${s.subscription_tiers?.users?.username ?? "creator"}`,
+    txHash: s.tx_hash,
+    createdAt: s.started_at,
+  }));
+
+  return [...tipRows, ...subRows]
+    .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+    .slice(0, limit);
+}
+
+export interface DemoCounts {
+  users: number;
+  posts: number;
+  listings: number;
+  purgedAt: string | null;
+}
+
+export async function getDemoCounts(): Promise<DemoCounts> {
+  const empty: DemoCounts = { users: 0, posts: 0, listings: 0, purgedAt: null };
+  if (!configured()) return empty;
+  const admin = createAdminClient();
+  const [u, p, l, { data: flag }] = await Promise.all([
+    admin.from("users").select("*", { count: "exact", head: true }).eq("is_demo", true).then((r) => r.count ?? 0),
+    admin.from("posts").select("*", { count: "exact", head: true }).eq("is_demo", true).then((r) => r.count ?? 0),
+    admin.from("marketplace_listings").select("*", { count: "exact", head: true }).then((r) => r.count ?? 0),
+    admin.from("platform_settings").select("value").eq("key", "demo_purged").maybeSingle<{ value: { at?: string } }>(),
+  ]);
+  return { users: u, posts: p, listings: l, purgedAt: flag?.value?.at ?? null };
+}
+
+export interface AnnouncementRow {
+  id: string;
+  title: string;
+  body: string;
+  audience: string;
+  createdAt: string;
+}
+
+export async function listAnnouncements(): Promise<AnnouncementRow[]> {
+  if (!configured()) return [];
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("announcements")
+    .select("id, title, body, audience, created_at")
+    .order("created_at", { ascending: false })
+    .limit(50);
+  return ((data as unknown as Array<{ id: string; title: string; body: string; audience: string; created_at: string }>) ?? []).map((a) => ({
+    id: a.id,
+    title: a.title,
+    body: a.body,
+    audience: a.audience,
+    createdAt: a.created_at,
+  }));
+}
+
+export type PlatformSettings = Record<string, unknown>;
+
+export async function getPlatformSettings(): Promise<PlatformSettings> {
+  if (!configured()) return {};
+  const admin = createAdminClient();
+  const { data } = await admin.from("platform_settings").select("key, value");
+  const out: PlatformSettings = {};
+  for (const row of (data ?? []) as Array<{ key: string; value: unknown }>) {
+    out[row.key] = row.value;
+  }
+  return out;
+}
+
+export interface IntegrationStatus {
+  name: string;
+  configured: boolean;
+  note: string;
+}
+
+/** Which integrations are wired (by env presence). No secrets are exposed. */
+export function getIntegrationStatus(): IntegrationStatus[] {
+  const has = (k: string) => !!process.env[k];
+  return [
+    { name: "Supabase", configured: has("NEXT_PUBLIC_SUPABASE_URL") && has("SUPABASE_SERVICE_ROLE_KEY"), note: "Auth, DB, Storage, Realtime" },
+    { name: "Anthropic (AI)", configured: has("ANTHROPIC_API_KEY"), note: "Powers the AI features" },
+    { name: "Upstash (rate limit)", configured: has("UPSTASH_REDIS_REST_URL"), note: "Falls back to in-memory if unset" },
+    { name: "Turnstile", configured: has("TURNSTILE_SECRET_KEY"), note: "Bot protection on auth" },
+    { name: "Resend (email)", configured: has("RESEND_API_KEY"), note: "Transactional email" },
+    { name: "WalletConnect", configured: has("NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID"), note: "Wallet connect modal" },
+    { name: "Alchemy (Polygon)", configured: has("ALCHEMY_POLYGON_RPC_URL") || has("ALCHEMY_API_KEY"), note: "On-chain reads" },
+    { name: "0x Swap", configured: has("ZEROX_API_KEY"), note: "In-app $NSFW swap" },
+    { name: "Sentry", configured: has("NEXT_PUBLIC_SENTRY_DSN"), note: "Error monitoring" },
+    { name: "PostHog", configured: has("NEXT_PUBLIC_POSTHOG_KEY"), note: "Product analytics" },
+  ];
+}

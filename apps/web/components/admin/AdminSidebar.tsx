@@ -10,6 +10,13 @@ import {
   ScrollText,
   ShieldCheck,
   ArrowLeft,
+  Coins,
+  Megaphone,
+  Settings,
+  Sparkles,
+  Activity,
+  Database,
+  BookText,
 } from "lucide-react";
 import type { Role } from "@/lib/auth/roles";
 import { cn } from "@/lib/utils";
@@ -26,7 +33,14 @@ const ITEMS: NavItem[] = [
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/reports", label: "Moderation", icon: Flag },
   { href: "/admin/creators", label: "Creators", icon: BadgeCheck },
+  { href: "/admin/transactions", label: "Transactions", icon: Coins },
+  { href: "/admin/announcements", label: "Announcements", icon: Megaphone, adminOnly: true },
+  { href: "/admin/ai", label: "AI", icon: Sparkles },
+  { href: "/admin/health", label: "System health", icon: Activity },
+  { href: "/admin/demo", label: "Demo data", icon: Database, adminOnly: true },
+  { href: "/admin/settings", label: "Settings", icon: Settings, adminOnly: true },
   { href: "/admin/audit", label: "Audit log", icon: ScrollText },
+  { href: "/admin/docs", label: "Admin docs", icon: BookText },
 ];
 
 export function AdminSidebar({
