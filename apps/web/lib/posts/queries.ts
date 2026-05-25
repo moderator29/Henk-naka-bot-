@@ -29,6 +29,7 @@ interface PostRow {
   created_at: string;
   creator_id: string;
   media: StoredMediaItem[] | null;
+  is_removed: boolean | null;
   users: {
     username: string | null;
     display_name: string | null;
@@ -39,7 +40,7 @@ interface PostRow {
 }
 
 const SELECT =
-  "id, caption, category, tier_required, visibility, created_at, creator_id, media, users!inner(username, display_name, is_verified), likes(count), comments(count)";
+  "id, caption, category, tier_required, visibility, created_at, creator_id, media, is_removed, users!inner(username, display_name, is_verified), likes(count), comments(count)";
 
 async function resolveMedia(
   stored: StoredMediaItem[] | null,
@@ -95,9 +96,10 @@ async function mapRow(r: PostRow, access: ViewerAccess): Promise<FeedPost> {
 }
 
 async function resolve(rows: PostRow[], viewerId: string | null): Promise<FeedPost[]> {
-  if (rows.length === 0) return [];
+  const live = rows.filter((r) => !r.is_removed);
+  if (live.length === 0) return [];
   const access = await loadViewerAccess(viewerId);
-  return Promise.all(rows.map((r) => mapRow(r, access)));
+  return Promise.all(live.map((r) => mapRow(r, access)));
 }
 
 /** The viewer's hidden categories (Settings → Content & safety), lowercased. */

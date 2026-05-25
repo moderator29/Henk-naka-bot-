@@ -42,6 +42,7 @@ interface PveelRow {
   save_count: number;
   created_at: string;
   is_demo: boolean;
+  is_removed: boolean | null;
   users: {
     username: string | null;
     display_name: string | null;
@@ -50,7 +51,7 @@ interface PveelRow {
 }
 
 const SELECT =
-  "id, creator_id, video_url, poster_url, caption, category, hashtags, visibility, tier_required, duration_seconds, width, height, allow_comments, allow_tips, view_count, like_count, comment_count, save_count, created_at, is_demo, users!inner(username, display_name, is_verified)";
+  "id, creator_id, video_url, poster_url, caption, category, hashtags, visibility, tier_required, duration_seconds, width, height, allow_comments, allow_tips, view_count, like_count, comment_count, save_count, created_at, is_demo, is_removed, users!inner(username, display_name, is_verified)";
 
 async function mapRow(
   r: PveelRow,
@@ -104,9 +105,10 @@ async function mapRow(
 /** Resolves a batch of rows to PveelViews with one viewer-access load and one
  * likes/saves read, then per-row playback resolution. */
 async function resolve(
-  rows: PveelRow[],
+  rowsIn: PveelRow[],
   viewerId: string | null
 ): Promise<PveelView[]> {
+  const rows = rowsIn.filter((r) => !r.is_removed);
   if (rows.length === 0) return [];
   const access = await loadViewerAccess(viewerId);
 
