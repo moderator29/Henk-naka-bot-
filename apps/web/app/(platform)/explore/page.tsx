@@ -3,9 +3,12 @@ import { Card } from "@/components/ui/Card";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { CreatorRow } from "@/components/explore/CreatorRow";
 import { ConciergePrompt } from "@/components/explore/ConciergePrompt";
+import { PostCard } from "@/components/feed/PostCard";
 import { CATEGORIES } from "@/lib/explore/categories";
-import { getTrendingCreators, getRecentPublicPosts } from "@/lib/explore/queries";
-import { cn, relativeTime } from "@/lib/utils";
+import { getTrendingCreators } from "@/lib/explore/queries";
+import { getAllPosts } from "@/lib/posts/queries";
+import { getSessionUser } from "@/lib/auth/session";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Discover" };
 
@@ -34,9 +37,10 @@ export default async function ExplorePage({
 }: {
   searchParams?: { cat?: string };
 }) {
+  const me = await getSessionUser();
   const [allTrending, posts] = await Promise.all([
     getTrendingCreators(12),
-    getRecentPublicPosts(10),
+    getAllPosts(me?.id ?? null),
   ]);
 
   const activeCat =
@@ -122,30 +126,16 @@ export default async function ExplorePage({
         )}
       </ScrollReveal>
 
-      {/* Fresh posts */}
+      {/* Fresh posts — full, interactive cards (like, comment, save, tip). */}
       <ScrollReveal delay={delay()}>
-        <section>
+        <section className="max-w-2xl">
           <h2 className="font-display text-lg sm:text-xl font-semibold text-white mb-3">
             Fresh on the platform
           </h2>
           {posts.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-none -mx-1 px-1 pb-2">
-              {posts.map((p) => (
-                <Link key={p.id} href="/feed" className="snap-start shrink-0 w-[280px]">
-                  <Card hoverable className="h-full">
-                    {p.category && (
-                      <span className="text-[0.65rem] uppercase tracking-wider text-cyan">
-                        {p.category}
-                      </span>
-                    )}
-                    <p className="mt-1 text-sm text-lilac/85 line-clamp-3">
-                      {p.caption || "New post"}
-                    </p>
-                    <time className="block mt-3 text-[0.65rem] text-lilac/40">
-                      {relativeTime(p.createdAt)}
-                    </time>
-                  </Card>
-                </Link>
+            <div className="flex flex-col gap-5">
+              {posts.map((p, i) => (
+                <PostCard key={p.id} post={p} index={i} />
               ))}
             </div>
           ) : (

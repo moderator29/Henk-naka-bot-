@@ -8,7 +8,7 @@ import type { DocBlock } from "@/app/(docs)/docs/content";
  */
 export function DocBlocks({ blocks }: { blocks: DocBlock[] }) {
   return (
-    <div className="space-y-5 text-lilac/85 text-base leading-relaxed">
+    <div className="space-y-5 text-lilac/85 text-base leading-relaxed break-words [overflow-wrap:anywhere] min-w-0">
       {blocks.map((block, i) => renderBlock(block, i))}
     </div>
   );

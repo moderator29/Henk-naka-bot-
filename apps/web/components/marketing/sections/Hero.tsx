@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Wallet } from "lucide-react";
+import { ArrowRight, Wallet, BookOpen } from "lucide-react";
 import { GradientText } from "@/components/brand/GradientText";
 import { Button } from "@/components/ui/Button";
 
@@ -67,6 +67,11 @@ export function Hero() {
             <Button size="lg" variant="glass" asChild>
               <Link href="/trade">
                 <Wallet size={18} /> Buy $NSFW
+              </Link>
+            </Button>
+            <Button size="lg" variant="ghost" asChild>
+              <Link href="/docs">
+                <BookOpen size={18} /> Read the docs
               </Link>
             </Button>
           </motion.div>

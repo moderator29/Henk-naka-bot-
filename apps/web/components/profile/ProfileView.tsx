@@ -19,7 +19,6 @@ import { Card } from "@/components/ui/Card";
 import { StatTicker } from "@/components/ui/StatTicker";
 import { Modal, ModalContent } from "@/components/ui/Modal";
 import { PostCard, type FeedPost } from "@/components/feed/PostCard";
-import { EditProfileForm } from "@/components/profile/EditProfileForm";
 import { FollowListModal } from "@/components/profile/FollowListModal";
 import { SocialLinks } from "@/components/profile/SocialLinks";
 import { useToast } from "@/components/ui/Toast";
@@ -79,7 +78,6 @@ export function ProfileView({
   const [tab, setTab] = useState<Tab>("posts");
   const [followModal, setFollowModal] = useState<"followers" | "following" | null>(null);
   const mediaPosts = posts.filter((p) => (p.media?.length ?? 0) > 0);
-  const [editing, setEditing] = useState(false);
   const [selected, setSelected] = useState<FeedPost | null>(null);
   const { push } = useToast();
 
@@ -162,8 +160,8 @@ export function ProfileView({
             <div className="flex items-center gap-2 flex-shrink-0">
               {signedIn ? (
                 <>
-                  <Button variant="glass" leftIcon={<Pencil size={15} />} onClick={() => setEditing(true)}>
-                    Edit
+                  <Button variant="glass" leftIcon={<Pencil size={15} />} asChild>
+                    <Link href="/profile/edit">Edit</Link>
                   </Button>
                   <Button variant="glass" size="icon" aria-label="Share profile" onClick={share}>
                     <Share2 size={16} />
@@ -201,21 +199,6 @@ export function ProfileView({
           </div>
         </motion.div>
       </div>
-
-      {editing && (
-        <EditProfileForm
-          initial={{
-            displayName: profile?.displayName ?? "",
-            username: profile?.username ?? "",
-            bio: profile?.bio ?? "",
-            telegramUrl: profile?.telegramUrl,
-            xUrl: profile?.xUrl,
-            avatarUrl: avatarUrl,
-            coverUrl: coverUrl,
-          }}
-          onClose={() => setEditing(false)}
-        />
-      )}
 
       {followModal && userId && (
         <FollowListModal
