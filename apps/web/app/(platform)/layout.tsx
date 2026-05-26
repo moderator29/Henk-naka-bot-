@@ -1,8 +1,10 @@
 import { PlatformShell } from "@/components/platform/PlatformShell";
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 import { ConciergeFab } from "@/components/ai/ConciergeFab";
+import { MaintenanceBanner } from "@/components/platform/MaintenanceBanner";
 import { getSessionUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { getPlatformFlags } from "@/lib/platform/flags";
 
 function configured() {
   return (
@@ -17,6 +19,7 @@ export default async function PlatformLayout({
   children: React.ReactNode;
 }) {
   const me = await getSessionUser();
+  const { maintenance } = await getPlatformFlags();
   let onboardingDone = false;
   if (me && configured()) {
     const supabase = createClient();
@@ -30,6 +33,7 @@ export default async function PlatformLayout({
 
   return (
     <PlatformShell>
+      {maintenance && <MaintenanceBanner />}
       <OnboardingGate initiallyComplete={onboardingDone} />
       {children}
       <ConciergeFab />
