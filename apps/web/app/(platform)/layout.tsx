@@ -5,6 +5,8 @@ import { MaintenanceBanner } from "@/components/platform/MaintenanceBanner";
 import { getSessionUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { getPlatformFlags } from "@/lib/platform/flags";
+import { getUserSettings } from "@/lib/profile/queries";
+import { DEFAULT_SETTINGS } from "@/lib/profile/settings";
 
 function configured() {
   return (
@@ -21,22 +23,27 @@ export default async function PlatformLayout({
   const me = await getSessionUser();
   const { maintenance } = await getPlatformFlags();
   let onboardingDone = false;
+  let ai = DEFAULT_SETTINGS.ai;
   if (me && configured()) {
     const supabase = createClient();
-    const { data } = await supabase
-      .from("user_preferences")
-      .select("onboarding_completed")
-      .eq("user_id", me.id)
-      .maybeSingle<{ onboarding_completed: boolean }>();
+    const [{ data }, settings] = await Promise.all([
+      supabase
+        .from("user_preferences")
+        .select("onboarding_completed")
+        .eq("user_id", me.id)
+        .maybeSingle<{ onboarding_completed: boolean }>(),
+      getUserSettings(me.id),
+    ]);
     onboardingDone = data?.onboarding_completed === true;
+    ai = settings.ai;
   }
 
   return (
-    <PlatformShell>
+    <PlatformShell showSmartSearch={ai.search}>
       {maintenance && <MaintenanceBanner />}
       <OnboardingGate initiallyComplete={onboardingDone} />
       {children}
-      <ConciergeFab />
+      {ai.concierge && <ConciergeFab />}
     </PlatformShell>
   );
 }

@@ -44,6 +44,8 @@ interface PlatformShellProps {
    * Until then this stays undefined (no badge). PENDING_SUPABASE_AUTH.
    */
   unreadMessageCount?: number;
+  /** Honors the user's Smart Search AI preference. */
+  showSmartSearch?: boolean;
 }
 
 /**
@@ -55,6 +57,7 @@ interface PlatformShellProps {
 export function PlatformShell({
   children,
   unreadMessageCount,
+  showSmartSearch = true,
 }: PlatformShellProps) {
   return (
     <div className="relative min-h-screen">
@@ -71,7 +74,7 @@ export function PlatformShell({
             <div className="lg:hidden">
               <Logo size="sm" showWordmark={false} />
             </div>
-            <SmartSearch />
+            {showSmartSearch ? <SmartSearch /> : <div className="flex-1" />}
             <Link
               href="/messages"
               aria-label={

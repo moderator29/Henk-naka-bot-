@@ -2,6 +2,7 @@ import { MessagesShell } from "@/components/messaging/MessagesShell";
 import { ThreadContainer } from "@/components/messaging/ThreadContainer";
 import { listConversations, getThreadMessages } from "@/lib/messaging/queries";
 import { getSessionUser } from "@/lib/auth/session";
+import { getUserSettings } from "@/lib/profile/queries";
 
 interface ThreadPageProps {
   params: { conversationId: string };
@@ -14,6 +15,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
     getThreadMessages(conversationId),
     getSessionUser(),
   ]);
+  const copilotOn = me ? (await getUserSettings(me.id)).ai.copilot : false;
 
   return (
     <MessagesShell
@@ -25,7 +27,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
           backHref="/messages"
           meId={me?.id}
           initialMessages={initialMessages}
-          enableReplySuggestions={!!me}
+          enableReplySuggestions={copilotOn}
         />
       }
     />
