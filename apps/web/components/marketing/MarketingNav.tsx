@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
+import { TranslateMenu } from "@/components/i18n/TranslateMenu";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -52,6 +53,7 @@ export function MarketingNav({ signedIn = false }: { signedIn?: boolean }) {
         </ul>
 
         <div className="hidden md:flex items-center gap-3">
+          <TranslateMenu />
           {signedIn ? (
             <Button variant="primary" size="sm" asChild>
               <Link href="/feed">Open app</Link>
@@ -68,15 +70,18 @@ export function MarketingNav({ signedIn = false }: { signedIn?: boolean }) {
           )}
         </div>
 
-        <button
-          type="button"
-          className="md:hidden text-lilac hover:text-white p-2 rounded-lg"
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-          aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen((v) => !v)}
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="md:hidden flex items-center gap-1">
+          <TranslateMenu compact />
+          <button
+            type="button"
+            className="text-lilac hover:text-white p-2 rounded-lg"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </nav>
 
       <AnimatePresence>

@@ -6,6 +6,7 @@ import { WagmiProvider } from "wagmi";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { ToastProvider } from "@/components/ui/Toast";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
+import { TranslateProvider } from "@/components/i18n/TranslateController";
 import { wagmiConfig } from "@/lib/web3/wagmi";
 import "@rainbow-me/rainbowkit/styles.css";
 
@@ -40,7 +41,9 @@ export function Providers({ children }: { children: ReactNode }) {
         >
           <ToastProvider>
             <Suspense fallback={null}>
-              <AnalyticsProvider>{children}</AnalyticsProvider>
+              <AnalyticsProvider>
+                <TranslateProvider>{children}</TranslateProvider>
+              </AnalyticsProvider>
             </Suspense>
           </ToastProvider>
         </RainbowKitProvider>

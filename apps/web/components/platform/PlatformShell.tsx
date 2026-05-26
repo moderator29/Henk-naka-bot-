@@ -19,6 +19,7 @@ import { SkipToContent } from "@/components/ui/SkipToContent";
 import { ConnectWallet } from "@/components/web3/ConnectWallet";
 import { NotificationsBell } from "@/components/notifications/NotificationsBell";
 import { SmartSearch } from "@/components/ai/SmartSearch";
+import { TranslateMenu } from "@/components/i18n/TranslateMenu";
 import { NavRail, type RailItem } from "@/components/platform/NavRail";
 import { PlatformBottomNav } from "@/components/platform/PlatformBottomNav";
 import { MoreMenu } from "@/components/platform/MoreMenu";
@@ -96,6 +97,7 @@ export function PlatformShell({
                 )}
             </Link>
             <NotificationsBell />
+            <TranslateMenu compact />
             <ConnectWallet compact />
             <MoreMenu />
           </header>

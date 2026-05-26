@@ -3,7 +3,9 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
+import { useTranslate } from "@/components/i18n/TranslateController";
 import { updatePreferences } from "@/lib/profile/actions";
+import { LANGUAGES } from "@/lib/i18n/languages";
 import type { UserSettings } from "@/lib/profile/settings";
 import { Section } from "./AccountSettings";
 import { cn } from "@/lib/utils";
@@ -77,6 +79,7 @@ function Row({
 export function PreferencesSettings({ initial }: { initial: UserSettings }) {
   const { push } = useToast();
   const router = useRouter();
+  const { setLang } = useTranslate();
   const [s, setS] = useState<UserSettings>(initial);
   const [, startTransition] = useTransition();
 
@@ -119,15 +122,17 @@ export function PreferencesSettings({ initial }: { initial: UserSettings }) {
       <Section title="Language" desc="Display language. Powers the translate control across the app.">
         <select
           value={s.language}
-          onChange={(e) => commit({ ...s, language: e.target.value }, true)}
+          onChange={(e) => {
+            commit({ ...s, language: e.target.value });
+            setLang(e.target.value);
+          }}
           className="h-11 w-full sm:w-64 rounded-xl bg-plum/60 border border-white/10 px-3 text-base text-white focus:border-magenta/50 focus:outline-none"
         >
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="fr">Français</option>
-          <option value="de">Deutsch</option>
-          <option value="pt">Português</option>
-          <option value="ja">日本語</option>
+          {LANGUAGES.map((l) => (
+            <option key={l.code} value={l.code}>
+              {l.label}
+            </option>
+          ))}
         </select>
       </Section>
     </>
