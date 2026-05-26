@@ -13,6 +13,7 @@ import {
 import { Section } from "@/components/settings/AccountSettings";
 import { Button } from "@/components/ui/Button";
 import { SignOutEverywhere } from "@/components/settings/SignOutEverywhere";
+import { DataExport } from "@/components/settings/DataExport";
 
 /**
  * The remaining settings sections (account info, monetization, wallet/security,
@@ -40,6 +41,9 @@ export function MoreSettings({
             value={dateOfBirth ? new Date(dateOfBirth).toLocaleDateString() : "Set during signup"}
             hint="Used only to verify you're 18+. Contact support to change it."
           />
+          <div className="rounded-xl bg-white/[0.03] border border-white/5 px-4 py-3">
+            <DataExport />
+          </div>
         </Section>
       </div>
 
