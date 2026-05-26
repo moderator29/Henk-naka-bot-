@@ -22,9 +22,9 @@ export default async function AdminLayout({
   if (!isStaffRole(role)) redirect("/");
 
   return (
-    <div className="min-h-screen bg-plum text-white flex">
+    <div className="min-h-screen bg-plum text-white">
       <AdminSidebar role={role} email={user.email} />
-      <main className="flex-1 min-w-0 px-5 sm:px-8 py-8 lg:ml-64">
+      <main className="min-w-0 px-4 sm:px-8 py-6 sm:py-8 lg:ml-64">
         {children}
       </main>
     </div>

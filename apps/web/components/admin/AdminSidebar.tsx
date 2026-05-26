@@ -57,6 +57,43 @@ export function AdminSidebar({
   const items = ITEMS.filter((i) => !i.adminOnly || isAdmin);
 
   return (
+    <>
+      {/* Mobile: sticky top bar with horizontally scrollable section chips */}
+      <div className="lg:hidden sticky top-0 z-30 bg-imperial-dark/80 backdrop-blur-xl border-b border-white/10">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="h-7 w-7 rounded-lg bg-gradient-primary grid place-items-center">
+              <ShieldCheck size={15} className="text-white" />
+            </span>
+            <span className="font-display font-semibold text-white text-sm">Admin</span>
+            <span className="text-[0.6rem] uppercase tracking-wider text-cyan">{role}</span>
+          </div>
+          <Link href="/feed" className="flex items-center gap-1 text-xs text-lilac/60 hover:text-white">
+            <ArrowLeft size={14} /> App
+          </Link>
+        </div>
+        <nav className="flex gap-1.5 overflow-x-auto px-4 pb-2.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {items.map(({ href, label, icon: Icon }) => {
+            const active =
+              href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(`${href}/`);
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex-shrink-0",
+                  active ? "bg-gradient-primary text-white" : "bg-white/[0.04] text-lilac/65 hover:text-white"
+                )}
+              >
+                <Icon size={14} />
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
     <aside className="fixed inset-y-0 left-0 z-20 hidden lg:flex w-64 flex-col border-r border-white/10 bg-imperial-dark/60 backdrop-blur-xl px-4 py-6">
       <div className="flex items-center gap-2 px-2 mb-6">
         <span className="h-8 w-8 rounded-xl bg-gradient-primary grid place-items-center">
@@ -107,5 +144,6 @@ export function AdminSidebar({
         </Link>
       </div>
     </aside>
+    </>
   );
 }
