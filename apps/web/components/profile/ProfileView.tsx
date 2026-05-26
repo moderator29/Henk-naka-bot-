@@ -20,6 +20,7 @@ import { StatTicker } from "@/components/ui/StatTicker";
 import { Modal, ModalContent } from "@/components/ui/Modal";
 import { PostCard, type FeedPost } from "@/components/feed/PostCard";
 import { EditProfileForm } from "@/components/profile/EditProfileForm";
+import { FollowListModal } from "@/components/profile/FollowListModal";
 import { useToast } from "@/components/ui/Toast";
 import { cn, relativeTime } from "@/lib/utils";
 
@@ -46,6 +47,7 @@ interface ProfileViewProps {
   likedPosts?: FeedPost[];
   followerCount?: number;
   followingCount?: number;
+  userId?: string | null;
 }
 
 const HUES = ["#FF1F8F", "#B847FF", "#5DD6FF", "#2A0E5A"];
@@ -69,8 +71,10 @@ export function ProfileView({
   likedPosts = [],
   followerCount = 0,
   followingCount = 0,
+  userId = null,
 }: ProfileViewProps) {
   const [tab, setTab] = useState<Tab>("posts");
+  const [followModal, setFollowModal] = useState<"followers" | "following" | null>(null);
   const mediaPosts = posts.filter((p) => (p.media?.length ?? 0) > 0);
   const [editing, setEditing] = useState(false);
   const [selected, setSelected] = useState<FeedPost | null>(null);
@@ -172,8 +176,20 @@ export function ProfileView({
 
           <div className="mt-6 grid grid-cols-3 gap-4 border-t border-white/5 pt-5">
             <Stat label="Posts" value={posts.length} />
-            <Stat label="Followers" value={followerCount} />
-            <Stat label="Following" value={followingCount} />
+            {userId ? (
+              <button type="button" onClick={() => setFollowModal("followers")} className="text-center hover:opacity-80 transition-opacity">
+                <Stat label="Followers" value={followerCount} />
+              </button>
+            ) : (
+              <Stat label="Followers" value={followerCount} />
+            )}
+            {userId ? (
+              <button type="button" onClick={() => setFollowModal("following")} className="text-center hover:opacity-80 transition-opacity">
+                <Stat label="Following" value={followingCount} />
+              </button>
+            ) : (
+              <Stat label="Following" value={followingCount} />
+            )}
           </div>
         </motion.div>
       </div>
@@ -188,6 +204,14 @@ export function ProfileView({
             coverUrl: coverUrl,
           }}
           onClose={() => setEditing(false)}
+        />
+      )}
+
+      {followModal && userId && (
+        <FollowListModal
+          userId={userId}
+          type={followModal}
+          onClose={() => setFollowModal(null)}
         />
       )}
 

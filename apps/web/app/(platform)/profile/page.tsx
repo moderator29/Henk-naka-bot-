@@ -80,6 +80,7 @@ export default async function ProfilePage() {
       likedPosts={likedPosts}
       followerCount={followerCount}
       followingCount={followingCount}
+      userId={me?.id ?? null}
     />
   );
 }
