@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Menu,
   X,
+  Megaphone,
   MessageCircle,
   Bookmark,
   Heart,
@@ -51,6 +52,7 @@ export function MoreMenu() {
     {
       heading: "You",
       items: [
+        { href: "/news", label: "News", icon: Megaphone },
         { href: "/messages", label: "Messages", icon: MessageCircle },
         { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
         { href: "/subscriptions", label: "Subscriptions", icon: Heart },

@@ -12,6 +12,7 @@ export type NotificationType =
   | "comment"
   | "post"
   | "message"
+  | "broadcast"
   | "system";
 
 export interface AppNotification {
@@ -43,6 +44,8 @@ export function describeNotification(n: AppNotification): string {
       return `${actor} posted something new`;
     case "message":
       return `${actor} sent you a message`;
+    case "broadcast":
+      return (n.payload?.title as string) ?? "New from Pleasure Coin";
     default:
       return (n.payload?.message as string) ?? "You have a new notification";
   }

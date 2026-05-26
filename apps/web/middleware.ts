@@ -13,6 +13,7 @@ const PROTECTED_PREFIXES = [
   "/explore",
   "/feed",
   "/pveels",
+  "/news",
   "/messages",
   "/marketplace",
   "/staking",

@@ -11,6 +11,7 @@ import {
   Coins,
   User,
   Bookmark,
+  Megaphone,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { AuroraBackground } from "@/components/brand/AuroraBackground";
@@ -27,6 +28,7 @@ const nav: RailItem[] = [
   { href: "/feed", label: "Home", icon: Home },
   { href: "/explore", label: "Discover", icon: Compass },
   { href: "/pveels", label: "Pveels", icon: Clapperboard },
+  { href: "/news", label: "News", icon: Megaphone },
   { href: "/messages", label: "Messages", icon: MessageCircle },
   { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
   { href: "/marketplace", label: "Marketplace", icon: Diamond },

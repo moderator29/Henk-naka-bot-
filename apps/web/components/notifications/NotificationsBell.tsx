@@ -9,6 +9,7 @@ import {
   Coins,
   MessageCircle,
   FileText,
+  Megaphone,
   Info,
   type LucideIcon,
 } from "lucide-react";
@@ -28,6 +29,7 @@ const ICONS: Record<NotificationType, LucideIcon> = {
   comment: MessageCircle,
   message: MessageCircle,
   post: FileText,
+  broadcast: Megaphone,
   system: Info,
 };
 

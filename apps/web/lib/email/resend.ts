@@ -100,6 +100,26 @@ export function sendCreatorPostEmail(to: string, creatorName: string) {
   );
 }
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/** Platform broadcast / announcement email. Body is plain text, escaped. */
+export function sendBroadcastEmail(to: string, title: string, body: string) {
+  return send(
+    to,
+    title,
+    shell(
+      escapeHtml(title),
+      escapeHtml(body).replace(/\n/g, "<br/>"),
+      "You're receiving this because you have a Pleasure Coin account. Manage notifications in Settings."
+    )
+  );
+}
+
 export function sendAccountDeletionEmail(to: string) {
   return send(
     to,

@@ -486,11 +486,51 @@ export const announcements = pgTable(
     title: text("title").notNull(),
     body: text("body").notNull(),
     audience: text("audience").default("all").notNull(),
+    imageUrl: text("image_url"),
     createdBy: uuid("created_by").references(() => users.id),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => ({ createdIdx: index("announcements_created_idx").on(t.createdAt) })
 );
+
+export const announcementLikes = pgTable(
+  "announcement_likes",
+  {
+    announcementId: uuid("announcement_id")
+      .notNull()
+      .references(() => announcements.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.announcementId, t.userId] }) })
+);
+
+export const announcementComments = pgTable(
+  "announcement_comments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    announcementId: uuid("announcement_id")
+      .notNull()
+      .references(() => announcements.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({ idx: index("announcement_comments_idx").on(t.announcementId, t.createdAt) })
+);
+
+export const legalDocuments = pgTable("legal_documents", {
+  slug: text("slug").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  version: integer("version").default(1).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedBy: uuid("updated_by").references(() => users.id),
+});
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
