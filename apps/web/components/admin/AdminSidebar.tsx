@@ -17,6 +17,7 @@ import {
   Activity,
   Database,
   BookText,
+  Scale,
 } from "lucide-react";
 import type { Role } from "@/lib/auth/roles";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,7 @@ const ITEMS: NavItem[] = [
   { href: "/admin/ai", label: "AI", icon: Sparkles },
   { href: "/admin/health", label: "System health", icon: Activity },
   { href: "/admin/demo", label: "Demo data", icon: Database, adminOnly: true },
+  { href: "/admin/legal", label: "Legal", icon: Scale, adminOnly: true },
   { href: "/admin/settings", label: "Settings", icon: Settings, adminOnly: true },
   { href: "/admin/audit", label: "Audit log", icon: ScrollText },
   { href: "/admin/docs", label: "Admin docs", icon: BookText },

@@ -31,6 +31,7 @@ const linkGroups = [
       { href: "/docs", label: "Documentation" },
       { href: "/legal/terms", label: "Terms" },
       { href: "/legal/privacy", label: "Privacy" },
+      { href: "/legal/disclaimer", label: "Disclaimer" },
       { href: "/legal/dmca", label: "DMCA" },
     ],
   },
@@ -86,6 +87,16 @@ export function Footer() {
             Built on Polygon · Powered by $NSFW
           </p>
         </div>
+        <p className="mt-6 text-[0.7rem] leading-relaxed text-lilac/40 max-w-3xl">
+          Disclaimer: Pleasure Coin is an adults-only (18+) platform and may
+          contain mature content. Nothing here is financial, investment, or legal
+          advice; $NSFW and on-chain activity carry risk and you transact at your
+          own risk. See our{" "}
+          <a href="/legal/disclaimer" className="underline hover:text-lilac/70">
+            full disclaimer
+          </a>
+          .
+        </p>
       </div>
     </footer>
   );

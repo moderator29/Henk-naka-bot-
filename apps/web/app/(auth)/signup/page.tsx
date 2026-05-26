@@ -28,6 +28,13 @@ export default function SignupPage() {
       <AuthDivider label="or with email" />
 
       <EmailSignUpForm humanVerified={humanVerified} />
+
+      <p className="mt-5 text-center text-xs text-lilac/45">
+        You must be 18+. By creating an account you agree to our{" "}
+        <a href="/legal/terms" className="underline hover:text-lilac/70">Terms</a>{" "}
+        and{" "}
+        <a href="/legal/privacy" className="underline hover:text-lilac/70">Privacy Policy</a>.
+      </p>
     </Card>
   );
 }

@@ -4,10 +4,10 @@ import { LegalShell } from "../LegalShell";
 import { LegalContent } from "@/components/legal/LegalContent";
 import { getLegalDoc } from "@/lib/legal/queries";
 
-export const metadata: Metadata = { title: "Privacy Policy" };
+export const metadata: Metadata = { title: "Disclaimer" };
 
-export default async function PrivacyPage() {
-  const doc = await getLegalDoc("privacy");
+export default async function DisclaimerPage() {
+  const doc = await getLegalDoc("disclaimer");
   if (!doc) notFound();
   const updated = doc.updatedAt
     ? new Date(doc.updatedAt).toLocaleDateString(undefined, { month: "long", year: "numeric" })
