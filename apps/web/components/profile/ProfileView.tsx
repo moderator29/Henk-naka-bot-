@@ -39,6 +39,8 @@ interface ProfileViewProps {
     displayName: string | null;
     username: string | null;
     bio: string | null;
+    avatarUrl?: string | null;
+    coverUrl?: string | null;
   } | null;
   posts?: FeedPost[];
   likedPosts?: FeedPost[];
@@ -79,6 +81,8 @@ export function ProfileView({
   const username =
     profile?.username || (signedIn ? email?.split("@")[0] ?? "you" : "you");
   const bio = profile?.bio ?? "";
+  const avatarUrl = profile?.avatarUrl ?? null;
+  const coverUrl = profile?.coverUrl ?? null;
 
   async function share() {
     const url = `${window.location.origin}/creators/${username}`;
@@ -102,7 +106,12 @@ export function ProfileView({
     <div className="max-w-4xl mx-auto">
       {/* Cover + identity */}
       <div className="relative h-40 sm:h-52 rounded-3xl overflow-hidden bg-gradient-to-br from-imperial via-plum to-imperial-dark">
-        <div className="absolute inset-0 opacity-60 bg-[radial-gradient(ellipse_at_top_left,rgba(255,31,143,0.35),transparent_55%),radial-gradient(ellipse_at_bottom_right,rgba(184,71,255,0.35),transparent_55%)]" />
+        {coverUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={coverUrl} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 opacity-60 bg-[radial-gradient(ellipse_at_top_left,rgba(255,31,143,0.35),transparent_55%),radial-gradient(ellipse_at_bottom_right,rgba(184,71,255,0.35),transparent_55%)]" />
+        )}
       </div>
 
       <div className="relative mx-4 sm:mx-8 -mt-14">
@@ -113,8 +122,13 @@ export function ProfileView({
           className="glass-strong edge-light rounded-2xl p-6 shadow-e3"
         >
           <div className="flex flex-col sm:flex-row gap-5 sm:items-end">
-            <div className="h-24 w-24 -mt-16 rounded-2xl bg-imperial ring-2 ring-magenta/40 grid place-items-center font-display text-4xl text-white flex-shrink-0">
-              {displayName.slice(0, 1).toUpperCase()}
+            <div className="h-24 w-24 -mt-16 rounded-2xl overflow-hidden bg-imperial ring-2 ring-magenta/40 grid place-items-center font-display text-4xl text-white flex-shrink-0">
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                displayName.slice(0, 1).toUpperCase()
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
@@ -170,6 +184,8 @@ export function ProfileView({
             displayName: profile?.displayName ?? "",
             username: profile?.username ?? "",
             bio: profile?.bio ?? "",
+            avatarUrl: avatarUrl,
+            coverUrl: coverUrl,
           }}
           onClose={() => setEditing(false)}
         />

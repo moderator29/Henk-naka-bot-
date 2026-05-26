@@ -19,6 +19,8 @@ export default async function ProfilePage() {
     displayName: string | null;
     username: string | null;
     bio: string | null;
+    avatarUrl: string | null;
+    coverUrl: string | null;
   } | null = null;
   let isCreator = false;
   let posts: Awaited<ReturnType<typeof getUserPosts>> = [];
@@ -31,13 +33,15 @@ export default async function ProfilePage() {
     const [{ data: row }, userPosts, userLikes, followers, following] = await Promise.all([
       supabase
         .from("users")
-        .select("display_name, username, bio, is_creator")
+        .select("display_name, username, bio, is_creator, avatar_url, cover_url")
         .eq("id", me.id)
         .maybeSingle<{
           display_name: string | null;
           username: string | null;
           bio: string | null;
           is_creator: boolean | null;
+          avatar_url: string | null;
+          cover_url: string | null;
         }>(),
       getUserPosts(me.id),
       getLikedPosts(me.id),
@@ -55,6 +59,8 @@ export default async function ProfilePage() {
         displayName: row.display_name,
         username: row.username,
         bio: row.bio,
+        avatarUrl: row.avatar_url,
+        coverUrl: row.cover_url,
       };
       isCreator = row.is_creator ?? false;
     }
