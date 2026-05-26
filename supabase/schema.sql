@@ -73,6 +73,7 @@ create table if not exists public.posts (
   media jsonb,
   tier_required uuid references public.subscription_tiers(id) on delete set null,
   category text,
+  audience text not null default 'public' check (audience in ('public','free','followers','subscribers')),
   is_demo boolean not null default false,
   created_at timestamptz not null default now(),
   scheduled_for timestamptz

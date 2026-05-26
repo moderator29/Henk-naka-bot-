@@ -25,7 +25,9 @@ const PRIVATE_BUCKET = "post-media-private";
 const schema = z.object({
   caption: z.string().trim().max(2000),
   category: z.string().trim().max(40).optional(),
-  /** A tier id to gate behind, or absent for a public post. */
+  /** Who can see the media. Non-public = gated, stored in the private bucket. */
+  audience: z.enum(["public", "free", "followers", "subscribers"]).default("public"),
+  /** Required when audience = subscribers: the tier to gate behind. */
   tierRequired: z.string().uuid().optional(),
 });
 
@@ -56,6 +58,7 @@ export async function createPost(formData: FormData): Promise<CreatePostResult> 
   const parsed = schema.safeParse({
     caption: String(formData.get("caption") ?? ""),
     category: (formData.get("category") as string) || undefined,
+    audience: (formData.get("audience") as string) || "public",
     tierRequired: (formData.get("tierRequired") as string) || undefined,
   });
   if (!parsed.success) {
@@ -83,10 +86,14 @@ export async function createPost(formData: FormData): Promise<CreatePostResult> 
   }
 
   const supabase = createClient();
+  const audience = parsed.data.audience;
 
-  // Confirm a gating tier belongs to this creator before trusting it.
+  // Subscriber posts must name a tier that belongs to this creator.
   let gatedTierId: string | null = null;
-  if (parsed.data.tierRequired) {
+  if (audience === "subscribers") {
+    if (!parsed.data.tierRequired) {
+      return { ok: false, error: "Pick a subscription tier for this post." };
+    }
     const { data: tier } = await supabase
       .from("subscription_tiers")
       .select("id")
@@ -100,9 +107,9 @@ export async function createPost(formData: FormData): Promise<CreatePostResult> 
     gatedTierId = parsed.data.tierRequired;
   }
 
-  // Upload media. Gated media goes to the private bucket (service role) and is
-  // stored as a path; public media goes to the public bucket as a URL.
-  const isGated = gatedTierId !== null;
+  // Upload media. Any non-public audience is gated: media goes to the private
+  // bucket (service role) as a path; public media goes to the public bucket.
+  const isGated = audience !== "public";
   const admin = isGated ? createAdminClient() : null;
   const media: StoredMedia[] = [];
   for (const file of files.slice(0, 8)) {
@@ -129,6 +136,7 @@ export async function createPost(formData: FormData): Promise<CreatePostResult> 
       creator_id: user.id,
       caption: parsed.data.caption || null,
       category: parsed.data.category ?? null,
+      audience,
       tier_required: gatedTierId,
       media: media.length ? media : null,
     })
@@ -169,19 +177,21 @@ export async function getGatedMedia(postId: string): Promise<GatedMediaResult> {
   const supabase = createClient();
   const { data: post } = await supabase
     .from("posts")
-    .select("creator_id, tier_required, media")
+    .select("creator_id, audience, tier_required, media")
     .eq("id", postId)
     .maybeSingle<{
       creator_id: string;
+      audience: string | null;
       tier_required: string | null;
       media: StoredMedia[] | null;
     }>();
   if (!post) return { entitled: false, media: [] };
 
   const stored = Array.isArray(post.media) ? post.media : [];
+  const audience = post.audience ?? (post.tier_required ? "subscribers" : "public");
 
-  // Not gated: media are already public URLs.
-  if (post.tier_required == null) {
+  // Public: media are already public URLs.
+  if (audience === "public") {
     return {
       entitled: true,
       media: stored
@@ -190,19 +200,32 @@ export async function getGatedMedia(postId: string): Promise<GatedMediaResult> {
     };
   }
 
+  // Entitlement by audience. The creator can always see their own.
   let entitled = false;
   if (user && user.id === post.creator_id) {
     entitled = true;
   } else if (user) {
-    const { data: sub } = await supabase
-      .from("subscriptions")
-      .select("id")
-      .eq("fan_id", user.id)
-      .eq("tier_id", post.tier_required)
-      .gt("expires_at", new Date().toISOString())
-      .limit(1)
-      .maybeSingle();
-    entitled = !!sub;
+    if (audience === "free") {
+      entitled = true; // any signed-in member
+    } else if (audience === "followers") {
+      const { data: follow } = await supabase
+        .from("follows")
+        .select("following_id")
+        .eq("follower_id", user.id)
+        .eq("following_id", post.creator_id)
+        .maybeSingle();
+      entitled = !!follow;
+    } else if (audience === "subscribers" && post.tier_required) {
+      const { data: sub } = await supabase
+        .from("subscriptions")
+        .select("id")
+        .eq("fan_id", user.id)
+        .eq("tier_id", post.tier_required)
+        .gt("expires_at", new Date().toISOString())
+        .limit(1)
+        .maybeSingle();
+      entitled = !!sub;
+    }
   }
   if (!entitled) return { entitled: false, media: [] };
 

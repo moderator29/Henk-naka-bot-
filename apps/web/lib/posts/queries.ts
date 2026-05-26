@@ -53,6 +53,7 @@ interface PostRow {
   caption: string | null;
   category: string | null;
   tier_required: string | null;
+  audience: string | null;
   media: PostMedia[] | null;
   created_at: string;
   creator_id: string;
@@ -66,7 +67,12 @@ interface PostRow {
 }
 
 function mapRow(r: PostRow): FeedPost {
-  const gated = r.tier_required != null;
+  const audience = (r.audience ?? (r.tier_required ? "subscribers" : "public")) as
+    | "public"
+    | "free"
+    | "followers"
+    | "subscribers";
+  const gated = audience !== "public";
   // Gated posts expose no media here — the private storage path stays server-
   // side and entitled viewers fetch a signed URL via getGatedMedia. Public
   // posts carry their public URLs.
@@ -83,6 +89,7 @@ function mapRow(r: PostRow): FeedPost {
     caption: r.caption ?? "",
     category: r.category ?? "",
     gated,
+    audience,
     media,
     likes: r.likes?.[0]?.count ?? 0,
     comments: r.comments?.[0]?.count ?? 0,
@@ -91,7 +98,7 @@ function mapRow(r: PostRow): FeedPost {
 }
 
 const SELECT =
-  "id, caption, category, tier_required, media, created_at, creator_id, users!inner(username, display_name, is_verified), likes(count), comments(count)";
+  "id, caption, category, tier_required, audience, media, created_at, creator_id, users!inner(username, display_name, is_verified), likes(count), comments(count)";
 
 /**
  * Home feed: posts from creators the signed-in user follows, newest first.

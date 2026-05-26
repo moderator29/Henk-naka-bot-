@@ -130,6 +130,7 @@ export const posts = pgTable(
       onDelete: "set null",
     }),
     category: text("category"),
+    audience: text("audience").default("public").notNull(),
     isDemo: boolean("is_demo").default(false).notNull(),
     moderationStatus: text("moderation_status").default("active").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })

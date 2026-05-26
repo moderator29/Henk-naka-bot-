@@ -142,6 +142,11 @@ export const DOC_SECTIONS: DocSection[] = [
         type: "p",
         text: "Tap Follow on any profile to see their public posts in your Feed. No payment, no signature, nothing to confirm. Unfollow any time.",
       },
+      { type: "h2", text: "Post audiences" },
+      {
+        type: "p",
+        text: "When a creator posts, they choose who can see the media, with four levels: Public (everyone, even logged out), Free (any signed-in member), Followers only (people who follow them), and Subscribers (active subscribers to a chosen tier). The post itself shows up as a locked teaser to everyone, with a clear prompt to sign in, follow, or subscribe; the media unlocks only for the right audience via a short-lived signed link.",
+      },
       { type: "h2", text: "Subscribing is the paid tier" },
       {
         type: "p",

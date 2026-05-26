@@ -25,6 +25,7 @@ export interface FeedPost {
   caption: string;
   category: string;
   gated: boolean;
+  audience?: "public" | "free" | "followers" | "subscribers";
   media?: PostMedia[];
   likes: number;
   comments: number;
@@ -161,24 +162,25 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
         {post.gated && gatedStatus === "loading" && (
           <div className="mt-3 h-40 rounded-xl bg-plum/50 animate-pulse" aria-hidden="true" />
         )}
-        {post.gated && gatedStatus === "locked" && (
-          <div className="mt-3 relative overflow-hidden rounded-xl border border-magenta/20 bg-plum/60 h-44 grid place-items-center">
-            <div className="absolute inset-0 bg-gradient-to-br from-magenta/10 to-orchid/10" />
-            <div className="relative text-center px-4">
-              <Lock size={22} className="mx-auto text-magenta mb-2" />
-              <p className="text-sm font-medium text-white">Subscriber-only</p>
-              <p className="text-xs text-lilac/60 mb-3">
-                Subscribe to {post.creatorName} to unlock this post
-              </p>
-              <Link
-                href={`/creators/${post.creatorUsername}`}
-                className="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-gradient-primary text-white text-xs font-semibold hover:opacity-90 transition-opacity"
-              >
-                View subscription tiers
-              </Link>
+        {post.gated && gatedStatus === "locked" && (() => {
+          const lock = lockCopy(post.audience ?? "subscribers", post.creatorName, post.creatorUsername);
+          return (
+            <div className="mt-3 relative overflow-hidden rounded-xl border border-magenta/20 bg-plum/60 h-44 grid place-items-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-magenta/10 to-orchid/10" />
+              <div className="relative text-center px-4">
+                <Lock size={22} className="mx-auto text-magenta mb-2" />
+                <p className="text-sm font-medium text-white">{lock.title}</p>
+                <p className="text-xs text-lilac/60 mb-3">{lock.body}</p>
+                <Link
+                  href={lock.href}
+                  className="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-gradient-primary text-white text-xs font-semibold hover:opacity-90 transition-opacity"
+                >
+                  {lock.cta}
+                </Link>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       <footer className="mt-4 flex items-center gap-6 text-sm">
@@ -264,6 +266,37 @@ export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }
       )}
     </motion.article>
   );
+}
+
+function lockCopy(
+  audience: "public" | "free" | "followers" | "subscribers",
+  creatorName: string,
+  creatorUsername: string
+): { title: string; body: string; cta: string; href: string } {
+  const profile = `/creators/${creatorUsername}`;
+  switch (audience) {
+    case "free":
+      return {
+        title: "Members only",
+        body: "Sign in to view this post.",
+        cta: "Sign in",
+        href: "/login",
+      };
+    case "followers":
+      return {
+        title: "Followers only",
+        body: `Follow ${creatorName} to unlock this post.`,
+        cta: "View profile",
+        href: profile,
+      };
+    default:
+      return {
+        title: "Subscriber-only",
+        body: `Subscribe to ${creatorName} to unlock this post.`,
+        cta: "View subscription tiers",
+        href: profile,
+      };
+  }
 }
 
 function MediaGrid({ media }: { media: PostMedia[] }) {

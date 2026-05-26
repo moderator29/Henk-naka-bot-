@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ImagePlus, Paperclip, X, Globe, Lock } from "lucide-react";
+import { ImagePlus, Paperclip, X, Globe, Users, UserCheck, Lock, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EmojiPicker } from "./EmojiPicker";
 import { CategoryPicker } from "./CategoryPicker";
@@ -17,6 +17,15 @@ interface Attachment {
   isImage: boolean;
 }
 
+type Audience = "public" | "free" | "followers" | "subscribers";
+
+const AUDIENCES: { value: Audience; label: string; icon: LucideIcon; needsTier?: boolean }[] = [
+  { value: "public", label: "Public", icon: Globe },
+  { value: "free", label: "Free", icon: Users },
+  { value: "followers", label: "Followers", icon: UserCheck },
+  { value: "subscribers", label: "Subscribers", icon: Lock, needsTier: true },
+];
+
 /**
  * Post composer. Caption + emojis + image/file attachments + visibility.
  * Public posts go out to everyone; "Subscribers" gates the post (and its media)
@@ -28,7 +37,7 @@ export function Composer({ tiers }: { tiers: MyTier[] }) {
   const captionRef = useRef<HTMLTextAreaElement>(null);
   const [caption, setCaption] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const [gated, setGated] = useState(false);
+  const [audience, setAudience] = useState<Audience>("public");
   const [tierId, setTierId] = useState<string>(tiers[0]?.id ?? "");
   const [category, setCategory] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -81,7 +90,8 @@ export function Composer({ tiers }: { tiers: MyTier[] }) {
       const fd = new FormData();
       fd.set("caption", caption);
       fd.set("category", category);
-      if (gated && tierId) fd.set("tierRequired", tierId);
+      fd.set("audience", audience);
+      if (audience === "subscribers" && tierId) fd.set("tierRequired", tierId);
       attachments.forEach((a) => fd.append("media", a.file));
       const res = await createPost(fd);
       if (!res.ok) {
@@ -142,39 +152,32 @@ export function Composer({ tiers }: { tiers: MyTier[] }) {
         </p>
       )}
 
-      {/* Visibility */}
+      {/* Audience */}
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setGated(false)}
-          className={cn(
-            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
-            !gated
-              ? "bg-gradient-primary text-white"
-              : "glass text-lilac/70 hover:text-white"
-          )}
-        >
-          <Globe size={13} />
-          Public
-        </button>
-        <button
-          type="button"
-          onClick={() => hasTiers && setGated(true)}
-          disabled={!hasTiers}
-          title={hasTiers ? undefined : "Create a subscription tier first"}
-          className={cn(
-            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
-            gated
-              ? "bg-gradient-primary text-white"
-              : "glass text-lilac/70 hover:text-white",
-            !hasTiers && "opacity-40 cursor-not-allowed"
-          )}
-        >
-          <Lock size={13} />
-          Subscribers
-        </button>
+        {AUDIENCES.map(({ value, label, icon: Icon, needsTier }) => {
+          const disabled = needsTier && !hasTiers;
+          return (
+            <button
+              key={value}
+              type="button"
+              disabled={disabled}
+              title={disabled ? "Create a subscription tier first" : undefined}
+              onClick={() => setAudience(value)}
+              className={cn(
+                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+                audience === value
+                  ? "bg-gradient-primary text-white"
+                  : "glass text-lilac/70 hover:text-white",
+                disabled && "opacity-40 cursor-not-allowed"
+              )}
+            >
+              <Icon size={13} />
+              {label}
+            </button>
+          );
+        })}
 
-        {gated && hasTiers && (
+        {audience === "subscribers" && hasTiers && (
           <select
             aria-label="Subscription tier"
             value={tierId}
@@ -195,7 +198,7 @@ export function Composer({ tiers }: { tiers: MyTier[] }) {
             href="/dashboard"
             className="text-xs text-lilac/50 hover:text-white underline underline-offset-2"
           >
-            Set up tiers to post subscriber-only content
+            Set up tiers for subscriber posts
           </Link>
         )}
       </div>
