@@ -247,6 +247,13 @@ export async function setDmPermission(
   return { ok: !error, error: error ? "Could not save." : undefined };
 }
 
+/** Sign out of every device by revoking all the user's sessions. */
+export async function signOutEverywhere(): Promise<void> {
+  const supabase = createClient();
+  await supabase.auth.signOut({ scope: "global" });
+  redirect("/login");
+}
+
 /** Persist notification / AI / language preferences to user_preferences. */
 export async function updatePreferences(
   formData: FormData

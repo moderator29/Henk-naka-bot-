@@ -53,7 +53,7 @@ export function AccountSettings({ initial }: Props) {
   }
 
   return (
-    <Section title="Account" desc="Your public profile across the platform.">
+    <Section title="Edit profile" desc="Your public identity across the platform.">
       <div className="grid sm:grid-cols-2 gap-4">
         <Input label="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} error={fieldErrors.displayName} />
         <Input label="Username" value={username} onChange={(e) => setUsername(e.target.value)} error={fieldErrors.username} hint="Letters, numbers, underscores" />
@@ -70,7 +70,7 @@ export function AccountSettings({ initial }: Props) {
           className="w-full resize-none rounded-xl bg-plum/60 border border-white/10 px-4 py-3 text-base text-white placeholder:text-lilac/40 focus:border-magenta/50 focus:outline-none focus:ring-2 focus:ring-magenta/20"
         />
       </div>
-      <Input label="Country" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Where you're based" />
+      <Input label="Location" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Where you're based" />
       <div className="grid sm:grid-cols-2 gap-4">
         <FileField label="Avatar" onChange={setAvatar} />
         <FileField label="Cover image" onChange={setCover} />

@@ -1,12 +1,11 @@
-import Link from "next/link";
-import { BookOpen } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { ReplayOnboardingAction } from "@/components/onboarding/ReplayOnboardingAction";
 import { AccountSettings } from "@/components/settings/AccountSettings";
 import { PasswordSettings } from "@/components/settings/PasswordSettings";
 import { PreferencesSettings } from "@/components/settings/PreferencesSettings";
 import { PrivacySettings } from "@/components/settings/PrivacySettings";
+import { MoreSettings } from "@/components/settings/MoreSettings";
+import { SectionNav } from "@/components/settings/SectionNav";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { DEFAULT_SETTINGS, type UserSettings } from "@/lib/profile/settings";
 import { getSessionUser } from "@/lib/auth/session";
@@ -27,12 +26,13 @@ export default async function SettingsPage() {
   let initial = { displayName: "", username: "", bio: "", country: "" };
   let prefs: UserSettings = DEFAULT_SETTINGS;
   let dmPermission: "everyone" | "mutuals" = "everyone";
+  let isCreator = false;
   if (me && configured()) {
     const supabase = createClient();
     const [{ data }, { data: pref }] = await Promise.all([
       supabase
         .from("users")
-        .select("display_name, username, bio, country, dm_permission")
+        .select("display_name, username, bio, country, dm_permission, is_creator")
         .eq("id", me.id)
         .maybeSingle<{
           display_name: string | null;
@@ -40,6 +40,7 @@ export default async function SettingsPage() {
           bio: string | null;
           country: string | null;
           dm_permission: string | null;
+          is_creator: boolean | null;
         }>(),
       supabase
         .from("user_preferences")
@@ -55,6 +56,7 @@ export default async function SettingsPage() {
         country: data.country ?? "",
       };
       dmPermission = data.dm_permission === "mutuals" ? "mutuals" : "everyone";
+      isCreator = data.is_creator ?? false;
     }
     if (pref?.settings) {
       prefs = {
@@ -66,48 +68,57 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto flex flex-col gap-5">
-      <header className="mb-2">
+    <div className="max-w-5xl mx-auto">
+      <header className="mb-6">
         <h1 className="font-display text-3xl sm:text-4xl font-bold text-white">
           <span className="text-gradient">Settings</span>
         </h1>
         <p className="mt-2 text-lilac/70">
-          Manage your account, security, and how the platform works for you.
+          Manage your profile, account, privacy, and how the platform works for you.
         </p>
       </header>
 
-      <AccountSettings initial={initial} />
-      <PrivacySettings dmPermission={dmPermission} />
-      <PreferencesSettings initial={prefs} />
-      <PasswordSettings />
+      <div className="flex gap-8 items-start">
+        <SectionNav />
 
-      <Card className="edge-light flex items-center justify-between gap-4">
-        <div>
-          <h2 className="font-display text-lg font-semibold text-white">
-            Replay the welcome tour
-          </h2>
-          <p className="mt-1 text-sm text-lilac/60">
-            15 cards covering everything Pleasure Coin can do.
-          </p>
+        <div className="flex-1 min-w-0 flex flex-col gap-5">
+          <div id="edit-profile">
+            <AccountSettings initial={initial} />
+          </div>
+
+          <MoreSettings
+            email={me?.email ?? null}
+            dateOfBirth={me?.dateOfBirth ?? null}
+            isCreator={isCreator}
+          />
+
+          <div id="privacy">
+            <PrivacySettings dmPermission={dmPermission} />
+          </div>
+          <div id="notifications">
+            <PreferencesSettings initial={prefs} />
+          </div>
+          <div id="password">
+            <PasswordSettings />
+          </div>
+
+          <Card className="edge-light flex items-center justify-between gap-4">
+            <div>
+              <h2 className="font-display text-lg font-semibold text-white">
+                Replay the welcome tour
+              </h2>
+              <p className="mt-1 text-sm text-lilac/60">
+                15 cards covering everything Pleasure Coin can do.
+              </p>
+            </div>
+            <ReplayOnboardingAction />
+          </Card>
+
+          <div id="danger">
+            <DangerZone />
+          </div>
         </div>
-        <ReplayOnboardingAction />
-      </Card>
-
-      <Card className="edge-light flex items-center justify-between gap-4">
-        <div>
-          <h2 className="font-display text-lg font-semibold text-white">
-            Read the docs
-          </h2>
-          <p className="mt-1 text-sm text-lilac/60">
-            Detailed guides for every part of the platform.
-          </p>
-        </div>
-        <Button variant="glass" leftIcon={<BookOpen size={16} />} asChild>
-          <Link href="/docs">Open docs</Link>
-        </Button>
-      </Card>
-
-      <DangerZone />
+      </div>
     </div>
   );
 }
