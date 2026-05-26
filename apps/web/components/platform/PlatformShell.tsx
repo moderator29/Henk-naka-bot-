@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Compass,
   Home,
@@ -12,6 +13,7 @@ import {
   User,
   Bookmark,
   Megaphone,
+  ArrowLeft,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { AuroraBackground } from "@/components/brand/AuroraBackground";
@@ -74,7 +76,7 @@ export function PlatformShell({
           <header className="glass-chrome edge-light rounded-2xl px-3 sm:px-4 h-14 flex items-center gap-3 sticky top-2 sm:top-3 z-50">
             <MoreMenu />
             <div className="lg:hidden">
-              <Logo size="sm" showWordmark={false} href="/feed" />
+              <BackOrLogo />
             </div>
             {showSmartSearch ? <SmartSearch /> : <div className="flex-1" />}
             {/* Messages also lives in the More menu on mobile; keep the header
@@ -122,5 +124,29 @@ export function PlatformShell({
 
       <PlatformBottomNav />
     </div>
+  );
+}
+
+/** Primary tabs (reachable from the bottom bar) show the logo; every deeper
+ * page shows a Back button so there is always a clear way back. */
+const ROOT_PATHS = new Set(["/feed", "/explore", "/pveels", "/profile"]);
+
+function BackOrLogo() {
+  const pathname = usePathname() ?? "/feed";
+  const router = useRouter();
+  const isRoot = ROOT_PATHS.has(pathname);
+
+  if (isRoot) {
+    return <Logo size="sm" showWordmark={false} href="/feed" />;
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => router.back()}
+      aria-label="Back"
+      className="h-10 w-10 shrink-0 rounded-xl flex items-center justify-center text-lilac/80 hover:text-white hover:bg-white/10 transition-colors"
+    >
+      <ArrowLeft size={20} />
+    </button>
   );
 }
