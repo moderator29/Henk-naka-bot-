@@ -73,9 +73,11 @@ export function PlatformShell({
         <div className="flex flex-col flex-1 min-w-0 max-w-full p-2 sm:p-3">
           <header className="glass-chrome edge-light rounded-2xl px-3 sm:px-4 h-14 flex items-center gap-3 sticky top-2 sm:top-3 z-50">
             <div className="lg:hidden">
-              <Logo size="sm" showWordmark={false} />
+              <Logo size="sm" showWordmark={false} href="/feed" />
             </div>
             {showSmartSearch ? <SmartSearch /> : <div className="flex-1" />}
+            {/* Messages also lives in the More menu on mobile; keep the header
+                uncluttered there so the More button stays reachable. */}
             <Link
               href="/messages"
               aria-label={
@@ -83,7 +85,7 @@ export function PlatformShell({
                   ? `Messages, ${unreadMessageCount} unread`
                   : "Messages"
               }
-              className="relative h-10 w-10 rounded-xl flex items-center justify-center text-lilac/70 hover:text-white hover:bg-white/5 transition-colors"
+              className="relative h-10 w-10 rounded-xl hidden lg:flex items-center justify-center text-lilac/70 hover:text-white hover:bg-white/5 transition-colors shrink-0"
             >
               <MessageCircle size={18} />
               {typeof unreadMessageCount === "number" &&
@@ -96,9 +98,16 @@ export function PlatformShell({
                   </span>
                 )}
             </Link>
-            <NotificationsBell />
-            <TranslateMenu compact />
-            <ConnectWallet compact />
+            <div className="shrink-0">
+              <NotificationsBell />
+            </div>
+            {/* Translate is available in the More menu on mobile. */}
+            <div className="hidden lg:block shrink-0">
+              <TranslateMenu compact />
+            </div>
+            <div className="shrink-0">
+              <ConnectWallet compact />
+            </div>
             <MoreMenu />
           </header>
 

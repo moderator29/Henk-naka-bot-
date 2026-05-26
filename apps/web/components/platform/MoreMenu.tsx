@@ -17,8 +17,11 @@ import {
   Sparkles,
   Settings,
   LogOut,
+  Languages,
   type LucideIcon,
 } from "lucide-react";
+import { useTranslate } from "@/components/i18n/TranslateController";
+import { LANGUAGES } from "@/lib/i18n/languages";
 
 interface Item {
   href?: string;
@@ -36,6 +39,7 @@ interface Item {
  */
 export function MoreMenu() {
   const [open, setOpen] = useState(false);
+  const { lang, setLang } = useTranslate();
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -82,7 +86,7 @@ export function MoreMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen(true)}
-        className="lg:hidden h-10 w-10 rounded-xl flex items-center justify-center text-lilac/70 hover:text-white hover:bg-white/5 transition-colors"
+        className="lg:hidden h-10 w-10 shrink-0 rounded-xl flex items-center justify-center text-lilac/70 hover:text-white hover:bg-white/5 transition-colors"
       >
         <Menu size={18} />
       </button>
@@ -152,6 +156,25 @@ export function MoreMenu() {
               </div>
 
               <div className="border-t border-white/10 pt-3 mt-3 flex flex-col">
+                <div className="flex items-center gap-3 h-11 px-2 rounded-xl text-sm text-lilac/80">
+                  <Languages size={18} className="shrink-0" />
+                  <span className="shrink-0">Language</span>
+                  <select
+                    aria-label="Translate the platform"
+                    value={lang}
+                    onChange={(e) => {
+                      setLang(e.target.value);
+                      setOpen(false);
+                    }}
+                    className="ml-auto h-9 rounded-lg bg-plum/60 border border-white/10 px-2 text-sm text-white focus:border-magenta/50 focus:outline-none"
+                  >
+                    {LANGUAGES.map((l) => (
+                      <option key={l.code} value={l.code}>
+                        {l.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <Link
                   href="/settings"
                   onClick={() => setOpen(false)}
