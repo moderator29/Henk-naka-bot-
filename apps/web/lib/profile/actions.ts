@@ -12,6 +12,7 @@ import {
   sendPasswordChangedEmail,
   sendAccountDeletionEmail,
 } from "@/lib/email/resend";
+import { normalizeTelegram, normalizeX } from "./social-links";
 import type { UserSettings } from "./settings";
 
 /**
@@ -83,6 +84,15 @@ export async function updateProfile(
     return { ok: false, fieldErrors };
   }
 
+  const telegram = normalizeTelegram(String(formData.get("telegram") ?? ""));
+  const x = normalizeX(String(formData.get("x") ?? ""));
+  const linkErrors: Record<string, string> = {};
+  if (telegram.error) linkErrors.telegram = telegram.error;
+  if (x.error) linkErrors.x = x.error;
+  if (Object.keys(linkErrors).length > 0) {
+    return { ok: false, fieldErrors: linkErrors };
+  }
+
   const supabase = createClient();
 
   const avatar = formData.get("avatar");
@@ -103,6 +113,8 @@ export async function updateProfile(
       username: parsed.data.username.toLowerCase(),
       bio: parsed.data.bio ?? null,
       country: parsed.data.country ?? null,
+      telegram_url: telegram.url,
+      x_url: x.url,
       ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
       ...(coverUrl ? { cover_url: coverUrl } : {}),
     })

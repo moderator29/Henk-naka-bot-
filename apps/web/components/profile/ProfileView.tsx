@@ -21,6 +21,7 @@ import { Modal, ModalContent } from "@/components/ui/Modal";
 import { PostCard, type FeedPost } from "@/components/feed/PostCard";
 import { EditProfileForm } from "@/components/profile/EditProfileForm";
 import { FollowListModal } from "@/components/profile/FollowListModal";
+import { SocialLinks } from "@/components/profile/SocialLinks";
 import { useToast } from "@/components/ui/Toast";
 import { cn, relativeTime } from "@/lib/utils";
 
@@ -40,6 +41,8 @@ interface ProfileViewProps {
     displayName: string | null;
     username: string | null;
     bio: string | null;
+    telegramUrl?: string | null;
+    xUrl?: string | null;
     avatarUrl?: string | null;
     coverUrl?: string | null;
   } | null;
@@ -150,6 +153,11 @@ export function ProfileView({
                     ? "Add a bio to tell people what you're about."
                     : "Sign in to claim your profile, follow creators, and start posting.")}
               </p>
+              <SocialLinks
+                telegramUrl={profile?.telegramUrl}
+                xUrl={profile?.xUrl}
+                className="mt-3"
+              />
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               {signedIn ? (
@@ -200,6 +208,8 @@ export function ProfileView({
             displayName: profile?.displayName ?? "",
             username: profile?.username ?? "",
             bio: profile?.bio ?? "",
+            telegramUrl: profile?.telegramUrl,
+            xUrl: profile?.xUrl,
             avatarUrl: avatarUrl,
             coverUrl: coverUrl,
           }}

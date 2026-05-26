@@ -13,6 +13,8 @@ interface EditProfileFormProps {
     displayName: string;
     username: string;
     bio: string;
+    telegramUrl?: string | null;
+    xUrl?: string | null;
     avatarUrl?: string | null;
     coverUrl?: string | null;
   };
@@ -29,6 +31,8 @@ export function EditProfileForm({ initial, onClose }: EditProfileFormProps) {
   const [displayName, setDisplayName] = useState(initial.displayName);
   const [username, setUsername] = useState(initial.username);
   const [bio, setBio] = useState(initial.bio);
+  const [telegram, setTelegram] = useState(initial.telegramUrl ?? "");
+  const [x, setX] = useState(initial.xUrl ?? "");
   const [avatar, setAvatar] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(initial.avatarUrl ?? null);
@@ -72,6 +76,8 @@ export function EditProfileForm({ initial, onClose }: EditProfileFormProps) {
       fd.set("displayName", displayName);
       fd.set("username", username);
       fd.set("bio", bio);
+      fd.set("telegram", telegram);
+      fd.set("x", x);
       if (avatar) fd.set("avatar", avatar);
       if (cover) fd.set("cover", cover);
       const res = await updateProfile(fd);
@@ -200,6 +206,22 @@ export function EditProfileForm({ initial, onClose }: EditProfileFormProps) {
                 className="w-full resize-none rounded-xl bg-plum/60 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-lilac/40 focus:border-magenta/50 focus:outline-none focus:ring-2 focus:ring-magenta/20"
               />
             </div>
+            <Input
+              label="Telegram"
+              value={telegram}
+              onChange={(e) => setTelegram(e.target.value)}
+              error={fieldErrors.telegram}
+              hint="Your handle or t.me link. Optional."
+              placeholder="@yourhandle"
+            />
+            <Input
+              label="X (Twitter)"
+              value={x}
+              onChange={(e) => setX(e.target.value)}
+              error={fieldErrors.x}
+              hint="Your handle or x.com link. Optional."
+              placeholder="@yourhandle"
+            />
           </div>
 
           <div className="mt-6 flex gap-3">

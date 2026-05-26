@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/Toast";
 import { SubscribeModal } from "@/components/creator/SubscribeModal";
 import { TipModal } from "@/components/feed/TipModal";
 import { UserActions } from "@/components/safety/UserActions";
+import { SocialLinks } from "@/components/profile/SocialLinks";
 import { toggleFollow } from "@/lib/engagement/actions";
 import { startConversation } from "@/lib/messaging/actions";
 import { formatNumber } from "@/lib/utils";
@@ -125,6 +126,11 @@ export function CreatorHeader({
                   {creator.tagline}
                 </p>
               )}
+              <SocialLinks
+                telegramUrl={creator.telegramUrl}
+                xUrl={creator.xUrl}
+                className="mt-3"
+              />
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0">

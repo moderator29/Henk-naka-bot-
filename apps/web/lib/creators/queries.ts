@@ -69,6 +69,8 @@ interface UserRow {
   display_name: string | null;
   avatar_url: string | null;
   cover_url: string | null;
+  telegram_url: string | null;
+  x_url: string | null;
   is_verified: boolean;
   last_active_at: string | null;
 }
@@ -88,7 +90,7 @@ export async function getCreatorByUsername(
   const supabase = createClient();
   const { data: user } = await supabase
     .from("users")
-    .select("id, username, display_name, avatar_url, cover_url, is_verified, last_active_at")
+    .select("id, username, display_name, avatar_url, cover_url, telegram_url, x_url, is_verified, last_active_at")
     .eq("username", username)
     .eq("is_creator", true)
     .maybeSingle<UserRow>();
@@ -147,6 +149,8 @@ export async function getCreatorByUsername(
     verified: user.is_verified,
     avatarUrl: user.avatar_url,
     coverUrl: user.cover_url,
+    telegramUrl: user.telegram_url,
+    xUrl: user.x_url,
     categories: profile?.categories ?? [],
     subscriberCount: profile?.subscriber_count ?? 0,
     postCount: count ?? mappedPosts.length,

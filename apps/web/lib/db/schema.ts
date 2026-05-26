@@ -36,6 +36,8 @@ export const users = pgTable(
     bio: text("bio"),
     avatarUrl: text("avatar_url"),
     coverUrl: text("cover_url"),
+    telegramUrl: text("telegram_url"),
+    xUrl: text("x_url"),
     walletAddress: text("wallet_address"),
     country: text("country"),
     dateOfBirth: date("date_of_birth"),

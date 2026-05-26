@@ -31,6 +31,8 @@ export interface CreatorProfileData {
   verified: boolean;
   avatarUrl: string | null;
   coverUrl: string | null;
+  telegramUrl?: string | null;
+  xUrl?: string | null;
   categories: string[];
   subscriberCount: number;
   postCount: number;

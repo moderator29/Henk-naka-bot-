@@ -23,6 +23,8 @@ create table if not exists public.users (
   bio text,
   avatar_url text,
   cover_url text,
+  telegram_url text,
+  x_url text,
   wallet_address text,
   country text,
   date_of_birth date,

@@ -19,6 +19,8 @@ export default async function ProfilePage() {
     displayName: string | null;
     username: string | null;
     bio: string | null;
+    telegramUrl: string | null;
+    xUrl: string | null;
     avatarUrl: string | null;
     coverUrl: string | null;
   } | null = null;
@@ -33,7 +35,7 @@ export default async function ProfilePage() {
     const [{ data: row }, userPosts, userLikes, followers, following] = await Promise.all([
       supabase
         .from("users")
-        .select("display_name, username, bio, is_creator, avatar_url, cover_url")
+        .select("display_name, username, bio, is_creator, avatar_url, cover_url, telegram_url, x_url")
         .eq("id", me.id)
         .maybeSingle<{
           display_name: string | null;
@@ -42,6 +44,8 @@ export default async function ProfilePage() {
           is_creator: boolean | null;
           avatar_url: string | null;
           cover_url: string | null;
+          telegram_url: string | null;
+          x_url: string | null;
         }>(),
       getUserPosts(me.id),
       getLikedPosts(me.id),
@@ -59,6 +63,8 @@ export default async function ProfilePage() {
         displayName: row.display_name,
         username: row.username,
         bio: row.bio,
+        telegramUrl: row.telegram_url,
+        xUrl: row.x_url,
         avatarUrl: row.avatar_url,
         coverUrl: row.cover_url,
       };
