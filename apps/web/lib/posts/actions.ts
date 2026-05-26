@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdult, getSessionUser } from "@/lib/auth/session";
 import { rateLimit } from "@/lib/security/ratelimit";
+import { notifyFollowersOfPost } from "@/lib/notifications/notify";
 
 /**
  * Create a post. Real Supabase insert into `posts`. Public media goes to the
@@ -146,6 +147,11 @@ export async function createPost(formData: FormData): Promise<CreatePostResult> 
   if (error || !data) {
     return { ok: false, error: "Could not publish. Try again." };
   }
+
+  // Tell followers a new post landed (honors their "posts" toggle, live over
+  // Realtime). Best-effort, never blocks publishing.
+  await notifyFollowersOfPost(user.id, data.id as string);
+
   revalidatePath("/feed");
   revalidatePath("/profile");
   return { ok: true, postId: data.id as string };

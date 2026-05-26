@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdult } from "@/lib/auth/session";
+import { notify } from "@/lib/notifications/notify";
 
 const sendSchema = z.object({
   conversationId: z.string().uuid(),
@@ -16,7 +17,9 @@ export interface SendResult {
 
 /**
  * Sends a text message into a conversation. RLS guarantees the sender is a
- * participant; we additionally enforce sender_id = the authed adult user.
+ * participant; we additionally enforce sender_id = the authed adult user, and
+ * re-check the recipient's DM permission per message (a "mutuals" recipient who
+ * later unfollows must stop receiving messages, not just new conversations).
  * The conversations.last_message_at bump happens via the DB trigger (0002).
  */
 export async function sendMessage(
@@ -36,6 +39,46 @@ export async function sendMessage(
   }
 
   const supabase = createClient();
+
+  // Resolve the other participant so we can re-check permission and notify.
+  const { data: convo } = await supabase
+    .from("conversations")
+    .select("participant_a, participant_b")
+    .eq("id", parsed.data.conversationId)
+    .maybeSingle<{ participant_a: string; participant_b: string }>();
+  if (!convo) return { ok: false, error: "Conversation not found." };
+  const recipientId =
+    convo.participant_a === user.id ? convo.participant_b : convo.participant_a;
+
+  // Re-check the recipient's DM permission on every message.
+  const { data: recipient } = await supabase
+    .from("users")
+    .select("dm_permission")
+    .eq("id", recipientId)
+    .maybeSingle<{ dm_permission: string | null }>();
+  if (recipient?.dm_permission === "mutuals") {
+    const [{ data: iFollow }, { data: followsMe }] = await Promise.all([
+      supabase
+        .from("follows")
+        .select("following_id")
+        .eq("follower_id", user.id)
+        .eq("following_id", recipientId)
+        .maybeSingle(),
+      supabase
+        .from("follows")
+        .select("follower_id")
+        .eq("follower_id", recipientId)
+        .eq("following_id", user.id)
+        .maybeSingle(),
+    ]);
+    if (!iFollow || !followsMe) {
+      return {
+        ok: false,
+        error: "This person only accepts messages from people they follow back.",
+      };
+    }
+  }
+
   const { error } = await supabase.from("messages").insert({
     conversation_id: parsed.data.conversationId,
     sender_id: user.id,
@@ -45,6 +88,10 @@ export async function sendMessage(
   if (error) {
     return { ok: false, error: "Could not send. Try again." };
   }
+
+  await notify(recipientId, user.id, "message", {
+    conversationId: parsed.data.conversationId,
+  });
   return { ok: true };
 }
 

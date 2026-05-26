@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth/session";
+import { notify } from "@/lib/notifications/notify";
 import {
   SUBSCRIPTION_PERIOD_DAYS,
   type MySubscription,
@@ -102,30 +103,6 @@ async function refreshSubscriberCount(creatorId: string) {
   }
 }
 
-async function notifySubscribe(
-  recipientId: string,
-  actorId: string,
-  tierName: string
-) {
-  if (recipientId === actorId) return;
-  try {
-    const admin = createAdminClient();
-    const { data: actor } = await admin
-      .from("users")
-      .select("display_name, username")
-      .eq("id", actorId)
-      .maybeSingle<{ display_name: string | null; username: string | null }>();
-    const actor_name = actor?.display_name ?? actor?.username ?? "Someone";
-    await admin.from("notifications").insert({
-      user_id: recipientId,
-      type: "subscribe",
-      payload: { actorId, tierName, actor_name },
-    });
-  } catch {
-    // best-effort
-  }
-}
-
 /** Record a subscription after the on-chain $NSFW payment confirms. */
 export async function recordSubscription(
   tierId: string,
@@ -158,7 +135,9 @@ export async function recordSubscription(
 
   await Promise.all([
     refreshSubscriberCount(target.creatorUserId),
-    notifySubscribe(target.creatorUserId, user.id, target.tierName),
+    notify(target.creatorUserId, user.id, "subscribe", {
+      tierName: target.tierName,
+    }),
   ]);
   return { ok: true };
 }

@@ -101,9 +101,9 @@ const SELECT =
   "id, caption, category, tier_required, audience, media, created_at, creator_id, users!inner(username, display_name, is_verified), likes(count), comments(count)";
 
 /**
- * Home feed: posts from creators the signed-in user follows, newest first.
- * Falls back to recent public posts when the follow graph is empty so the
- * feed is never barren for a real signed-in user.
+ * Home feed: the signed-in user's own posts plus posts from creators they
+ * follow, newest first. Falls back to recent public posts when there is
+ * nothing yet so the feed is never barren for a real signed-in user.
  */
 export async function getFeedPosts(userId: string | null): Promise<FeedPost[]> {
   if (!configured()) return [];
@@ -115,7 +115,10 @@ export async function getFeedPosts(userId: string | null): Promise<FeedPost[]> {
       .select("following_id")
       .eq("follower_id", userId);
 
-    const ids = (follows ?? []).map((f) => f.following_id as string);
+    // Always include the user's own posts so a new post shows up immediately.
+    const ids = Array.from(
+      new Set([userId, ...(follows ?? []).map((f) => f.following_id as string)])
+    );
     if (ids.length > 0) {
       const { data } = await supabase
         .from("posts")

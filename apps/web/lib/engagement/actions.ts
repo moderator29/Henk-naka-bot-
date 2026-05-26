@@ -1,16 +1,16 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/auth/session";
 import { rateLimit } from "@/lib/security/ratelimit";
+import { notify } from "@/lib/notifications/notify";
 import type { CommentItem } from "./types";
 
 /**
  * Real engagement writes: follow, like, save. Each runs under the caller's
- * session so RLS enforces "act as yourself". Notifications for the recipient
- * are created with the service role (RLS only lets a user write their own
- * notifications), after the actor is verified, and never for self-actions.
+ * session so RLS enforces "act as yourself". Recipient notifications are
+ * created with the service role via the shared notify helper, which honors the
+ * recipient's notification preferences and delivers live over Realtime.
  *
  * Demo creators/posts aren't in the database, so their writes resolve to a
  * no-op result and the calling UI keeps its optimistic state.
@@ -26,30 +26,6 @@ async function me() {
     return await getSessionUser();
   } catch {
     return null;
-  }
-}
-
-async function notify(
-  recipientId: string,
-  actorId: string,
-  type: string,
-  payload: Record<string, unknown>
-) {
-  if (recipientId === actorId) return;
-  try {
-    const admin = createAdminClient();
-    // Resolve the actor's name so the notification reads "<name> ..." not "Someone".
-    const { data: actor } = await admin
-      .from("users")
-      .select("display_name, username")
-      .eq("id", actorId)
-      .maybeSingle<{ display_name: string | null; username: string | null }>();
-    const actor_name = actor?.display_name ?? actor?.username ?? "Someone";
-    await admin
-      .from("notifications")
-      .insert({ user_id: recipientId, type, payload: { ...payload, actor_name } });
-  } catch {
-    // No service key configured, or insert failed: notifications are best-effort.
   }
 }
 
