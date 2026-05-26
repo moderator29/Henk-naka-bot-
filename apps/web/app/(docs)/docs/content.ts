@@ -657,6 +657,27 @@ export const DOC_SECTIONS: DocSection[] = [
     ],
   },
   {
+    slug: "search",
+    title: "Search",
+    description: "Find people, posts, and Pveels across the platform.",
+    blocks: [
+      {
+        type: "p",
+        text: "There are two ways to search. The Smart Search bar in the top bar is AI-powered: ask in natural language (\"calm creators under 1k followers\") and it builds the filters for you. The Search page is a fast keyword search across people, posts, and Pveels.",
+      },
+      { type: "h2", text: "Keyword search" },
+      {
+        type: "p",
+        text: "Open Search from the navigation (or the More menu on mobile), type a name, @handle, caption, or topic, and switch between the People, Posts, and Pveels tabs. Results respect your blocks, so people you've blocked won't appear.",
+      },
+      {
+        type: "callout",
+        tone: "tip",
+        text: "Looking for someone to message? The new-message picker in Messages uses the same people search.",
+      },
+    ],
+  },
+  {
     slug: "faq",
     title: "FAQ",
     description: "Quick answers to the questions we hear the most.",

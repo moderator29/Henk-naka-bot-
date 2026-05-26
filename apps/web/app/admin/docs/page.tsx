@@ -73,6 +73,22 @@ const SECTIONS: Section[] = [
     ],
   },
   {
+    id: "broadcasts",
+    title: "Broadcasts & news",
+    body: [
+      "Announcements broadcasts a message to users from one place. Compose a title, body, and optional image (no video) and pick an audience: everyone, creators, or fans. Publishing inserts the announcement, fans it out to every targeted user's notifications (real rows), sends a branded email to those with an address (Resend, env-gated), and posts it to the in-app /news feed.",
+      "On /news each broadcast is likeable, commentable, and shareable by users. Keep broadcasts factual and on-brand; they reach inboxes, so use them deliberately. Every broadcast is recorded in the audit log with the recipient count.",
+    ],
+  },
+  {
+    id: "legal",
+    title: "Legal documents",
+    body: [
+      "The Privacy Policy, Terms of Service, and Disclaimer ship as in-code defaults and are editable from Legal in the panel. Saving a document publishes it immediately to the public /legal pages (it overrides the default), bumps its version, and writes to the audit log.",
+      "Content is light markdown: lines starting with '## ' are section headings; blank lines separate paragraphs. Review changes carefully, these are binding user-facing policies. The footer disclaimer and signup agreement link to these pages.",
+    ],
+  },
+  {
     id: "demo",
     title: "Demo data & audit log",
     body: [
