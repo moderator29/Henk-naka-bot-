@@ -16,9 +16,16 @@ export const HUMAN_COOKIE = "aurora_human";
 const TTL_SECONDS = 30 * 60;
 
 function signingSecret(): string {
-  // Falls back to a constant only when Turnstile is not configured (dev), in
-  // which case the challenge is a passthrough anyway.
-  return process.env.TURNSTILE_SECRET_KEY ?? "aurora-dev-human-check";
+  // Prefer a dedicated secret, then the service-role key (always present in any
+  // real deployment) so production never signs with the public dev constant.
+  // The constant only ever applies in a local dev box with nothing configured,
+  // where the human challenge is a passthrough anyway.
+  return (
+    process.env.AUTH_COOKIE_SECRET ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.TURNSTILE_SECRET_KEY ||
+    "aurora-dev-human-check"
+  );
 }
 
 function sign(exp: number): string {

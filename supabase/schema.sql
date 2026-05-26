@@ -376,6 +376,40 @@ create policy users_self_read   on public.users for select using (true);
 create policy users_self_update on public.users for update using (auth.uid() = id) with check (auth.uid() = id);
 create policy users_self_insert on public.users for insert with check (auth.uid() = id);
 
+-- Column guard: RLS scopes self-update to the owner's row but cannot restrict
+-- which columns change. Freeze privileged columns on self-initiated updates so
+-- a user cannot un-ban themselves, self-grant creator/verified, or rewrite
+-- their wallet / date_of_birth. Service-role writes (auth.uid() null) pass through.
+create or replace function public.protect_user_columns()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is not null and auth.uid() = old.id then
+    new.id             := old.id;
+    new.email          := old.email;
+    new.account_status := old.account_status;
+    new.is_creator     := old.is_creator;
+    new.is_verified    := old.is_verified;
+    new.is_demo        := old.is_demo;
+    new.wallet_address := old.wallet_address;
+    new.created_at     := old.created_at;
+    if old.date_of_birth is not null then
+      new.date_of_birth := old.date_of_birth;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists protect_user_columns on public.users;
+create trigger protect_user_columns
+  before update on public.users
+  for each row
+  execute function public.protect_user_columns();
+
 -- Creator profiles
 drop policy if exists creator_profiles_read  on public.creator_profiles;
 drop policy if exists creator_profiles_write on public.creator_profiles;

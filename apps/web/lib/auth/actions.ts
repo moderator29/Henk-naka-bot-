@@ -1,7 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit, clientIp } from "@/lib/security/ratelimit";
 import {
   signInSchema,
   signUpSchema,
@@ -17,6 +19,20 @@ export interface AuthActionState {
   error?: string;
   notice?: string;
   fieldErrors?: Record<string, string>;
+}
+
+const TOO_MANY: AuthActionState = {
+  error: "Too many attempts. Please wait a few minutes and try again.",
+};
+
+/** True when the caller is within the allowance for this bucket + scope. */
+async function withinLimit(
+  bucket: string,
+  scope: string,
+  requests: number,
+  window: `${number} s` | `${number} m` | `${number} h` | `${number} d`
+): Promise<boolean> {
+  return rateLimit(bucket, scope, requests, window);
 }
 
 /**
@@ -71,6 +87,9 @@ export async function signUpAction(
   if (!parseDateOfBirth(parsed.data.dateOfBirth)) {
     return { fieldErrors: { dateOfBirth: "Enter a valid date" } };
   }
+
+  const ip = clientIp(headers());
+  if (!(await withinLimit("signup-ip", ip, 5, "1 h"))) return TOO_MANY;
 
   const human = await passedHumanCheck(formData);
   if (!human.ok) {
@@ -150,6 +169,16 @@ export async function signInAction(
     return { fieldErrors: fieldErrorsFrom(parsed.error.issues) };
   }
 
+  // Throttle by IP (volume) and by email (password-spray on one account).
+  const ip = clientIp(headers());
+  const email = parsed.data.email.toLowerCase();
+  if (
+    !(await withinLimit("signin-ip", ip, 10, "5 m")) ||
+    !(await withinLimit("signin-email", email, 5, "15 m"))
+  ) {
+    return TOO_MANY;
+  }
+
   const human = await passedHumanCheck(formData);
   if (!human.ok) {
     return { error: human.error ?? "Please complete the verification." };
@@ -187,6 +216,15 @@ export async function magicLinkAction(
     return { fieldErrors: fieldErrorsFrom(parsed.error.issues) };
   }
 
+  const ip = clientIp(headers());
+  const email = parsed.data.email.toLowerCase();
+  if (
+    !(await withinLimit("magic-ip", ip, 5, "15 m")) ||
+    !(await withinLimit("magic-email", email, 3, "15 m"))
+  ) {
+    return TOO_MANY;
+  }
+
   const human = await passedHumanCheck(formData);
   if (!human.ok) {
     return { error: human.error ?? "Please complete the verification." };
@@ -213,6 +251,15 @@ export async function forgotPasswordAction(
   });
   if (!parsed.success) {
     return { fieldErrors: fieldErrorsFrom(parsed.error.issues) };
+  }
+
+  const ip = clientIp(headers());
+  const email = parsed.data.email.toLowerCase();
+  if (
+    !(await withinLimit("reset-ip", ip, 5, "15 m")) ||
+    !(await withinLimit("reset-email", email, 3, "15 m"))
+  ) {
+    return TOO_MANY;
   }
 
   const human = await passedHumanCheck(formData);
@@ -274,6 +321,16 @@ export async function resendConfirmationAction(
   if (!parsed.success) {
     return { fieldErrors: fieldErrorsFrom(parsed.error.issues) };
   }
+
+  const ip = clientIp(headers());
+  const email = parsed.data.email.toLowerCase();
+  if (
+    !(await withinLimit("resend-ip", ip, 5, "15 m")) ||
+    !(await withinLimit("resend-email", email, 3, "15 m"))
+  ) {
+    return TOO_MANY;
+  }
+
   const supabase = createClient();
   const { error } = await supabase.auth.resend({
     type: "signup",

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { usernameSchema } from "@/lib/auth/schemas";
+import { rateLimit, clientIp } from "@/lib/security/ratelimit";
 
 /**
  * Live username availability. Validates the format, then checks the users
@@ -8,6 +9,13 @@ import { usernameSchema } from "@/lib/auth/schemas";
  * free. Used by the sign-up form for the green check / red message.
  */
 export async function GET(req: Request) {
+  if (!(await rateLimit("username-check", clientIp(req.headers), 40, "1 m"))) {
+    return NextResponse.json(
+      { available: false, reason: "Too many checks. Slow down a moment." },
+      { status: 429 }
+    );
+  }
+
   const u = new URL(req.url).searchParams.get("u") ?? "";
   const parsed = usernameSchema.safeParse(u);
   if (!parsed.success) {
