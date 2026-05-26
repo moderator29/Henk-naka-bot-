@@ -122,6 +122,12 @@ Drizzle schema:
 - 0014 news/broadcast (announcements.image_url, announcement_likes,
   announcement_comments, legal_documents) + announcements in realtime
 - 0015 posts.audience (public | free | followers | subscribers)
+- 0016 user column guard (before-update trigger freezing account_status,
+  is_creator, is_verified, wallet_address, email, date_of_birth-once-set on
+  self-edits; bans/age are now enforced at the DB, not just the UI)
+- 0017 profile social links (users.telegram_url, users.x_url)
+- 0018 subscription integrity (subscriptions.amount_nsfw + unique tx_hash index
+  for idempotent recording)
 
 Owner storage setup (Supabase): public bucket post-media; private bucket
 post-media-private (gated media is served via short-lived signed URLs). Confirm
@@ -157,9 +163,30 @@ public.user_roles for the owner email (pleasurecoinv2@gmail.com).
   Settings (fee %, maintenance mode -> live banner), Audit log, Admin docs. All
   real data.
 - AI: Concierge (Aura) with new-chat + image upload, Smart Search, Co-Pilot,
-  Forecaster, Subscription Intelligence. Hard safety guardrails appended to
-  every prompt (nothing involving minors, no explicit image generation, nothing
-  illegal/non-consensual, no prompt/data leak). 503 when ANTHROPIC_API_KEY unset.
+  Forecaster, Subscription Intelligence. ALL FIVE call Claude for real now
+  (Forecaster + Subscription Intelligence were placeholder stubs and are wired
+  in lib/ai/prompts/{forecaster,summary}.ts). Hard safety guardrails appended to
+  every prompt. 503 when ANTHROPIC_API_KEY unset. Each AI feature is honored by
+  its per-user Settings toggle (off => removed from the UI live).
+- Translation: live on-demand page translation (lib/i18n + components/i18n +
+  /api/translate proxy over Google's public endpoint). Globe control in the
+  platform header and marketing nav (covers landing + docs); the Settings
+  language drives it. RTL for Arabic, restores English exactly, skips inputs and
+  [data-no-translate].
+- Profile social links: optional Telegram + X, validated/normalized server-side
+  (lib/profile/social-links.ts), shown as buttons on own + creator profiles.
+- Token chart is gated behind the in-app wallet (components/token/ChartWalletGate).
+- Notifications: DM ("message") and new-post ("post") now fire; the shared
+  lib/notifications/notify helper honors recipient preferences. A user's own
+  posts appear in their own feed.
+- Security this pass: users column-guard trigger (0016), OAuth callback redirect
+  guard, rate limiting on all email-auth actions + username/human-check routes,
+  human-check cookie signed with a real secret in prod (AUTH_COOKIE_SECRET ->
+  service-role fallback). turbo.json / .env.example synced to the code.
+- Subscriptions: idempotent recording, amount stored, "auto-renew" relabeled as
+  a renewal reminder (the cron emails a reminder; there is no custodial charge).
+- Build note: TypeScript resolved to 5.9; baseUrl was dropped and ambient
+  declarations added (apps/web/types/ambient.d.ts) to keep tsc/build green.
 - Legal: admin-editable Privacy Policy, Terms, Disclaimer (defaults in code,
   DB overrides). Footer disclaimer line + signup 18+/Terms agreement.
 - Security: rate limiting on auth/upload/tips/export (Upstash with in-memory
