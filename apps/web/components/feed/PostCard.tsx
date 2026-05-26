@@ -37,8 +37,8 @@ export interface FeedPost {
 
 /**
  * A feed post card with the brand glass treatment and live micro-interactions
- * (like fill + count bump, save toggle). Engagement is local-only in demo
- * context; real like/save/tip wire to Supabase + on-chain in a later pass.
+ * (like fill + count bump, save toggle). Like, save, comment, and tip are wired
+ * to Supabase / on-chain via lib/engagement; the UI updates optimistically.
  */
 export function PostCard({ post, index = 0 }: { post: FeedPost; index?: number }) {
   const [liked, setLiked] = useState(post.likedByMe ?? false);

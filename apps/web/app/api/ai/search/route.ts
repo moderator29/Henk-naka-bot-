@@ -72,6 +72,7 @@ interface SearchResult {
   id: string;
   title: string;
   subtitle: string;
+  href: string;
 }
 
 async function runSearch(
@@ -97,19 +98,30 @@ async function runSearch(
   if (kind === "posts") {
     let q = supabase
       .from("posts")
-      .select("id, caption, category")
+      .select("id, caption, category, users!inner(username)")
       .is("tier_required", null)
       .order("created_at", { ascending: false })
       .limit(20);
     // ilike keeps the fallback working without depending on a full-text index.
     if (searchText) q = q.ilike("caption", `%${searchText}%`);
     const { data } = await q;
-    return (data ?? []).map((p) => ({
-      kind: "post" as const,
-      id: p.id as string,
-      title: (p.caption as string)?.slice(0, 80) ?? "Post",
-      subtitle: (p.category as string) ?? "",
-    }));
+    type PostRow = {
+      id: string;
+      caption: string | null;
+      category: string | null;
+      users: { username: string | null } | null;
+    };
+    return ((data as unknown as PostRow[]) ?? []).map((p) => {
+      const username = p.users?.username;
+      return {
+        kind: "post" as const,
+        id: p.id,
+        title: p.caption?.slice(0, 80) || "Post",
+        subtitle: p.category ?? "",
+        // Posts live on the author's profile; link there rather than a dead end.
+        href: username ? `/creators/${username}` : "/feed",
+      };
+    });
   }
 
   // creators
@@ -145,5 +157,6 @@ async function runSearch(
       id: r.users!.username!,
       title: r.users!.display_name ?? r.users!.username!,
       subtitle: `${r.subscriber_count} subscribers`,
+      href: `/creators/${r.users!.username!}`,
     }));
 }

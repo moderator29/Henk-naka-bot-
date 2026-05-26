@@ -101,7 +101,7 @@ export function StakingDashboard() {
       ]);
       setAmount("");
       setStakeStage("success");
-      push({ tone: "success", title: "Staked", description: `${fmt(amountNum)} $NSFW locked for ${STAKING_LOCK_WEEKS} weeks.` });
+      push({ tone: "success", title: "Staked (preview)", description: `Preview only. With the live contract, ${fmt(amountNum)} $NSFW would lock for ${STAKING_LOCK_WEEKS} weeks.` });
       await wait(1200);
       setStakeStage("idle");
     } catch {
@@ -121,7 +121,7 @@ export function StakingDashboard() {
     // Reset accrual by restarting each position's clock.
     setPositions((p) => p.map((x) => ({ ...x, stakedAt: Date.now() })));
     setClaimBusy(false);
-    push({ tone: "success", title: "Rewards claimed", description: `${fmt(claimed)} $NSFW sent to your wallet.` });
+    push({ tone: "success", title: "Rewards claimed (preview)", description: `Preview only. On-chain, ${fmt(claimed)} $NSFW would be sent to your wallet.` });
   }
 
   async function handleUnstake(id: string) {
@@ -131,7 +131,7 @@ export function StakingDashboard() {
     await wait(1400);
     setPositions((p) => p.filter((x) => x.id !== id));
     setBusyUnstake(null);
-    push({ tone: "success", title: "Unstaked", description: "Your $NSFW has been returned." });
+    push({ tone: "success", title: "Unstaked (preview)", description: "Preview only. On-chain, your $NSFW would be returned." });
   }
 
   const stakeLabel =

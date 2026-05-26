@@ -9,6 +9,7 @@ interface SearchResult {
   id: string;
   title: string;
   subtitle: string;
+  href: string;
 }
 
 /**
@@ -110,7 +111,7 @@ export function SmartSearch() {
                 {results.map((r) => (
                   <li key={`${r.kind}-${r.id}`}>
                     <Link
-                      href={r.kind === "creator" ? `/creators/${r.id}` : `/feed`}
+                      href={r.href}
                       onClick={() => setOpen(false)}
                       className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-white/5"
                     >
