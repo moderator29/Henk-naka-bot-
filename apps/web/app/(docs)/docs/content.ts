@@ -414,10 +414,15 @@ export const DOC_SECTIONS: DocSection[] = [
         type: "p",
         text: "Open Messages from the nav, or the bell. Pick a conversation or start a new one, type, and send. Delivery is instant over a live connection, no refresh needed. Your conversation list orders by most recent so the active threads stay on top.",
       },
+      { type: "h2", text: "Starting a conversation" },
+      {
+        type: "p",
+        text: "Tap the compose button in Messages to search for anyone by name or handle and start a thread. You can also message a creator straight from their profile.",
+      },
       { type: "h2", text: "Who can message you" },
       {
         type: "p",
-        text: "Subscribing to a creator opens a direct channel with them. You stay in control of your inbox, and every message a creator sends is written and sent by them.",
+        text: "Anyone can follow you. For DMs you choose: in Settings → Privacy, set who can start a conversation with you to Everyone, or limit it to people you follow back (mutuals only). It's enforced the moment someone tries to open a thread. Every message a creator sends is written and sent by them.",
       },
       {
         type: "callout",
@@ -601,6 +606,53 @@ export const DOC_SECTIONS: DocSection[] = [
       {
         type: "p",
         text: "Sensitive fields are protected by row-level security so only you (and, where required, moderators) can read them. You can export or delete your account at any time from Settings → Account. The AI assistants operate under hard safety limits and never generate explicit imagery or reveal your private data.",
+      },
+    ],
+  },
+  {
+    slug: "news-and-broadcasts",
+    title: "News & Broadcasts",
+    description: "Platform announcements, delivered everywhere they matter.",
+    blocks: [
+      {
+        type: "p",
+        text: "News is the platform's announcement feed. When the team publishes an update, it lands in three places at once: the in-app News page, your notifications, and your email inbox, so you never miss something important.",
+      },
+      { type: "h2", text: "The News feed" },
+      {
+        type: "p",
+        text: "Open News from the navigation (or the More menu on mobile) to read the latest announcements, newest first. Each post can include an image, and you can like, comment, and share any item, just like a regular post. It all updates in real time.",
+      },
+      { type: "h2", text: "Where broadcasts reach you" },
+      {
+        type: "p",
+        text: "Every broadcast creates a real notification for the targeted audience and, if you have email notifications on, sends a branded email. You stay in control: manage what you receive from Settings → Notifications.",
+      },
+      {
+        type: "callout",
+        tone: "tip",
+        text: "Admins broadcast from the admin panel: a title, a message, an optional image, and an audience (everyone, creators, or fans). Publishing fans it out instantly.",
+      },
+    ],
+  },
+  {
+    slug: "pleasureland",
+    title: "Pleasureland",
+    description: "The immersive metaverse corner of the ecosystem.",
+    blocks: [
+      {
+        type: "p",
+        text: "Pleasureland is the immersive, world-building side of the Pleasure Coin ecosystem, a styled launch surface that connects the platform to the wider metaverse experience.",
+      },
+      { type: "h2", text: "How to reach it" },
+      {
+        type: "p",
+        text: "Pleasureland is linked from the ecosystem sections and the navigation. It opens its own experience while your single Pleasure Coin sign-in and wallet carry across, so the token, identity, and assets stay unified.",
+      },
+      {
+        type: "callout",
+        tone: "info",
+        text: "Pleasureland keeps its existing experience by design; Pleasure Coin unifies access and identity around it rather than rebuilding it.",
       },
     ],
   },
