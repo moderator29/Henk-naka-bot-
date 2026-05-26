@@ -14,20 +14,26 @@ export interface SessionUser {
 }
 
 export async function getSessionUser(): Promise<SessionUser | null> {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
 
-  const dob =
-    (user.user_metadata?.date_of_birth as string | undefined) ?? null;
+    const dob =
+      (user.user_metadata?.date_of_birth as string | undefined) ?? null;
 
-  return {
-    id: user.id,
-    email: user.email ?? null,
-    dateOfBirth: dob,
-  };
+    return {
+      id: user.id,
+      email: user.email ?? null,
+      dateOfBirth: dob,
+    };
+  } catch {
+    // Never let a transient client/session error blank a whole route; callers
+    // treat null as "signed out" and render the appropriate state.
+    return null;
+  }
 }
 
 export class NotAuthenticatedError extends Error {
