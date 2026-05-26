@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/StatTicker";
 import { CopyAddress } from "@/components/marketing/CopyAddress";
 import { PriceChart } from "@/components/token/PriceChart";
+import { ChartWalletGate } from "@/components/token/ChartWalletGate";
 import { NSFW_TOKEN_ADDRESS } from "@/lib/web3/addresses";
 import { getTokenStats } from "@/lib/market/token-stats";
 import { getPriceHistory } from "@/lib/market/price-history";
@@ -96,7 +97,9 @@ export default async function TokenPage() {
 
       <section className="relative pb-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <PriceChart initial={history} initialTimeframe="7" />
+          <ChartWalletGate>
+            <PriceChart initial={history} initialTimeframe="7" />
+          </ChartWalletGate>
         </div>
       </section>
 
