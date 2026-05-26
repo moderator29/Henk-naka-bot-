@@ -115,23 +115,54 @@ export async function recordSubscription(
   const target = await getSubscribeTarget(tierId);
   if (!target) return { ok: false };
 
-  const expiresAt = new Date(
-    Date.now() + SUBSCRIPTION_PERIOD_DAYS * 24 * 60 * 60 * 1000
-  ).toISOString();
-
   const supabase = createClient();
-  const { error } = await supabase.from("subscriptions").insert({
-    fan_id: user.id,
-    tier_id: tierId,
-    expires_at: expiresAt,
-    auto_renew: true,
-    tx_hash: txHash,
-  });
-  if (error) return { ok: false };
 
-  // amountNsfw is the on-chain amount that was transferred; recorded implicitly
-  // via tx_hash. (Kept in the signature so the modal documents what it paid.)
-  void amountNsfw;
+  // Idempotency: a confirmed tx is recorded once. If we've already seen this
+  // hash, treat the call as a success without double-applying.
+  const { data: seen } = await supabase
+    .from("subscriptions")
+    .select("id")
+    .eq("tx_hash", txHash)
+    .maybeSingle<{ id: string }>();
+  if (seen) return { ok: true };
+
+  const periodMs = SUBSCRIPTION_PERIOD_DAYS * 24 * 60 * 60 * 1000;
+
+  // If the fan already has an active subscription to this tier, extend it from
+  // its current expiry (a renewal) instead of inserting a duplicate active row.
+  const { data: active } = await supabase
+    .from("subscriptions")
+    .select("id, expires_at")
+    .eq("fan_id", user.id)
+    .eq("tier_id", tierId)
+    .gt("expires_at", new Date().toISOString())
+    .order("expires_at", { ascending: false })
+    .maybeSingle<{ id: string; expires_at: string }>();
+
+  if (active) {
+    const base = Math.max(Date.now(), new Date(active.expires_at).getTime());
+    const { error } = await supabase
+      .from("subscriptions")
+      .update({
+        expires_at: new Date(base + periodMs).toISOString(),
+        auto_renew: true,
+        amount_nsfw: amountNsfw,
+        tx_hash: txHash,
+      })
+      .eq("id", active.id);
+    if (error) return { ok: false };
+  } else {
+    const { error } = await supabase.from("subscriptions").insert({
+      fan_id: user.id,
+      tier_id: tierId,
+      expires_at: new Date(Date.now() + periodMs).toISOString(),
+      auto_renew: true,
+      amount_nsfw: amountNsfw,
+      tx_hash: txHash,
+    });
+    // A concurrent insert of the same tx hits the unique index; treat as done.
+    if (error && error.code !== "23505") return { ok: false };
+  }
 
   await Promise.all([
     refreshSubscriberCount(target.creatorUserId),

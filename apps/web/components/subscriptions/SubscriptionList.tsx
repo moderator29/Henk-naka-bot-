@@ -90,7 +90,7 @@ export function SubscriptionList({ initial }: { initial: MySubscription[] }) {
                   : "bg-white/5 text-lilac/60"
               )}
             >
-              {sub.autoRenew ? "Auto-renews" : "Won't renew"}
+              {sub.autoRenew ? "Renewal reminder on" : "No reminder"}
             </span>
             <Button
               variant="glass"
@@ -98,7 +98,7 @@ export function SubscriptionList({ initial }: { initial: MySubscription[] }) {
               loading={pendingId === sub.id}
               onClick={() => toggleRenew(sub)}
             >
-              {sub.autoRenew ? "Cancel renewal" : "Resume"}
+              {sub.autoRenew ? "Turn off reminder" : "Remind me"}
             </Button>
           </div>
         </li>

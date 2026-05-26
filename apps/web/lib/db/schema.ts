@@ -22,6 +22,7 @@ import {
   date,
   primaryKey,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable(
@@ -111,11 +112,13 @@ export const subscriptions = pgTable(
       .notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     autoRenew: boolean("auto_renew").default(true).notNull(),
+    amountNsfw: numeric("amount_nsfw", { precision: 36, scale: 6 }),
     txHash: text("tx_hash"),
   },
   (t) => ({
     fanIdx: index("subs_fan_idx").on(t.fanId),
     expiresIdx: index("subs_expires_idx").on(t.expiresAt),
+    txHashUnique: uniqueIndex("subs_tx_hash_unique").on(t.txHash),
   })
 );
 

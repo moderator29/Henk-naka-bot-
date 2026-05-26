@@ -65,8 +65,12 @@ create table if not exists public.subscriptions (
   started_at timestamptz not null default now(),
   expires_at timestamptz not null,
   auto_renew boolean not null default true,
+  amount_nsfw numeric(36, 6),
   tx_hash text
 );
+create unique index if not exists subs_tx_hash_unique
+  on public.subscriptions (tx_hash)
+  where tx_hash is not null;
 
 create table if not exists public.posts (
   id uuid primary key default gen_random_uuid(),
