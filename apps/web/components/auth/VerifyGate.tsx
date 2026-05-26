@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, Check, ArrowRight } from "lucide-react";
@@ -18,7 +18,16 @@ export function VerifyGate({ next = "/signup" }: { next?: string }) {
   const router = useRouter();
   const [verified, setVerified] = useState(false);
   const [advancing, setAdvancing] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
   const advanced = useRef(false);
+
+  // Never dead-end: if the widget is slow or fails to load (for example the
+  // sitekey hostname is not configured for this domain), surface a manual
+  // Continue. The real human check still runs on the sign-up form submit.
+  useEffect(() => {
+    const t = setTimeout(() => setShowFallback(true), 6000);
+    return () => clearTimeout(t);
+  }, []);
 
   const proceed = useCallback(() => {
     if (advanced.current) return;
@@ -98,7 +107,21 @@ export function VerifyGate({ next = "/signup" }: { next?: string }) {
             </Button>
           ) : (
             <>
-              <Turnstile onVerify={onVerify} onExpire={() => setVerified(false)} />
+              <Turnstile
+                onVerify={onVerify}
+                onExpire={() => setVerified(false)}
+                onError={() => setShowFallback(true)}
+              />
+              {showFallback && (
+                <button
+                  type="button"
+                  onClick={proceed}
+                  className="text-sm text-lilac/70 hover:text-white inline-flex items-center gap-1.5"
+                >
+                  Having trouble? Continue
+                  <ArrowRight size={15} />
+                </button>
+              )}
             </>
           )}
         </div>

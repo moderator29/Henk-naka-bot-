@@ -32,9 +32,10 @@ declare global {
 interface TurnstileProps {
   onVerify: (token: string) => void;
   onExpire?: () => void;
+  onError?: () => void;
 }
 
-export function Turnstile({ onVerify, onExpire }: TurnstileProps) {
+export function Turnstile({ onVerify, onExpire, onError }: TurnstileProps) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const ref = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | null>(null);
@@ -50,9 +51,12 @@ export function Turnstile({ onVerify, onExpire }: TurnstileProps) {
       theme: "dark",
       callback: (token) => onVerify(token),
       "expired-callback": () => onExpire?.(),
-      "error-callback": () => setErrored(true),
+      "error-callback": () => {
+        setErrored(true);
+        onError?.();
+      },
     });
-  }, [siteKey, onVerify, onExpire]);
+  }, [siteKey, onVerify, onExpire, onError]);
 
   useEffect(() => {
     if (ready) render();
