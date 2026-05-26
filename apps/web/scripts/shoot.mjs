@@ -13,6 +13,12 @@ const ctx = await browser.newContext({
   deviceScaleFactor: 2,
   userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
 });
+await ctx.addInitScript(() => {
+  try {
+    localStorage.setItem("aurora.onboarding.completedAt", new Date().toISOString());
+    localStorage.setItem("pc.agegate", new Date().toISOString());
+  } catch {}
+});
 const page = await ctx.newPage();
 const overflow = [];
 for (const p of pages) {
