@@ -144,6 +144,47 @@ export async function getFeedPosts(userId: string | null): Promise<FeedPost[]> {
   return applyViewerState(supabase, posts, userId);
 }
 
+/**
+ * "For you" feed: every visible post on the platform, newest first. RLS keeps
+ * gated rows showing a locked teaser to non-entitled viewers. This is what new
+ * users and everyone see by default.
+ */
+export async function getAllPosts(userId: string | null): Promise<FeedPost[]> {
+  if (!configured()) return [];
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("posts")
+    .select(SELECT)
+    .order("created_at", { ascending: false })
+    .limit(40);
+  const posts = ((data as unknown as PostRow[]) ?? []).map(mapRow);
+  return applyViewerState(supabase, posts, userId);
+}
+
+/**
+ * "Following" feed: the user's own posts plus posts from creators they follow,
+ * newest first. No public fallback, this tab is explicitly the follow graph.
+ */
+export async function getFollowingPosts(userId: string | null): Promise<FeedPost[]> {
+  if (!configured() || !userId) return [];
+  const supabase = createClient();
+  const { data: follows } = await supabase
+    .from("follows")
+    .select("following_id")
+    .eq("follower_id", userId);
+  const ids = Array.from(
+    new Set([userId, ...(follows ?? []).map((f) => f.following_id as string)])
+  );
+  const { data } = await supabase
+    .from("posts")
+    .select(SELECT)
+    .in("creator_id", ids)
+    .order("created_at", { ascending: false })
+    .limit(40);
+  const posts = ((data as unknown as PostRow[]) ?? []).map(mapRow);
+  return applyViewerState(supabase, posts, userId);
+}
+
 export interface PveelItem {
   id: string;
   creatorUsername: string;

@@ -23,6 +23,12 @@
     overflow-x: clip;
   }
 
+  /* Headings use Inter at heavier weights; a touch of negative tracking gives
+     the clean, modern product-UI look (Linear/GitHub-class). */
+  .font-display {
+    letter-spacing: -0.02em;
+  }
+
   /* Media never forces the viewport wider than the screen. */
   img,
   video {

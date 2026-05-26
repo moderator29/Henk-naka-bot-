@@ -1,20 +1,13 @@
 /**
  * Font wiring for the app.
  *
- * RPD §4.3 calls for Clash Display (Fontshare) as the display face. The
- * sandbox build environment can't reach Fontshare's CDN, so we ship Space
- * Grotesk via next/font/google as a near-equivalent geometric display face
- * until the owner drops a self-hosted Clash Display woff2 into
- * apps/web/public/fonts/ClashDisplay-Variable.woff2.
- *
- * SWAP PATH, when the Clash file is provided:
- *   1. Place ClashDisplay-Variable.woff2 in apps/web/public/fonts/
- *   2. Replace the spaceGrotesk export with the localFont() block below
- *   3. No other code changes required, every component reads var(--font-display).
+ * Inter for everything: body copy at regular weights and headings at the
+ * heavier weights. Inter is the de-facto standard for modern product UIs
+ * (Linear, GitHub, Vercel-class apps), so the platform reads clean and
+ * professional rather than stylized. JetBrains Mono for addresses and code.
  */
 
-import { Inter, JetBrains_Mono, Sora } from "next/font/google";
-// import localFont from "next/font/local"; // re-enable when Clash file lands
+import { Inter, JetBrains_Mono } from "next/font/google";
 
 export const inter = Inter({
   subsets: ["latin"],
@@ -28,20 +21,10 @@ export const mono = JetBrains_Mono({
   display: "swap",
 });
 
-// Display face: Sora — a clean, modern, geometric face that reads premium and
-// a touch futuristic. Inter stays for body copy (readability).
-export const display = Sora({
+// Headings use Inter at its heavier weights via --font-display.
+export const display = Inter({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["500", "600", "700", "800"],
   display: "swap",
 });
-
-// Swap target once Clash Display is committed under public/fonts/:
-//
-// export const display = localFont({
-//   src: "../public/fonts/ClashDisplay-Variable.woff2",
-//   variable: "--font-display",
-//   display: "swap",
-//   weight: "200 700",
-// });

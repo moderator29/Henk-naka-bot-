@@ -24,7 +24,7 @@ export function Hero() {
             Now live · Powered by $NSFW
           </motion.div>
 
-          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.05] tracking-tight text-white">
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.08] tracking-tight text-white">
             {headline.map((word, i) => (
               <motion.span
                 key={`${word}-${i}`}
