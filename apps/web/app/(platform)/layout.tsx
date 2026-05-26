@@ -1,6 +1,7 @@
 import { PlatformShell } from "@/components/platform/PlatformShell";
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 import { ConciergeFab } from "@/components/ai/ConciergeFab";
+import { IdleTimeout } from "@/components/platform/IdleTimeout";
 import { MaintenanceBanner } from "@/components/platform/MaintenanceBanner";
 import { getSessionUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
@@ -41,6 +42,7 @@ export default async function PlatformLayout({
   return (
     <PlatformShell showSmartSearch={ai.search}>
       {maintenance && <MaintenanceBanner />}
+      <IdleTimeout active={!!me} />
       <OnboardingGate initiallyComplete={onboardingDone} />
       {children}
       {ai.concierge && <ConciergeFab />}

@@ -26,7 +26,12 @@ export async function GET(req: NextRequest) {
       const supabase = createClient();
       const { error } = await supabase.auth.exchangeCodeForSession(code);
       if (!error) {
-        return NextResponse.redirect(`${origin}${next}`);
+        // Land on a short in-platform "Verifying…" interstitial that then
+        // forwards to the destination, so confirmation never dumps the user on
+        // the marketing site.
+        const dest = new URL("/auth/confirmed", origin);
+        dest.searchParams.set("next", next);
+        return NextResponse.redirect(dest);
       }
     } catch {
       // Supabase env not configured; fall through to the error redirect.
