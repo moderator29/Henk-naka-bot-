@@ -72,6 +72,7 @@ export function PlatformShell({
 
         <div className="flex flex-col flex-1 min-w-0 max-w-full p-2 sm:p-3">
           <header className="glass-chrome edge-light rounded-2xl px-3 sm:px-4 h-14 flex items-center gap-3 sticky top-2 sm:top-3 z-50">
+            <MoreMenu />
             <div className="lg:hidden">
               <Logo size="sm" showWordmark={false} href="/feed" />
             </div>
@@ -108,7 +109,6 @@ export function PlatformShell({
             <div className="shrink-0">
               <ConnectWallet compact />
             </div>
-            <MoreMenu />
           </header>
 
           <main

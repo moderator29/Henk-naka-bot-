@@ -116,9 +116,10 @@ export function PveelComposer({ tiers }: { tiers: MyTier[] }) {
   }
 
   return (
-    <div className="glass-strong rounded-3xl p-6 shadow-glow flex flex-col gap-4">
-      {/* Preview / live / placeholder */}
-      <div className="relative rounded-2xl overflow-hidden bg-black/50 aspect-[9/16] max-h-[60vh] mx-auto w-full max-w-sm grid place-items-center">
+    <div className="glass-strong rounded-3xl p-4 sm:p-6 shadow-glow flex flex-col gap-4">
+      {/* Preview / live / placeholder. Capped shorter on phones so the caption,
+          audience, and Post button stay on-screen above the bottom nav. */}
+      <div className="relative rounded-2xl overflow-hidden bg-black/50 aspect-[9/16] max-h-[38vh] sm:max-h-[60vh] mx-auto w-full max-w-[220px] sm:max-w-sm grid place-items-center">
         {video ? (
           <video ref={previewRef} src={video.url} controls playsInline className="h-full w-full object-contain" />
         ) : recording ? (
@@ -165,6 +166,11 @@ export function PveelComposer({ tiers }: { tiers: MyTier[] }) {
             onChange={(e) => pickFile(e.target.files?.[0])}
           />
         </div>
+      )}
+      {!video && (
+        <p className="text-center text-xs text-lilac/50">
+          MP4 or WebM · up to 25MB
+        </p>
       )}
 
       <textarea

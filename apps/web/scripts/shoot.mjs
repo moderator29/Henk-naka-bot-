@@ -29,6 +29,12 @@ for (const p of pages) {
     try { await page.goto(base + p, { waitUntil: "domcontentloaded", timeout: 15000 }); } catch {}
   }
   await page.waitForTimeout(1200);
+  if (process.env.OPEN_MENU) {
+    try {
+      await page.click('[aria-label="Menu"]', { timeout: 4000 });
+      await page.waitForTimeout(600);
+    } catch {}
+  }
   const out = `/tmp/shots/${name}.png`;
   await page.screenshot({ path: out, fullPage: true });
   // Detect horizontal overflow

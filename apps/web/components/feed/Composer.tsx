@@ -45,13 +45,24 @@ export function Composer({ tiers }: { tiers: MyTier[] }) {
 
   const hasTiers = tiers.length > 0;
 
+  const MAX_BYTES = 25 * 1024 * 1024;
+
   const addFiles = (files: FileList | null, asImage: boolean) => {
     if (!files) return;
-    const next = Array.from(files).map((file) => ({
-      file,
-      url: URL.createObjectURL(file),
-      isImage: asImage || file.type.startsWith("image/"),
-    }));
+    const all = Array.from(files);
+    const oversize = all.filter((f) => f.size > MAX_BYTES);
+    setError(
+      oversize.length > 0
+        ? `Each file must be under 25MB. "${oversize[0]!.name}" is too large.`
+        : null
+    );
+    const next = all
+      .filter((f) => f.size <= MAX_BYTES)
+      .map((file) => ({
+        file,
+        url: URL.createObjectURL(file),
+        isImage: asImage || file.type.startsWith("image/"),
+      }));
     setAttachments((prev) => [...prev, ...next].slice(0, 8));
   };
 
@@ -203,7 +214,10 @@ export function Composer({ tiers }: { tiers: MyTier[] }) {
         )}
       </div>
 
-      <div className="mt-4 flex items-center gap-2 border-t border-white/5 pt-4">
+      <p className="mt-3 text-xs text-lilac/45">
+        Images and video · up to 25MB each, 8 files
+      </p>
+      <div className="mt-2 flex items-center gap-2 border-t border-white/5 pt-4">
         <ImageButton onFiles={(f) => addFiles(f, true)} />
         <FileButton onFiles={(f) => addFiles(f, false)} />
         <EmojiPicker onPick={insertEmoji} />

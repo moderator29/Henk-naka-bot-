@@ -46,10 +46,10 @@ export function PlatformBottomNav() {
   return (
     <nav
       aria-label="Primary"
-      className="lg:hidden fixed bottom-[calc(env(safe-area-inset-bottom,0px)+1rem)] inset-x-4 z-40"
+      className="lg:hidden fixed bottom-[calc(env(safe-area-inset-bottom,0px)+0.4rem)] inset-x-5 z-40"
     >
-      <div className="relative mx-auto max-w-md">
-        <div className="glass-chrome edge-light rounded-full shadow-e3 flex items-center justify-between px-3 h-16">
+      <div className="relative mx-auto max-w-sm">
+        <div className="glass-chrome edge-light rounded-full shadow-e3 flex items-center justify-between px-2.5 h-[3.25rem]">
           <div className="flex items-center gap-1">
             {left.map((item) => (
               <NavButton key={item.href} item={item} active={isActive(pathname, item.href)} />
@@ -57,7 +57,7 @@ export function PlatformBottomNav() {
           </div>
 
           {/* Spacer for the elevated center button */}
-          <div className="w-16" aria-hidden="true" />
+          <div className="w-14" aria-hidden="true" />
 
           <div className="flex items-center gap-1">
             {right.map((item) => (
@@ -66,7 +66,7 @@ export function PlatformBottomNav() {
           </div>
         </div>
 
-        {/* Elevated create-post button */}
+        {/* Elevated create-post button (kept larger than the side tabs) */}
         <Link
           href="/compose"
           aria-label="Create a post"
@@ -75,9 +75,9 @@ export function PlatformBottomNav() {
           <motion.span
             whileTap={{ scale: 0.92 }}
             whileHover={{ scale: 1.06 }}
-            className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-primary text-white shadow-glow-lg ring-4 ring-plum/80"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-primary text-white shadow-glow-lg ring-4 ring-plum/80"
           >
-            <Plus size={28} />
+            <Plus size={26} />
           </motion.span>
         </Link>
       </div>
@@ -93,11 +93,11 @@ function NavButton({ item, active }: { item: NavItem; active: boolean }) {
       aria-current={active ? "page" : undefined}
       aria-label={label}
       className={cn(
-        "relative flex flex-col items-center justify-center gap-0.5 w-16 h-12 rounded-2xl text-[0.6rem] font-medium transition-colors",
+        "relative flex flex-col items-center justify-center gap-0.5 w-12 h-10 rounded-2xl text-[0.55rem] font-medium transition-colors",
         active ? "text-magenta" : "text-lilac/60 hover:text-white"
       )}
     >
-      <Icon size={20} aria-hidden="true" />
+      <Icon size={17} aria-hidden="true" />
       {label}
       {active && (
         <motion.span

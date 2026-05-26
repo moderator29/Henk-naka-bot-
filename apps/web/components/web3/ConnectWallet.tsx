@@ -1,6 +1,7 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { Wallet } from "lucide-react";
 
 /**
  * Brand-styled wallet connect entry point. Wraps RainbowKit's ConnectButton
@@ -34,7 +35,17 @@ export function ConnectWallet({ compact = false }: { compact?: boolean }) {
           >
             {(() => {
               if (!connected) {
-                return (
+                return compact ? (
+                  <button
+                    type="button"
+                    onClick={openConnectModal}
+                    aria-label="Connect wallet"
+                    className="btn-primary text-white font-semibold h-9 px-3 rounded-xl text-xs shadow-glow hover:shadow-glow-lg transition-shadow inline-flex items-center gap-1.5"
+                  >
+                    <Wallet size={15} aria-hidden="true" />
+                    Connect
+                  </button>
+                ) : (
                   <button
                     type="button"
                     onClick={openConnectModal}
