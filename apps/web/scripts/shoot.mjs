@@ -36,7 +36,7 @@ for (const p of pages) {
     } catch {}
   }
   const out = `/tmp/shots/${name}.png`;
-  await page.screenshot({ path: out, fullPage: true });
+  await page.screenshot({ path: out, fullPage: process.env.FULLPAGE !== "0" });
   // Detect horizontal overflow
   const o = await page.evaluate((vw) => {
     const docW = document.documentElement.scrollWidth;

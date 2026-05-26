@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -47,8 +48,11 @@ interface Item {
  */
 export function MoreMenu() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { lang, setLang } = useTranslate();
   const pathname = usePathname() ?? "/";
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -118,9 +122,11 @@ export function MoreMenu() {
         <Menu size={20} />
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <>
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {open && (
+              <>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -226,7 +232,9 @@ export function MoreMenu() {
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+          </AnimatePresence>,
+          document.body
+        )}
     </>
   );
 }
