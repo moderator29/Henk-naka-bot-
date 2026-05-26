@@ -2,6 +2,27 @@ import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
 
 /**
+ * App Router stand-in for component tests. Components that call useRouter,
+ * usePathname, useSearchParams, or useParams need a mounted router context that
+ * jsdom does not provide; this registers an inert one for every test file.
+ */
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    refresh: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+  useParams: () => ({}),
+  redirect: vi.fn(),
+  notFound: vi.fn(),
+}));
+
+/**
  * jsdom polyfills.
  * matchMedia and IntersectionObserver are used by AuroraBackground (parallax
  * + reduced-motion checks) and StatTicker (in-view trigger). jsdom doesn't
@@ -33,6 +54,7 @@ if (
   class IntersectionObserverStub implements IntersectionObserver {
     readonly root: Element | Document | null = null;
     readonly rootMargin = "";
+    readonly scrollMargin = "";
     readonly thresholds: ReadonlyArray<number> = [];
     observe = vi.fn();
     unobserve = vi.fn();
