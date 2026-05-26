@@ -98,6 +98,11 @@ export const DOC_SECTIONS: DocSection[] = [
         type: "p",
         text: "Connect a wallet on Polygon and swap for $NSFW on a DEX like SushiSwap, or use the in-app trade screen. You only need a little POL for gas. The live price, market cap, and holder count are on the Token page.",
       },
+      { type: "h2", text: "The live chart" },
+      {
+        type: "p",
+        text: "The Token page shows the live $NSFW chart. Connect your wallet, the same one you use for tips, subscriptions, and the marketplace, to unlock it; until you do, a clean connect prompt stands in for the chart. This keeps the trading view tied to the wallet you actually transact with.",
+      },
     ],
   },
   {
@@ -359,17 +364,22 @@ export const DOC_SECTIONS: DocSection[] = [
       { type: "h2", text: "Smart Search" },
       {
         type: "p",
-        text: "Natural language in, real results out. Across creators, posts, and NFTs.",
+        text: "Natural language in, real results out, across creators and posts. Ask for \"creators under 1k who post weekly\" and Aura turns it into a real query. Each result links straight to the creator. If the AI is unsure, it falls back to plain keyword search so you always get something useful.",
       },
       { type: "h2", text: "Earnings Forecaster (for creators)" },
       {
         type: "p",
-        text: "Projects next month's earnings from your trajectory with a transparent breakdown of what's driving the number. Scenario sliders let you see the impact of decisions before you make them.",
+        text: "Projects the next six months of earnings from your real trajectory, then writes a plain-language read of where you're heading and one practical suggestion. The numbers come from your own dashboard data; the narrative never promises returns or gives financial advice.",
       },
       { type: "h2", text: "Subscription Intelligence (for fans)" },
       {
         type: "p",
-        text: "Tracks your active subscriptions, summarizes what each creator has posted since your last visit, notifies before auto-renews. No more feeling behind, no more surprise charges.",
+        text: "Catch up in one tap: it pulls a creator's recent posts and writes a short recap of what you missed since your last visit, grounded in their actual captions. Renewal reminders give you a heads-up before a subscription lapses, so there are no surprises.",
+      },
+      {
+        type: "callout",
+        tone: "info",
+        text: "Every AI feature runs behind the same hard safety rules and only responds when the platform's AI key is configured; it never invents data or fakes a reply.",
       },
     ],
   },
@@ -473,8 +483,14 @@ export const DOC_SECTIONS: DocSection[] = [
           "Display name and username, with a live availability check",
           "Bio and country",
           "Avatar and cover image uploads",
+          "Telegram and X (Twitter) links, shown as clean buttons on your profile so people can follow you off-platform. Enter a handle or a full link; we validate and tidy it for you",
           "Changes save to your account and reflect instantly",
         ],
+      },
+      { type: "h2", text: "Preferences" },
+      {
+        type: "p",
+        text: "Under Settings, your notification and AI toggles save the moment you flip them. Turn off any notification type you don't want, or switch off an AI feature (Concierge, Smart Search, Co-Pilot) and it disappears from your interface immediately. Your display language lives here too and drives the translate control across the app.",
       },
       { type: "h2", text: "Account & security" },
       {
@@ -679,6 +695,36 @@ export const DOC_SECTIONS: DocSection[] = [
         type: "callout",
         tone: "tip",
         text: "Looking for someone to message? The new-message picker in Messages uses the same people search.",
+      },
+    ],
+  },
+  {
+    slug: "translation",
+    title: "Translate the Platform",
+    description: "Read Pleasure Coin in your language, anywhere on the app.",
+    blocks: [
+      {
+        type: "p",
+        text: "Pleasure Coin translates itself on demand. Tap the globe control and pick from a dozen languages; the visible page is rewritten in place, from the landing page to the docs to the app itself. Switch back to English at any time and the original copy returns exactly as it was.",
+      },
+      { type: "h2", text: "Where to find it" },
+      {
+        type: "ul",
+        items: [
+          "In the app: the globe in the top bar, next to notifications",
+          "On the landing page and docs: the globe in the main navigation",
+          "In Settings: your display language, which drives the same translation",
+        ],
+      },
+      { type: "h2", text: "How it works" },
+      {
+        type: "p",
+        text: "Translation happens through a server-side proxy, so your choice follows you across the platform without slowing pages down, and right-to-left languages like Arabic flip the layout automatically. Your selection is remembered on your device. Input fields, code, and your own draft text are never altered.",
+      },
+      {
+        type: "callout",
+        tone: "tip",
+        text: "Translation covers the interface and content text. Usernames, handles, and amounts are left as-is on purpose.",
       },
     ],
   },

@@ -40,6 +40,7 @@ const SECTIONS: Section[] = [
     body: [
       "Subscriptions and tips are paid on-chain in $NSFW (the same ERC-20 transfer). Tiers are priced in USD and converted at the live token price at checkout; price_nsfw is a stored fallback. Transactions lists every tip and subscription with its tx hash.",
       "Payouts go directly to the creator's payout wallet on-chain, so there is no platform-held balance to disburse. The platform fee percentage is set in Settings (basis points).",
+      "Subscription recording is idempotent: each confirmed tx_hash is recorded once (unique index), and re-subscribing to a tier the fan already holds extends the existing period instead of creating a duplicate active row. The paid amount is stored on the subscription. There is no custodial auto-charge; 'auto-renew' sends the fan a renewal reminder email via the daily cron, it does not move funds.",
     ],
   },
   {
@@ -55,6 +56,8 @@ const SECTIONS: Section[] = [
     body: [
       "Sign-in: connecting a wallet and signing a nonce-based SIWE message mints a real Supabase session. First-time wallets go to profile setup (username + DOB, 18+); returning wallets go straight in. The signature is verified server-side and the nonce is single-use.",
       "The in-app wallet (top of the dashboard) is separate: it powers tips, the $NSFW swap, staking, and NFT purchases. They coexist via the same wagmi provider.",
+      "The Token page's live chart is gated behind this in-app wallet: visitors see a connect-wallet prompt until they connect, then the chart renders.",
+      "Account-state integrity: a before-update trigger on public.users freezes privileged columns (account_status, is_creator, is_verified, wallet_address, email, and date_of_birth once set) on any self-initiated update, so a suspended or banned user cannot un-ban themselves or self-grant a role. Admin/service-role writes pass through. Bans are therefore enforced at the database, not just the UI.",
     ],
   },
   {
@@ -62,14 +65,25 @@ const SECTIONS: Section[] = [
     title: "Integrations & keys",
     body: [
       "System health shows which integrations are connected (by key presence, never the secret values). Keys live only in Vercel/Supabase env, never in the repo. Supabase (auth/db/storage/realtime), Anthropic (AI), Upstash (rate limits), Turnstile (bot protection), Resend (email), WalletConnect/Alchemy/0x (web3), Sentry/PostHog (observability).",
-      "Rate limiting falls back to an in-memory limiter if Upstash is unset, so it is never fully off, but production should set Upstash for cross-instance limits.",
+      "Rate limiting falls back to an in-memory limiter if Upstash is unset, so it is never fully off, but production should set Upstash for cross-instance limits. It covers the sensitive endpoints: every email auth action (sign-in/up, magic link, reset, resend) by IP and email, the username- and human-check routes, tips, uploads, GDPR export, the translate proxy, and the per-user daily AI limits.",
     ],
   },
   {
     id: "ai",
     title: "AI grounding & guardrails",
     body: [
-      "The AI features share a non-negotiable safety floor (see the AI section): nothing involving minors or ambiguous age, no explicit-image generation, nothing illegal or non-consensual, no prompt/data leakage. These are appended to every system prompt and override user instructions. Edit them in lib/ai/prompts/guardrails.ts and bump the version.",
+      "Five AI features are wired to Claude server-side (the browser never calls Anthropic directly): the Concierge (Aura), Smart Search, Creator Co-Pilot reply suggestions, the Earnings Forecaster narrative, and Subscription Intelligence recaps. Each is auth-gated and rate-limited per user per day, and returns a clean 503 when ANTHROPIC_API_KEY is unset rather than faking output.",
+      "The AI features share a non-negotiable safety floor: nothing involving minors or ambiguous age, no explicit-image generation, nothing illegal or non-consensual, no prompt/data leakage. These are appended to every system prompt and override user instructions. Edit them in lib/ai/prompts/guardrails.ts and bump the version.",
+      "Each AI feature can be turned off per-user in Settings; the toggles are honored live (a disabled feature is removed from that user's interface).",
+    ],
+  },
+  {
+    id: "profiles-i18n",
+    title: "Profiles, preferences & translation",
+    body: [
+      "Profiles support optional Telegram and X (Twitter) links, validated and normalized to canonical https URLs server-side and shown as buttons on the user's profile and their public creator page.",
+      "Notification and AI preferences (in Settings) save instantly and are enforced: notification types the user turned off are not written, and disabled AI features are hidden. The notify helper checks each recipient's preferences before inserting.",
+      "Translation runs through a server-side proxy (/api/translate over Google's public endpoint, rate-limited and cached). The globe control in the platform header and marketing nav, and the language setting, translate the visible page on demand for everyone; nothing is pre-translated or stored.",
     ],
   },
   {
